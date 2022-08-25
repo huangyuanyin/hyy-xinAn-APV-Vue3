@@ -75,6 +75,7 @@ import type { FormInstance, FormRules } from "element-plus";
 import { instrumentManagementData } from "./data.js"
 import Termmail from '@/components/Termail.vue'
 import { useRouter } from "vue-router";
+import { deviceApi } from '@/api/APV/index.js'
 export default defineComponent({
   components: {
     Termmail
@@ -166,7 +167,12 @@ export default defineComponent({
       })
       state.tableData = instrumentManagementData
       console.log("数据...", state.tableData);
+      getDeviceApi()
     })
+    const getDeviceApi = async () => {
+      let res = await deviceApi()
+      console.log("res", res)
+    }
     return {
       isShowTermail,
       ...toRefs(state),

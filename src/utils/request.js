@@ -24,7 +24,10 @@ service.interceptors.request.use(
       hastoken &&
       config.url !== "/forum/login/" &&
       config.url !== "/datas/datas/" &&
-      config.url !== "/WEBt/terminals/"
+      config.url !== "/WEBt/terminals/" &&
+      config.url !== "/device/" &&
+      config.url !== "/d_type/" &&
+      config.url !== "/d_group/"
     ) {
       config.headers["token"] = hastoken;
     }
@@ -38,6 +41,8 @@ service.interceptors.request.use(
       case "Login":
         config.url = baseUrl.Base_Login_URL + config.url;
         break;
+      case "APV":
+        config.url = baseUrl.Base_APV_URL + config.url;
     }
     // 请求拦截进来 显示loading效果
     return config;
