@@ -25,7 +25,7 @@ const routes = [
   },
   {
     path: "/",
-    redirect: "/POCTest/overview",
+    redirect: "/APVAuto/overview",
     component: Layout,
   },
   {
@@ -33,74 +33,74 @@ const routes = [
     component: Layout,
     children: [
       {
-        path: "/POCTest",
-        name: "POCTest",
+        path: "/APVAuto",
+        name: "APVAuto",
         meta: {
-          title: "POC测试",
+          title: "APV自动化",
         },
-        redirect: "/POCTest/overview", // 该配置是若点击选择一级菜单时，默认选中并跳转到该一级菜单下的第一个二级菜单
-        component: () => import("@/views/POCTest/index.vue"),
+        redirect: "/APVAuto/overview", // 该配置是若点击选择一级菜单时，默认选中并跳转到该一级菜单下的第一个二级菜单
+        component: () => import("@/views/APVAuto/index.vue"),
         children: [
           {
-            path: "/POCTest/overview",
+            path: "/APVAuto/overview",
             name: "Overview",
             meta: {
               title: "概览",
             },
-            component: () => import("@/views/POCTest/overview/index.vue"),
+            component: () => import("@/views/APVAuto/overview/index.vue"),
           },
           {
-            path: "/POCTest/deviceManagement",
+            path: "/APVAuto/deviceManagement",
             name: "DeviceManagement",
             meta: {
               title: "设备管理",
             },
             component: () =>
-              import("@/views/POCTest/deviceManagement/index.vue"),
+              import("@/views/APVAuto/deviceManagement/index.vue"),
           },
           {
-            path: "/POCTest/performanceTestTask",
+            path: "/APVAuto/performanceTestTask",
             name: "PerformanceTestTask",
             meta: {
               title: "性能测试任务",
             },
             component: () =>
-              import("@/views/POCTest/performanceTestTask/index.vue"),
+              import("@/views/APVAuto/performanceTestTask/index.vue"),
           },
           {
-            path: "/POCTest/taskDetail",
+            path: "/APVAuto/taskDetail",
             name: "TaskDetail",
             meta: {
               title: "性能测试任务详情",
             },
             component: () =>
-              import("@/views/POCTest/performanceTestTask/taskDetail.vue"),
+              import("@/views/APVAuto/performanceTestTask/taskDetail.vue"),
           },
           {
-            path: "/POCTest/templateReport",
+            path: "/APVAuto/templateReport",
             name: "TemplateReport",
             meta: {
               title: "测试报告",
             },
-            component: () => import("@/views/POCTest/templateReport/index.vue"),
+            component: () => import("@/views/APVAuto/templateReport/index.vue"),
           },
           {
-            path: "/POCTest/dataAnalysis",
+            path: "/APVAuto/dataAnalysis",
             name: "DataAnalysis",
             meta: {
               title: "数据分析",
             },
             component: () =>
-              import("@/views/POCTest/templateReport/dataAnalysis.vue"),
+              import("@/views/APVAuto/templateReport/dataAnalysis.vue"),
           },
           {
-            path: "/POCTest/reportDetail",
+            path: "/APVAuto/reportDetail",
             name: "reportDetail",
             meta: {
               title: "报告详情",
             },
             component: () =>
-              import("@/views/POCTest/templateReport/reportDetail.vue"),
+              import("@/views/APVAuto/templateReport/reportDetail.vue"),
           },
         ],
       },

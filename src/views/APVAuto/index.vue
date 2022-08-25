@@ -15,7 +15,7 @@ import { useRouter } from "vue-router";
 // import TestMenuVue from "../../components/CollapseMenu.vue";
 import CollapseMenu from "../../components/CollapseMenu.vue";
 import Breadcrumb from "../../components/Breadcrumb.vue";
-import { POCTestMenuData } from "../../data/menu";
+import { APVAutoMenuData } from "../../data/menu";
 export default defineComponent({
   components: {
     // TestMenuVue,
@@ -24,7 +24,7 @@ export default defineComponent({
   },
   setup() {
     const router = useRouter();
-    const menuList = ref(POCTestMenuData);
+    const menuList = ref(APVAutoMenuData);
     return {
       router,
       menuList,
