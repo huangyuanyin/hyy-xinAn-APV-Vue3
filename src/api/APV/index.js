@@ -40,6 +40,16 @@ export function addD_typeApi(params) {
   });
 }
 
+// 设备类型 - 编辑
+export function editD_typeApi(params) {
+  return request({
+    url: "/d_type/",
+    method: "PUT",
+    urlType: "APV",
+    data: qs.stringify(params),
+  });
+}
+
 // 设备类型 - 删除
 export function deleteD_typeApi(params) {
   return request({
@@ -65,6 +75,16 @@ export function addD_groupApi(params) {
   return request({
     url: "/d_group/",
     method: "post",
+    urlType: "APV",
+    data: qs.stringify(params),
+  });
+}
+
+// 分组管理 - 编辑
+export function editD_groupApi(params) {
+  return request({
+    url: "/d_group/",
+    method: "PUT",
     urlType: "APV",
     data: qs.stringify(params),
   });
