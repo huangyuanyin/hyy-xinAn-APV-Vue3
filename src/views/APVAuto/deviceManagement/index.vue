@@ -2,7 +2,7 @@
   <div class="performanceManagement">
     <el-tabs v-model="activeName" class="tabs" @tab-click="handleClick">
       <el-tab-pane label="设备管理" name="instrumentManagement">
-        <el-button type="primary" @click="openAddDialog('device')" style="margin-bottom: 20px">添加设备</el-button>
+        <el-button type="primary" @click="openAddDialog('device', 'add')" style="margin-bottom: 20px">添加设备</el-button>
         <el-table :data="state.tableData">
           <el-table-column prop="uname" label="设备名称" align="center" />
           <el-table-column prop="ip" label="ip" align="center" />
@@ -10,41 +10,43 @@
           <el-table-column prop="gid__name" label="gid__name" align="center" />
           <el-table-column fixed="right" label="Operations" align="center">
             <template #default="scope">
-              <el-button link type="primary" size="small" @click="handleDedit">编辑</el-button>
+              <el-button link type="primary" size="small" @click="openAddDialog('device', 'edit')">编辑</el-button>
               <el-button link type="primary" size="small" @click="handleDelete">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
       </el-tab-pane>
       <el-tab-pane label="设备类型" name="third">
-        <el-button type="primary" @click="openAddDialog('deviceType')" style="margin-bottom: 20px">添加设备类型</el-button>
+        <el-button type="primary" @click="openAddDialog('deviceType', 'add')" style="margin-bottom: 20px">添加设备类型
+        </el-button>
         <el-table :data="state.d_typeData" border>
           <el-table-column prop="name" label="设备类型" align="center" />
           <el-table-column fixed="right" label="Operations" align="center">
             <template #default="scope">
-              <el-button link type="primary" size="small" @click="handleDedit">编辑</el-button>
-              <el-button link type="primary" size="small" @click="handleDelete">删除</el-button>
+              <el-button link type="primary" size="small" @click="openAddDialog('deviceType', 'edit')">编辑</el-button>
+              <el-button link type="primary" size="small" @click="handleDelete('deviceType', scope.row.id)">删除
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
       </el-tab-pane>
       <el-tab-pane label="分组管理" name="second">
-        <el-button type="primary" @click="openAddDialog('group')" style="margin-bottom: 20px">添加分组</el-button>
+        <el-button type="primary" @click="openAddDialog('group', 'add')" style="margin-bottom: 20px">添加分组</el-button>
         <el-table :data="state.d_groupData">
           <el-table-column prop="name" label="分组名称" align="center" />
           <el-table-column prop="buildip" label="ip" align="center" />
           <el-table-column prop="status" label="状态" align="center" />
           <el-table-column fixed="right" label="Operations" align="center">
             <template #default="scope">
-              <el-button link type="primary" size="small" @click="handleDedit">编辑</el-button>
-              <el-button link type="primary" size="small" @click="handleDelete">删除</el-button>
+              <el-button link type="primary" size="small" @click="openAddDialog('group', 'edit')">编辑</el-button>
+              <el-button link type="primary" size="small" @click="handleDelete('group', scope.row.id)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
       </el-tab-pane>
     </el-tabs>
-
-    <el-dialog v-model="dialogVisible" title="添加设备" width="25%" :before-close="handleClose">
+    <!--添加设备弹窗-->
+    <el-dialog v-model="dialogVisible" :title="titleDialog" width="25%" :before-close="handleClose">
       <span>
         <el-form :inline="false" :model="addDeviceForm" ref="addDeviceRuleFormRef" :rules="addDeviceFormRules"
           class="addDevice-form" label-width="110px">
@@ -77,7 +79,7 @@
     </el-dialog>
 
     <!-- 添加设备类型弹窗-->
-    <el-dialog v-model="deviceTypeDialogVisible" title="添加设备类型" width="25%" :before-close="handleClose">
+    <el-dialog v-model="deviceTypeDialogVisible" :title="titleDialog" width="25%" :before-close="handleClose">
       <span>
         <el-form :inline="false" :model="addDeviceTypeForm" ref="addDeviceTypeRuleFormRef"
           :rules="addDeviceTypeFormRules" class="addDevice-form" label-width="110px">
@@ -95,7 +97,7 @@
     </el-dialog>
 
     <!-- 添加分组管理弹窗-->
-    <el-dialog v-model="groupDialogVisible" title="添加分组" width="25%" :before-close="handleClose">
+    <el-dialog v-model="groupDialogVisible" :title="titleDialog" width="25%" :before-close="handleClose">
       <span>
         <el-form :inline="false" :model="addGroupForm" ref="addGroupRuleFormRef" :rules="addGroupFormRules"
           class="addDevice-form" label-width="110px">
@@ -105,12 +107,12 @@
           <el-form-item label="buildip" prop="buildip">
             <el-input v-model="addGroupForm.buildip" placeholder="请输入..." />
           </el-form-item>
-          <el-form-item label="状态" prop="status">
+          <!-- <el-form-item label="状态" prop="status">
             <el-select v-model="addGroupForm.status" placeholder="请选择...">
               <el-option label="空闲" value="false" />
               <el-option label="使用中" value="true" />
             </el-select>
-          </el-form-item>
+          </el-form-item> -->
         </el-form>
       </span>
       <template #footer>
@@ -130,7 +132,7 @@ import type { TabsPaneContext } from "element-plus";
 import { ElMessage } from "element-plus";
 import type { FormInstance, FormRules } from "element-plus";
 import { useRouter } from "vue-router";
-import { deviceApi, d_groupApi, d_typeApi } from '@/api/APV/index.js'
+import { deviceApi, addDeviceApi, d_groupApi, d_typeApi, addD_typeApi, deleteD_typeApi, addD_groupApi, deleteD_groupApi } from '@/api/APV/index.js'
 
 const router = useRouter()
 const activeName = ref("instrumentManagement");
@@ -142,6 +144,7 @@ const state: any = reactive({
   d_groupData: [], // 分组管理数据
   d_typeData: [], // 设备类型数据
 })
+const titleDialog = ref("")
 const addDeviceForm = reactive({
   ip: "",
   uname: "",
@@ -175,7 +178,7 @@ const addDeviceTypeFormRules = reactive<FormRules>({
 const addGroupForm = reactive({
   name: "",
   buildip: "",
-  status: "",
+  // status: null,
 })
 const addGroupRuleFormRef = ref<FormInstance>();
 const addGroupFormRules = reactive<FormRules>({
@@ -185,7 +188,7 @@ const addGroupFormRules = reactive<FormRules>({
   buildip: [
     { required: true, message: "buildip不能为空", trigger: "blur" },
   ],
-  status: [{ required: true, message: "请选择状态", trigger: "blur" }],
+  // status: [{ required: true, message: "请选择状态", trigger: "blur" }],
 });
 
 // 切换Tab
@@ -193,16 +196,19 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
   console.log(tab, event);
 };
 
-// 打开添加设备弹窗
-const openAddDialog = (type) => {
+// 打开添加弹窗
+const openAddDialog = (type, operation) => {
   switch (type) {
     case 'device':
+      operation == 'add' ? titleDialog.value = '添加设备' : titleDialog.value = '编辑设备'
       dialogVisible.value = true;
       break;
     case 'deviceType':
+      operation == 'add' ? titleDialog.value = '添加设备类型' : titleDialog.value = '编辑设备类型'
       deviceTypeDialogVisible.value = true;
       break;
     case 'group':
+      operation == 'add' ? titleDialog.value = '添加分组' : titleDialog.value = '编辑分组'
       groupDialogVisible.value = true;
       break;
     default:
@@ -213,9 +219,25 @@ const openAddDialog = (type) => {
 // 添加设备
 const onAddDeviceForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
-  await formEl.validate((valid, fields) => {
+  await formEl.validate(async (valid, fields) => {
     if (valid) {
       console.log("添加成功...", addDeviceForm);
+      let res = await addDeviceApi(addDeviceForm)
+      if (res.code === 1000) {
+        getDeviceApi()
+        ElMessage({
+          message: "添加成功",
+          type: "success",
+          duration: 1000,
+        });
+      } else {
+        ElMessage({
+          message: res?.msg || "添加失败",
+          type: "error",
+          duration: 3000,
+        });
+      }
+      addDeviceRuleFormRef.value.resetFields()
       dialogVisible.value = false;
     } else {
       console.log("error submit!", fields);
@@ -226,9 +248,25 @@ const onAddDeviceForm = async (formEl: FormInstance | undefined) => {
 // 添加设备类型
 const onAddDeviceTypeForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
-  await formEl.validate((valid, fields) => {
+  await formEl.validate(async (valid, fields) => {
     if (valid) {
       console.log("添加成功...", addDeviceTypeForm);
+      let res = await addD_typeApi(addDeviceTypeForm)
+      if (res.code === 1000) {
+        getD_typeApi()
+        ElMessage({
+          message: "添加成功",
+          type: "success",
+          duration: 1000,
+        });
+      } else {
+        ElMessage({
+          message: res?.msg || "添加失败",
+          type: "error",
+          duration: 3000,
+        });
+      }
+      addDeviceTypeRuleFormRef.value.resetFields()
       deviceTypeDialogVisible.value = false;
     } else {
       console.log("error submit!", fields);
@@ -239,12 +277,26 @@ const onAddDeviceTypeForm = async (formEl: FormInstance | undefined) => {
 // 添加分组管理 
 const onAddGroupForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
-  await formEl.validate((valid, fields) => {
+  await formEl.validate(async (valid, fields) => {
     if (valid) {
       console.log("添加成功...", addGroupForm);
+      let res = await addD_groupApi(addGroupForm)
+      if (res.code === 1000) {
+        getD_group()
+        ElMessage({
+          message: "添加成功",
+          type: "success",
+          duration: 1000,
+        });
+      } else {
+        ElMessage({
+          message: res?.msg || "添加失败",
+          type: "error",
+          duration: 3000,
+        });
+      }
+      addGroupRuleFormRef.value.resetFields()
       groupDialogVisible.value = false;
-    } else {
-      console.log("error submit!", fields);
     }
   });
 };
@@ -265,40 +317,75 @@ const handleClose = (done: () => void) => {
   groupDialogVisible.value = false
 };
 
-// 编辑设备
-const handleDedit = () => {
-  console.log("编辑")
-}
-
-// 删除设备
-const handleDelete = () => {
-  console.log('删除')
+// 删除
+const handleDelete = (type, id) => {
+  switch (type) {
+    case 'group':
+      deleteD_group(id)
+      break;
+    case 'deviceType':
+      deleteD_type(id)
+    default:
+      break;
+  }
 }
 
 onMounted(() => {
   getDeviceApi()
-  getD_groupApi()
+  getD_group()
   getD_typeApi()
 })
 
 // 分组管理 接口
-const getD_groupApi = async () => {
+const getD_group = async () => {
   let group = await d_groupApi()
   state.d_groupData = group.data
 }
 
-// 设备管理 接口
+// 分组管理 删除接口
+const deleteD_group = async (id) => {
+  let params = {
+    id: id
+  }
+  let res = await deleteD_groupApi(params)
+  if (res.code === 1000) {
+    getD_group()
+    ElMessage({
+      message: res?.msg || "删除成功",
+      type: "success",
+      duration: 1000,
+    });
+  }
+}
+
+// 设备管理 获取接口
 const getDeviceApi = async () => {
   let res = await deviceApi()
   state.tableData = res.data
   console.log("设备管理...", state.tableData);
 }
 
-// 设备类型 接口
+// 设备类型 获取接口
 const getD_typeApi = async () => {
   let res = await d_typeApi()
   state.d_typeData = res.data
   console.log("设备类型...", state.d_typeData);
+}
+
+// 分组管理 删除接口
+const deleteD_type = async (id) => {
+  let params = {
+    id: id
+  }
+  let res = await deleteD_typeApi(params)
+  if (res.code === 1000) {
+    getD_typeApi()
+    ElMessage({
+      message: res?.msg || "删除成功",
+      type: "success",
+      duration: 1000,
+    });
+  }
 }
 
 </script>
