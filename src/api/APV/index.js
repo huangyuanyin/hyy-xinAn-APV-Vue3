@@ -1,5 +1,6 @@
 import request from "@/utils/request.js";
 import qs from 'qs'
+
 // 设备管理 - 获取
 export function deviceApi(params) {
   return request({
@@ -15,6 +16,26 @@ export function addDeviceApi(params) {
   return request({
     url: "/device/",
     method: "post",
+    urlType: "APV",
+    data: qs.stringify(params),
+  });
+}
+
+// 设备管理 - 编辑
+export function editDeviceApi(params) {
+  return request({
+    url: "/device/",
+    method: "PUT",
+    urlType: "APV",
+    data: qs.stringify(params),
+  });
+}
+
+// 设备管理 - 删除
+export function deleteDeviceApi(params) {
+  return request({
+    url: `/device/`,
+    method: "DELETE",
     urlType: "APV",
     data: qs.stringify(params),
   });

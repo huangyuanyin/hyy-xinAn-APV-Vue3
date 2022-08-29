@@ -2,7 +2,9 @@
   <div class="performanceManagement">
     <el-tabs v-model="activeName" class="tabs" @tab-click="handleClick">
       <el-tab-pane label="设备管理" name="instrumentManagement">
-        <el-button type="primary" @click="openAddDialog('device', 'add')" style="margin-bottom: 20px">添加设备</el-button>
+        <el-button type="primary" @click="openAddDialog('device', 'add', null)" style="margin-bottom: 20px">
+          添加设备
+        </el-button>
         <el-table :data="state.tableData">
           <el-table-column prop="uname" label="设备名称" align="center" />
           <el-table-column prop="ip" label="ip" align="center" />
@@ -12,13 +14,14 @@
             <template #default="scope">
               <el-button link type="primary" size="small" @click="openAddDialog('device', 'edit', scope.row.id)">编辑
               </el-button>
-              <el-button link type="primary" size="small" @click="handleDelete">删除</el-button>
+              <el-button link type="primary" size="small" @click="handleDelete('device', scope.row.id)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
       </el-tab-pane>
       <el-tab-pane label="设备类型" name="third">
-        <el-button type="primary" @click="openAddDialog('deviceType', 'add')" style="margin-bottom: 20px">添加设备类型
+        <el-button type="primary" @click="openAddDialog('deviceType', 'add', null)" style="margin-bottom: 20px">
+          添加设备类型
         </el-button>
         <el-table :data="state.d_typeData" border>
           <el-table-column prop="name" label="设备类型" align="center" />
@@ -33,7 +36,9 @@
         </el-table>
       </el-tab-pane>
       <el-tab-pane label="分组管理" name="second">
-        <el-button type="primary" @click="openAddDialog('group', 'add')" style="margin-bottom: 20px">添加分组</el-button>
+        <el-button type="primary" @click="openAddDialog('group', 'add', null)" style="margin-bottom: 20px">
+          添加分组
+        </el-button>
         <el-table :data="state.d_groupData">
           <el-table-column prop="name" label="分组名称" align="center" />
           <el-table-column prop="buildip" label="ip" align="center" />
@@ -135,7 +140,7 @@ import type { TabsPaneContext } from "element-plus";
 import { ElMessage } from "element-plus";
 import type { FormInstance, FormRules } from "element-plus";
 import { useRouter } from "vue-router";
-import { deviceApi, addDeviceApi, d_groupApi, d_typeApi, addD_typeApi, editD_typeApi, deleteD_typeApi, addD_groupApi, editD_groupApi, deleteD_groupApi } from '@/api/APV/index.js'
+import { deviceApi, addDeviceApi, editDeviceApi, deleteDeviceApi, d_groupApi, d_typeApi, addD_typeApi, editD_typeApi, deleteD_typeApi, addD_groupApi, editD_groupApi, deleteD_groupApi } from '@/api/APV/index.js'
 
 const router = useRouter()
 const activeName = ref("instrumentManagement");
@@ -149,6 +154,7 @@ const state: any = reactive({
 })
 const titleDialog = ref("")
 const addDeviceForm = reactive({
+  id: "",
   ip: "",
   uname: "",
   tid__name: "",
@@ -201,11 +207,12 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
   console.log(tab, event);
 };
 
-// 打开添加弹窗
+// 打开添加/编辑弹窗
 const openAddDialog = (type, operation, id) => {
   switch (type) {
     case 'device':
       operation == 'add' ? titleDialog.value = '添加设备' : titleDialog.value = '编辑设备'
+      getOneData(type, id)
       dialogVisible.value = true;
       break;
     case 'deviceType':
@@ -227,7 +234,15 @@ const openAddDialog = (type, operation, id) => {
 const getOneData = (type, id) => {
   switch (type) {
     case "device":
-
+      state.tableData.map(item => {
+        if (item.id === id) {
+          addDeviceForm.id = item.id
+          addDeviceForm.ip = item.ip
+          addDeviceForm.uname = item.uname
+          addDeviceForm.tid__name = item.tid__name
+          addDeviceForm.gid__name = item.gid__name
+        }
+      })
       break;
     case 'deviceType':
       state.d_typeData.map(item => {
@@ -257,20 +272,10 @@ const onAddDeviceForm = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       console.log("添加成功...", addDeviceForm);
-      let res = await addDeviceApi(addDeviceForm)
-      if (res.code === 1000) {
-        getDeviceApi()
-        ElMessage({
-          message: "添加成功",
-          type: "success",
-          duration: 1000,
-        });
+      if (titleDialog.value == '添加设备') {
+        addDevice(addDeviceForm)
       } else {
-        ElMessage({
-          message: res?.msg || "添加失败",
-          type: "error",
-          duration: 3000,
-        });
+        editDevice(addDeviceForm)
       }
       addDeviceRuleFormRef.value.resetFields()
       dialogVisible.value = false;
@@ -335,6 +340,9 @@ const handleClose = (done: () => void) => {
 // 删除
 const handleDelete = (type, id) => {
   switch (type) {
+    case 'device':
+      deleteDevice(id)
+      break;
     case 'group':
       deleteD_group(id)
       break;
@@ -346,7 +354,7 @@ const handleDelete = (type, id) => {
 }
 
 onMounted(() => {
-  getDeviceApi()
+  getDevice()
   getD_typeApi()
   getD_group()
 })
@@ -376,7 +384,6 @@ const addD_group = async (params) => {
   }
 }
 
-
 // 分组管理 编辑接口
 const editD_group = async (params) => {
   let res = await editD_groupApi(params)
@@ -390,7 +397,7 @@ const editD_group = async (params) => {
   } else {
     ElMessage({
       message: res?.msg || "编辑失败",
-      type: "success",
+      type: "error",
       duration: 3000,
     });
   }
@@ -413,10 +420,64 @@ const deleteD_group = async (id) => {
 }
 
 // 设备管理 获取接口
-const getDeviceApi = async () => {
+const getDevice = async () => {
   let res = await deviceApi()
   state.tableData = res.data
   console.log("设备管理...", state.tableData);
+}
+
+// 设备管理 添加接口
+const addDevice = async (params) => {
+  let res = await addDeviceApi(params)
+  if (res.code === 1000) {
+    getDevice()
+    ElMessage({
+      message: "添加成功",
+      type: "success",
+      duration: 1000,
+    });
+  } else {
+    ElMessage({
+      message: res?.msg || "添加失败",
+      type: "error",
+      duration: 3000,
+    });
+  }
+}
+
+// 设备管理 编辑接口
+const editDevice = async (params) => {
+  let res = await editDeviceApi(params)
+  if (res.code === 1000) {
+    getDevice()
+    ElMessage({
+      message: res?.msg || "编辑成功",
+      type: "success",
+      duration: 1000,
+    });
+  } else {
+    ElMessage({
+      message: res?.msg || "编辑失败",
+      type: "error",
+      duration: 3000,
+    });
+  }
+}
+
+// 设备管理 删除接口
+const deleteDevice = async (id) => {
+  let params = {
+    id: id
+  }
+  let res = await deleteDeviceApi(params)
+  if (res.code === 1000) {
+    getDevice()
+    ElMessage({
+      message: res?.msg || "删除成功",
+      type: "success",
+      duration: 1000,
+    });
+  }
 }
 
 // 设备类型 获取接口
@@ -458,7 +519,7 @@ const editD_type = async (params) => {
   } else {
     ElMessage({
       message: res?.msg || "编辑失败",
-      type: "success",
+      type: "error",
       duration: 3000,
     });
   }
