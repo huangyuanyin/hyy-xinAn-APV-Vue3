@@ -35,12 +35,12 @@
           </el-table-column>
         </el-table>
       </el-tab-pane>
-      <el-tab-pane label="分组管理" name="second">
+      <el-tab-pane label="测试环境管理" name="second">
         <el-button type="primary" @click="openAddDialog('group', 'add', null)" style="margin-bottom: 20px">
-          添加分组
+          添加测试环境
         </el-button>
         <el-table :data="state.d_groupData">
-          <el-table-column prop="name" label="分组名称" align="center" />
+          <el-table-column prop="name" label="测试环境名称" align="center" />
           <el-table-column prop="buildip" label="ip" align="center" />
           <el-table-column prop="status" label="状态" align="center" />
           <el-table-column fixed="right" label="Operations" align="center">
@@ -104,7 +104,7 @@
       </template>
     </el-dialog>
 
-    <!-- 添加分组管理弹窗-->
+    <!-- 添加测试环境管理弹窗-->
     <el-dialog v-model="groupDialogVisible" :title="titleDialog" width="25%" :before-close="handleClose">
       <span>
         <el-form :inline="false" :model="addGroupForm" ref="addGroupRuleFormRef" :rules="addGroupFormRules"

@@ -55,6 +55,13 @@ export const APVAutoMenuData = [
     children: [],
   },
   {
+    id: "0304",
+    title: "任务管理",
+    path: "/APVAuto/taskManagement",
+    isDisabled: false,
+    children: [],
+  },
+  {
     id: "0302",
     title: "性能测试任务",
     path: "/APVAuto/performanceTestTask",
