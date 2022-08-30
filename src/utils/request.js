@@ -3,7 +3,6 @@ import { ElMessage } from "element-plus";
 // import { useCookies } from '@vueuse/integrations/useCookies'
 import { getToken } from "./auth";
 import baseUrl from "@/config/api";
-
 const service = axios.create({
   // baseURL:"http://ceshi13.dishait.cn/"
   // baseURL:"http://10.20.84.55:8000/",
@@ -57,7 +56,7 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   function (response) {
     // 对响应数据做点什么
-    if (response.data.code == "1001") {
+    if (response.data.code != "1000") {
       ElMessage({
         message: response.data?.msg || "请求失败",
         type: "error",
