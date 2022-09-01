@@ -24,9 +24,11 @@ service.interceptors.request.use(
       config.url !== "/forum/login/" &&
       config.url !== "/datas/datas/" &&
       config.url !== "/WEBt/terminals/" &&
-      config.url !== "/device/" &&
-      config.url !== "/d_type/" &&
-      config.url !== "/d_group/"
+      config.url !== "/autoapv/device/" &&
+      config.url !== "/autoapv/d_type/" &&
+      config.url !== "/autoapv/d_group/" &&
+      config.url !== "/autoapv/task/" && 
+      config.url !== "/base/build/"
     ) {
       config.headers["token"] = hastoken;
     }
