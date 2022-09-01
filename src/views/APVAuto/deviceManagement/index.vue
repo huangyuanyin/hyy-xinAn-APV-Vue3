@@ -41,7 +41,8 @@
         </el-button>
         <el-table :data="state.d_groupData">
           <el-table-column prop="name" label="测试环境名称" align="center" />
-          <el-table-column prop="buildip" label="ip" align="center" />
+          <el-table-column prop="buildip" label="buildIp" align="center" />
+          <el-table-column prop="build" label="build" align="center" />
           <el-table-column prop="status" label="状态" align="center" />
           <el-table-column fixed="right" label="Operations" align="center">
             <template #default="scope">
@@ -112,6 +113,9 @@
           <el-form-item label="分组名称" prop="name">
             <el-input v-model="addGroupForm.name" placeholder="请输入..." />
           </el-form-item>
+          <el-form-item label="build" prop="build">
+            <el-input v-model="addGroupForm.build" placeholder="请输入..." />
+          </el-form-item>
           <el-form-item label="buildip" prop="buildip">
             <el-input v-model="addGroupForm.buildip" placeholder="请输入..." />
           </el-form-item>
@@ -151,6 +155,7 @@ const state: any = reactive({
   tableData: [],
   d_typeData: [], // 设备类型数据
   d_groupData: [], // 分组管理数据
+  groupIdList: [], // 分组ID集合
 })
 const titleDialog = ref("")
 const addDeviceForm = reactive({
@@ -188,6 +193,7 @@ const addDeviceTypeFormRules = reactive<FormRules>({
 const addGroupForm = reactive({
   id: "",
   name: "",
+  build: null,
   buildip: "",
   // status: null,
 })
@@ -195,6 +201,9 @@ const addGroupRuleFormRef = ref<FormInstance>();
 const addGroupFormRules = reactive<FormRules>({
   name: [
     { required: true, message: "设备类型名称不能为空", trigger: "blur" },
+  ],
+  build: [
+    { required: true, message: "build不能为空", trigger: "blur" },
   ],
   buildip: [
     { required: true, message: "buildip不能为空", trigger: "blur" },
@@ -257,6 +266,7 @@ const getOneData = (type, id) => {
         if (item.id === id) {
           addGroupForm.id = item.id
           addGroupForm.name = item.name
+          addGroupForm.build = item.build
           addGroupForm.buildip = item.buildip
         }
       })
