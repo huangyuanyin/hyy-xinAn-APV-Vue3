@@ -129,7 +129,10 @@
             <el-input v-model="addGroupForm.name" placeholder="请输入..." />
           </el-form-item>
           <el-form-item label="build" prop="build">
-            <el-input v-model="addGroupForm.build" placeholder="请输入..." />
+            <el-select v-model="addGroupForm.build" placeholder="请选择...">
+              <el-option v-for="(item, index) in state.buildData" :key="'buildData' + index" :label="item.name"
+                :value="item.name" />
+            </el-select>
           </el-form-item>
           <el-form-item label="buildip" prop="buildip">
             <el-input v-model="addGroupForm.buildip" placeholder="请输入..." />
