@@ -49,15 +49,8 @@ export const APVAutoMenuData = [
   },
   {
     id: "0301",
-    title: "设备管理",
+    title: "资源管理",
     path: "/APVAuto/deviceManagement",
-    isDisabled: false,
-    children: [],
-  },
-  {
-    id: "0305",
-    title: "build管理",
-    path: "/APVAuto/buildManagement",
     isDisabled: false,
     children: [],
   },

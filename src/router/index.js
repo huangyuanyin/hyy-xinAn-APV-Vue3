@@ -52,19 +52,10 @@ const routes = [
             path: "/APVAuto/deviceManagement",
             name: "DeviceManagement",
             meta: {
-              title: "设备管理",
+              title: "资源管理",
             },
             component: () =>
               import("@/views/APVAuto/deviceManagement/index.vue"),
-          },
-          {
-            path: "/APVAuto/buildManagement",
-            name: "BuildManagement",
-            meta: {
-              title: "build管理",
-            },
-            component: () =>
-              import("@/views/APVAuto/buildManagement/index.vue"),
           },
           {
             path: "/APVAuto/taskManagement",

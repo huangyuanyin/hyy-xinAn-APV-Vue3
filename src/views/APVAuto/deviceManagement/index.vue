@@ -53,6 +53,21 @@
           </el-table-column>
         </el-table>
       </el-tab-pane>
+      <el-tab-pane label="build管理" name="buildManagement">
+        <el-upload class="upload-demo" :show-file-list="false" action="action" :http-request="handleUpload"
+          :on-success="handleSuccess">
+          <el-button type="primary" style="margin-bottom: 20px" :auto-upload="false">上传文件</el-button>
+        </el-upload>
+        <el-table :data="state.buildData">
+          <el-table-column prop="name" label="文件名称" align="center" />
+          <el-table-column fixed="right" label="Operations" align="center">
+            <template #default="scope">
+              <el-button link type="primary" size="small" @click="handleDelete('build', scope.row.name)">删除文件
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-tab-pane>
     </el-tabs>
     <!--添加设备弹窗-->
     <el-dialog v-model="dialogVisible" :title="titleDialog" width="25%" :before-close="handleClose">
@@ -142,9 +157,10 @@ import { onMounted, toRefs } from "vue";
 import { ref, reactive } from "vue";
 import type { TabsPaneContext } from "element-plus";
 import { ElMessage } from "element-plus";
-import type { FormInstance, FormRules } from "element-plus";
+import type { FormInstance, FormRules, UploadProps } from "element-plus";
 import { useRouter } from "vue-router";
 import { deviceApi, addDeviceApi, editDeviceApi, deleteDeviceApi, d_groupApi, d_typeApi, addD_typeApi, editD_typeApi, deleteD_typeApi, addD_groupApi, editD_groupApi, deleteD_groupApi } from '@/api/APV/index.js'
+import { buildApi, buildUploadApi, deleteBuildApi } from '@/api/APV/buildManagement.js'
 
 const router = useRouter()
 const activeName = ref("instrumentManagement");
@@ -156,6 +172,7 @@ const state: any = reactive({
   d_typeData: [], // 设备类型数据
   d_groupData: [], // 分组管理数据
   groupIdList: [], // 分组ID集合
+  buildData: [], // build管理数据
 })
 const titleDialog = ref("")
 const addDeviceForm = reactive({
@@ -358,6 +375,10 @@ const handleDelete = (type, id) => {
       break;
     case 'deviceType':
       deleteD_type(id)
+      break;
+    case 'build':
+      deleteBuild(id)
+      break
     default:
       break;
   }
@@ -367,6 +388,7 @@ onMounted(() => {
   getDevice()
   getD_typeApi()
   getD_group()
+  getBuild()
 })
 
 // 分组管理 接口
@@ -549,6 +571,49 @@ const deleteD_type = async (id) => {
       duration: 1000,
     });
   }
+}
+
+// build管理 获取接口
+const getBuild = async () => {
+  let res = await buildApi({ filetype: "apvbuild" })
+  state.buildData = res.data.map(item => ({ name: item }))
+}
+
+// build管理 删除接口
+const deleteBuild = async (name) => {
+  let params = {
+    "filename": name,
+    'filetype': "apvbuild"
+  }
+  let res = await deleteBuildApi(params)
+  if (res.code === 1000) {
+    getBuild()
+    ElMessage({
+      message: res?.msg || "删除成功",
+      type: "success",
+      duration: 1000,
+    });
+  }
+}
+
+// 文件上传
+const handleUpload = async (files) => {
+  console.log("onChange...", files)
+  let formData = new FormData()
+  formData.append('file', files.file)
+  formData.append('filetype', "apvbuild")
+  let res = await buildUploadApi(formData)
+  if (res.code === 1000) {
+    ElMessage({
+      message: "上传成功",
+      type: "success",
+      duration: 2000,
+    });
+  }
+}
+
+const handleSuccess: UploadProps['onSuccess'] = () => {
+  getBuild()
 }
 
 </script>

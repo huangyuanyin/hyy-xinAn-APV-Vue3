@@ -27,8 +27,9 @@ service.interceptors.request.use(
       config.url !== "/autoapv/device/" &&
       config.url !== "/autoapv/d_type/" &&
       config.url !== "/autoapv/d_group/" &&
-      config.url !== "/autoapv/task/" && 
-      config.url !== "/base/build/"
+      config.url !== "/autoapv/task/" &&
+      config.url !== "/base/build/" &&
+      config.url !== "/base/files/"
     ) {
       config.headers["token"] = hastoken;
     }
