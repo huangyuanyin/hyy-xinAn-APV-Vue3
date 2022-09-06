@@ -23,7 +23,7 @@
       </el-tab-pane>
     </el-tabs>
     <!--添加任务弹窗-->
-    <el-dialog v-model="dialogVisible" :title="titleDialog" width="25%" :before-close="handleClose">
+    <el-dialog v-model="dialogVisible" :title="titleDialog" width="30%" :before-close="handleClose">
       <span>
         <el-form :inline="false" :model="addTaskForm" ref="addTaskRuleFormRef" :rules="addTaskFormRules"
           class="addDevice-form" label-width="110px">
@@ -39,18 +39,16 @@
                 :value="item.name" />
             </el-select>
           </el-form-item>
-          <el-form-item label="分组名称" prop="group">
-            <el-select v-model="addTaskForm.group" placeholder="请选择...">
-              <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name"
-                :value="item.id" />
-            </el-select>
+          <el-form-item label="测试平台" prop="group">
+            <el-select-v2 placeholder="请选择..." clearable multiple style="width: 214px" v-model="value"
+              :options="state.d_groupDataAfter" @change="getGroupDataId" />
           </el-form-item>
         </el-form>
       </span>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="onResetDeviceForm(addTaskRuleFormRef)">取消</el-button>
-          <el-button type="primary" @click="onAddDeviceForm(addTaskRuleFormRef)">添加</el-button>
+          <el-button @click="onResetTaskForm(addTaskRuleFormRef)">取消</el-button>
+          <el-button type="primary" @click="onAddTaskForm(addTaskRuleFormRef)">添加</el-button>
         </span>
       </template>
     </el-dialog>
@@ -77,7 +75,9 @@ const state: any = reactive({
   tableData: [],  // 任务管理数据
   getD_group: [],  // 分组信息
   buildData: [], // build管理数据
+  d_groupDataAfter: []
 })
+const value = ref('')
 const titleDialog = ref("")
 const addTaskForm = reactive({
   id: "",
@@ -96,7 +96,7 @@ const addTaskFormRules = reactive<FormRules>({
   ],
   build: [{ required: true, message: "请选择版本信息", trigger: "blur" }],
   group: [
-    { required: true, message: "请选择分组", trigger: "blur" },
+    { required: true, message: "请选择测试平台", trigger: "blur" },
   ],
 });
 
@@ -137,16 +137,18 @@ const getOneData = (type, id) => {
   }
 }
 
-// 添加设备
-const onAddDeviceForm = async (formEl: FormInstance | undefined) => {
+// 添加任务
+const onAddTaskForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
     if (valid) {
+      addTaskForm.group = "[" + String(addTaskForm.group) + "]"
+      delete addTaskForm.id
       console.log("添加成功...", addTaskForm);
       if (titleDialog.value == '添加任务') {
-        addDevice(addTaskForm)
+        addTask(addTaskForm)
       } else {
-        editDevice(addTaskForm)
+        addTask(addTaskForm)
       }
       addTaskRuleFormRef.value.resetFields()
       dialogVisible.value = false;
@@ -157,7 +159,7 @@ const onAddDeviceForm = async (formEl: FormInstance | undefined) => {
 };
 
 // 取消弹窗
-const onResetDeviceForm = (formEl: FormInstance | undefined) => {
+const onResetTaskForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   formEl.resetFields();
   dialogVisible.value = false;
@@ -176,13 +178,8 @@ const handleClose = (done: () => void) => {
 const handleDelete = (type, id) => {
   switch (type) {
     case 'task':
-      deleteDevice(id)
+      deleteTask(id)
       break;
-    case 'group':
-      deleteD_group(id)
-      break;
-    case 'deviceType':
-      deleteD_type(id)
     default:
       break;
   }
@@ -199,13 +196,59 @@ const getTask = async () => {
   let res = await taskApi()
   state.tableData = res.data
   console.log("任务管理...", state.tableData);
-  handleGroupId()
+  handleGroupData(state.tableData)
+}
+
+// 任务管理 添加接口
+const addTask = async (params) => {
+  let res = await addTaskApi(params)
+  if (res.code === 1000) {
+    getTask()
+    ElMessage({
+      message: "添加成功",
+      type: "success",
+      duration: 1000,
+    });
+  } else {
+    ElMessage({
+      message: res?.msg || "添加失败",
+      type: "error",
+      duration: 3000,
+    });
+  }
+}
+
+// 任务管理 编辑接口
+
+// 任务管理 删除接口
+const deleteTask = async (id) => {
+  let params = {
+    id: id
+  }
+  let res = await deleteTaskApi(params)
+  if (res.code === 1000) {
+    getTask()
+    ElMessage({
+      message: res?.msg || "删除成功",
+      type: "success",
+      duration: 1000,
+    });
+  }
+}
+
+// 任务管理 分组信息处理展示
+const handleGroupData = (data) => {
+  console.log("data", data);
 }
 
 // 分组管理 获取接口
 const getD_group = async () => {
   let group = await d_groupApi()
   state.d_groupData = group.data
+  state.d_groupDataAfter = group.data.map((i) => ({
+    label: i.name,
+    value: i.id
+  }))
 }
 
 // build管理 获取接口
@@ -214,192 +257,9 @@ const getBuild = async () => {
   state.buildData = res.data.map(item => ({ name: item }))
 }
 
-// 分组管理 ID集合处理展示
-const handleGroupId = () => {
-  state.tableData.map((item, index) => {
-    console.log("item.group", item.group)
-    state.d_groupData.map((it) => {
-      if (it.id === item.group) {
-        state.tableData[index].group = it[index].name
-      }
-    })
-  })
-}
-
-// 分组管理 添加接口
-const addD_group = async (params) => {
-  let res = await addD_groupApi(params)
-  if (res.code === 1000) {
-    getD_group()
-    ElMessage({
-      message: "添加成功",
-      type: "success",
-      duration: 1000,
-    });
-  } else {
-    ElMessage({
-      message: res?.msg || "添加失败",
-      type: "error",
-      duration: 3000,
-    });
-  }
-}
-
-// 分组管理 编辑接口
-const editD_group = async (params) => {
-  let res = await editD_groupApi(params)
-  if (res.code === 1000) {
-    getD_group()
-    ElMessage({
-      message: res?.msg || "编辑成功",
-      type: "success",
-      duration: 1000,
-    });
-  } else {
-    ElMessage({
-      message: res?.msg || "编辑失败",
-      type: "error",
-      duration: 3000,
-    });
-  }
-}
-
-// 分组管理 删除接口
-const deleteD_group = async (id) => {
-  let params = {
-    id: id
-  }
-  let res = await deleteD_groupApi(params)
-  if (res.code === 1000) {
-    getD_group()
-    ElMessage({
-      message: res?.msg || "删除成功",
-      type: "success",
-      duration: 1000,
-    });
-  }
-}
-
-// 设备管理 获取接口
-const getDevice = async () => {
-  let res = await deviceApi()
-  state.tableData = res.data
-  console.log("设备管理...", state.tableData);
-}
-
-// 设备管理 添加接口
-const addDevice = async (params) => {
-  let res = await addDeviceApi(params)
-  if (res.code === 1000) {
-    getDevice()
-    ElMessage({
-      message: "添加成功",
-      type: "success",
-      duration: 1000,
-    });
-  } else {
-    ElMessage({
-      message: res?.msg || "添加失败",
-      type: "error",
-      duration: 3000,
-    });
-  }
-}
-
-// 设备管理 编辑接口
-const editDevice = async (params) => {
-  let res = await editDeviceApi(params)
-  if (res.code === 1000) {
-    getDevice()
-    ElMessage({
-      message: res?.msg || "编辑成功",
-      type: "success",
-      duration: 1000,
-    });
-  } else {
-    ElMessage({
-      message: res?.msg || "编辑失败",
-      type: "error",
-      duration: 3000,
-    });
-  }
-}
-
-// 设备管理 删除接口
-const deleteDevice = async (id) => {
-  let params = {
-    id: id
-  }
-  let res = await deleteDeviceApi(params)
-  if (res.code === 1000) {
-    getDevice()
-    ElMessage({
-      message: res?.msg || "删除成功",
-      type: "success",
-      duration: 1000,
-    });
-  }
-}
-
-// 设备类型 获取接口
-const getD_typeApi = async () => {
-  let res = await d_typeApi()
-  state.d_typeData = res.data
-  console.log("设备类型...", state.d_typeData);
-}
-
-// 设备类型 添加接口
-const addD_type = async (params) => {
-  let res = await addD_typeApi(params)
-  if (res.code === 1000) {
-    getD_typeApi()
-    ElMessage({
-      message: "添加成功",
-      type: "success",
-      duration: 1000,
-    });
-  } else {
-    ElMessage({
-      message: res?.msg || "添加失败",
-      type: "error",
-      duration: 3000,
-    });
-  }
-}
-
-// 设备类型 编辑接口 
-const editD_type = async (params) => {
-  let res = await editD_typeApi(params)
-  if (res.code === 1000) {
-    getD_typeApi()
-    ElMessage({
-      message: res?.msg || "编辑成功",
-      type: "success",
-      duration: 1000,
-    });
-  } else {
-    ElMessage({
-      message: res?.msg || "编辑失败",
-      type: "error",
-      duration: 3000,
-    });
-  }
-}
-
-// 分组管理 删除接口
-const deleteD_type = async (id) => {
-  let params = {
-    id: id
-  }
-  let res = await deleteD_typeApi(params)
-  if (res.code === 1000) {
-    getD_typeApi()
-    ElMessage({
-      message: res?.msg || "删除成功",
-      type: "success",
-      duration: 1000,
-    });
-  }
+// 分组名称 下拉选择框
+const getGroupDataId = (value) => {
+  addTaskForm.group = value
 }
 
 </script>
