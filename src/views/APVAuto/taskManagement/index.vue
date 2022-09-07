@@ -7,8 +7,8 @@
         </el-button>
         <el-table :data="state.tableData">
           <el-table-column prop="name" label="任务名称" align="center" />
-          <el-table-column prop="build" label="版本信息" align="center" />
-          <el-table-column prop="group" label="分组信息" align="center" />
+          <el-table-column prop="build" label="压测版本" align="center" />
+          <el-table-column prop="group" label="测试平台" align="center" />
           <el-table-column prop="state" label="任务状态" align="center" />
           <el-table-column prop="user" label="负责人" align="center" />
           <el-table-column prop="uptime" label="更新时间" align="center" />
@@ -33,15 +33,17 @@
           <el-form-item label="负责人" prop="user">
             <el-input v-model="addTaskForm.user" placeholder="请输入..." />
           </el-form-item>
-          <el-form-item label="版本信息" prop="build">
+          <el-form-item label="压测版本" prop="build">
             <el-select v-model="addTaskForm.build" placeholder="请选择...">
               <el-option v-for="(item, index) in state.buildData" :key="'buildData' + index" :label="item.name"
                 :value="item.name" />
             </el-select>
           </el-form-item>
           <el-form-item label="测试平台" prop="group">
-            <el-select-v2 placeholder="请选择..." clearable multiple style="width: 214px" v-model="value"
-              :options="state.d_groupDataAfter" @change="getGroupDataId" />
+            <el-select multiple clearable v-model="addTaskForm.group" placeholder="请选择..." @change="getGroupDataId">
+              <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name"
+                :value="item.id" />
+            </el-select>
           </el-form-item>
         </el-form>
       </span>
@@ -75,9 +77,7 @@ const state: any = reactive({
   tableData: [],  // 任务管理数据
   getD_group: [],  // 分组信息
   buildData: [], // build管理数据
-  d_groupDataAfter: []
 })
-const value = ref('')
 const titleDialog = ref("")
 const addTaskForm = reactive({
   id: "",
@@ -94,7 +94,7 @@ const addTaskFormRules = reactive<FormRules>({
   user: [
     { required: true, message: "负责人不能为空", trigger: "blur" },
   ],
-  build: [{ required: true, message: "请选择版本信息", trigger: "blur" }],
+  build: [{ required: true, message: "请选择压测版本", trigger: "blur" }],
   group: [
     { required: true, message: "请选择测试平台", trigger: "blur" },
   ],
@@ -128,7 +128,8 @@ const getOneData = (type, id) => {
           addTaskForm.name = item.name
           addTaskForm.user = item.user
           addTaskForm.build = item.build
-          addTaskForm.group = item.group
+          addTaskForm.group = item.group.toString().replace(/\[|]/g, "").split(",") // 后端返回 '[21,22]' => 前端回显 ["21","22"]
+          handleSelectData(addTaskForm.group)
         }
       })
       break;
@@ -137,15 +138,28 @@ const getOneData = (type, id) => {
   }
 }
 
+// 处理 测试平台回显数据
+const handleSelectData = (data) => {
+  let arr = []
+  data.forEach((item) => {
+    state.d_groupData.map(it => {
+      if (it.id == item) {
+        arr.push(it.name)
+      }
+    })
+  })
+  addTaskForm.group = JSON.parse(JSON.stringify(arr)) // 转为proxy对象
+}
+
 // 添加任务
 const onAddTaskForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       addTaskForm.group = "[" + String(addTaskForm.group) + "]"
-      delete addTaskForm.id
       console.log("添加成功...", addTaskForm);
       if (titleDialog.value == '添加任务') {
+        delete addTaskForm.id
         addTask(addTaskForm)
       } else {
         addTask(addTaskForm)
@@ -156,22 +170,6 @@ const onAddTaskForm = async (formEl: FormInstance | undefined) => {
       console.log("error submit!", fields);
     }
   });
-};
-
-// 取消弹窗
-const onResetTaskForm = (formEl: FormInstance | undefined) => {
-  if (!formEl) return;
-  formEl.resetFields();
-  dialogVisible.value = false;
-  deviceTypeDialogVisible.value = false;
-  groupDialogVisible.value = false;
-};
-
-// 关闭弹窗
-const handleClose = (done: () => void) => {
-  dialogVisible.value = false;
-  deviceTypeDialogVisible.value = false
-  groupDialogVisible.value = false
 };
 
 // 删除
@@ -196,7 +194,6 @@ const getTask = async () => {
   let res = await taskApi()
   state.tableData = res.data
   console.log("任务管理...", state.tableData);
-  handleGroupData(state.tableData)
 }
 
 // 任务管理 添加接口
@@ -236,19 +233,10 @@ const deleteTask = async (id) => {
   }
 }
 
-// 任务管理 分组信息处理展示
-const handleGroupData = (data) => {
-  console.log("data", data);
-}
-
 // 分组管理 获取接口
 const getD_group = async () => {
   let group = await d_groupApi()
   state.d_groupData = group.data
-  state.d_groupDataAfter = group.data.map((i) => ({
-    label: i.name,
-    value: i.id
-  }))
 }
 
 // build管理 获取接口
@@ -261,6 +249,22 @@ const getBuild = async () => {
 const getGroupDataId = (value) => {
   addTaskForm.group = value
 }
+
+// 取消弹窗
+const onResetTaskForm = (formEl: FormInstance | undefined) => {
+  if (!formEl) return;
+  formEl.resetFields();
+  dialogVisible.value = false;
+  deviceTypeDialogVisible.value = false;
+  groupDialogVisible.value = false;
+};
+
+// 关闭弹窗
+const handleClose = (done: () => void) => {
+  dialogVisible.value = false;
+  deviceTypeDialogVisible.value = false
+  groupDialogVisible.value = false
+};
 
 </script>
 

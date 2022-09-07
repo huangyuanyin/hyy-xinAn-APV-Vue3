@@ -37,6 +37,6 @@ export function deleteTaskApi(params) {
     url: `/autoapv/task/`,
     method: "DELETE",
     urlType: "APV",
-    data: qs.stringify(params),
+    params,
   });
 }
