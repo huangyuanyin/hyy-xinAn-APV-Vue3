@@ -61,13 +61,13 @@ export const APVAutoMenuData = [
     isDisabled: false,
     children: [],
   },
-  {
-    id: "0302",
-    title: "性能测试任务",
-    path: "/APVAuto/performanceTestTask",
-    isDisabled: false,
-    children: [],
-  },
+  // {
+  //   id: "0302",
+  //   title: "性能测试任务",
+  //   path: "/APVAuto/performanceTestTask",
+  //   isDisabled: false,
+  //   children: [],
+  // },
   {
     id: "0303",
     title: "测试报告",

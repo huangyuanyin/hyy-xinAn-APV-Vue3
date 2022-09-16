@@ -66,15 +66,15 @@ const routes = [
             component: () =>
               import("@/views/APVAuto/taskManagement/index.vue"),
           },
-          {
-            path: "/APVAuto/performanceTestTask",
-            name: "PerformanceTestTask",
-            meta: {
-              title: "性能测试任务",
-            },
-            component: () =>
-              import("@/views/APVAuto/performanceTestTask/index.vue"),
-          },
+          // {
+          //   path: "/APVAuto/performanceTestTask",
+          //   name: "PerformanceTestTask",
+          //   meta: {
+          //     title: "性能测试任务",
+          //   },
+          //   component: () =>
+          //     import("@/views/APVAuto/performanceTestTask/index.vue"),
+          // },
           {
             path: "/APVAuto/taskDetail",
             name: "TaskDetail",

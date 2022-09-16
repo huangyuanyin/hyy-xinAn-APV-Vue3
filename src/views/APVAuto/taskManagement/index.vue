@@ -14,9 +14,15 @@
           <el-table-column prop="uptime" label="更新时间" align="center" />
           <el-table-column fixed="right" label="Operations" align="center">
             <template #default="scope">
+              <el-button link type="primary" size="small">启动</el-button>
               <el-button link type="primary" size="small" @click="openAddDialog('task', 'edit', scope.row.id)">编辑
               </el-button>
-              <el-button link type="primary" size="small" @click="handleDelete('task', scope.row.id)">删除</el-button>
+              <el-popconfirm title="确定删除此项任务?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消"
+                @confirm="handleDelete('task', scope.row.id)">
+                <template #reference>
+                  <el-button link type="primary" size="small">删除</el-button>
+                </template>
+              </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
@@ -75,8 +81,8 @@ const deviceTypeDialogVisible = ref(false)
 const groupDialogVisible = ref(false)
 const state: any = reactive({
   tableData: [],  // 任务管理数据
-  getD_group: [],  // 分组信息
-  buildData: [], // build管理数据
+  getD_group: [],  // 测试平台数据
+  buildData: [], // 压测版本数据
 })
 const titleDialog = ref("")
 const addTaskForm = reactive({
@@ -239,7 +245,7 @@ const getD_group = async () => {
   state.d_groupData = group.data
 }
 
-// build管理 获取接口
+// 压测版本 获取接口
 const getBuild = async () => {
   let res = await buildApi({ filetype: "apvbuild" })
   state.buildData = res.data.map(item => ({ name: item }))
