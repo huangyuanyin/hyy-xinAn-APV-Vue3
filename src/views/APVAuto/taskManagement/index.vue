@@ -111,7 +111,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, toRefs } from "vue";
+import { onMounted, toRefs, nextTick } from "vue";
 import { ref, reactive } from "vue";
 import type { TabsPaneContext } from "element-plus";
 import { ElMessage } from "element-plus";
@@ -176,7 +176,9 @@ const openAddDialog = (type, operation, id) => {
   switch (type) {
     case 'task':
       operation == 'add' ? titleDialog.value = '添加任务' : titleDialog.value = '编辑任务'
-      getOneData(type, id)
+      nextTick(() => {
+        getOneData(type, id)
+      })
       dialogVisible.value = true;
       break;
     default:
@@ -366,6 +368,7 @@ const onResetTaskForm = (formEl: FormInstance | undefined) => {
   dialogVisible.value = false;
   deviceTypeDialogVisible.value = false;
   groupDialogVisible.value = false;
+  platformDialog.value = false;
 };
 
 // 关闭弹窗
@@ -375,14 +378,17 @@ const handleClose = (done: () => void) => {
   groupDialogVisible.value = false
   taskProgressDialog.value = false
   platformDialog.value = false
+  addTaskRuleFormRef.value.resetFields()
 };
 
 </script>
 
 <style lang="scss" scoped>
 .addDevice-form {
-  .el-input {
-    width: 214px;
+
+  .el-input,
+  .el-select {
+    width: 300px;
   }
 }
 
