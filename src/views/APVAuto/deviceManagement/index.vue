@@ -8,16 +8,17 @@
         <el-table :data="state.d_groupData">
           <el-table-column prop="name" label="测试平台名称" align="center" />
           <!-- <el-table-column prop="buildip" label="BuildIp" align="center" /> -->
-          <el-table-column prop="build" label="build" align="center" />
+          <el-table-column prop="build" label="压测版本" align="center" />
           <el-table-column label="状态" align="center">
             <template #default="scope">
               <span v-if="scope.row.status === false">空闲</span>
               <span v-else>使用中</span>
             </template>
           </el-table-column>
-          <el-table-column fixed="right" label="Operations" align="center">
+          <el-table-column prop="user" label="使用人" align="center" />
+          <el-table-column fixed="right" label="操作" align="center">
             <template #default="scope">
-              <el-button link type="primary" size="small" @click="openAddDeviceDrawer()">绑定设备
+              <el-button link type="primary" size="small" @click="openAddDeviceDrawer(scope.row)">绑定设备
               </el-button>
               <el-button link type="primary" size="small" @click="openAddDialog('group', 'edit', scope.row.id)">编辑
               </el-button>
@@ -52,8 +53,8 @@
       </el-tab-pane>
     </el-tabs>
     <!--添加设备弹窗-->
-    <el-dialog v-model="dialogVisible" :title="titleDialog" width="30%" :before-close="handleClose"
-      :close-on-click-modal="false" :close-on-press-escape="false">
+    <el-dialog v-model="dialogVisible" :title="titleDialog" width="35%" @close="handleClose('deviceDialog')"
+      :close-on-click-modal=" false" :close-on-press-escape="false">
       <span>
         <el-form :inline="false" :model="addDeviceForm" ref="addDeviceRuleFormRef" :rules="addDeviceFormRules"
           class="addDevice-form" label-width="110px">
@@ -68,12 +69,12 @@
           </el-form-item>
           <el-form-item label="设备类型" prop="tid__name">
             <el-select v-model="addDeviceForm.tid__name" placeholder="请选择...">
-              <el-option v-for="(item, index) in state.d_typeData" :key="'d_typeData' + index" :label="item.name"
-                :value="item.id" />
+              <el-option v-for="(item, index) in state.d_typeData" :key="'d_typeData' + index" :label="item"
+                :value="item" />
             </el-select>
           </el-form-item>
           <el-form-item label="测试平台" prop="gid__name">
-            <el-select v-model="addDeviceForm.gid__name" placeholder="请选择...">
+            <el-select v-model="addDeviceForm.gid__name" placeholder="请选择..." disabled>
               <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name"
                 :value="item.id" />
             </el-select>
@@ -89,7 +90,7 @@
     </el-dialog>
 
     <!-- 添加测试平台弹窗-->
-    <el-dialog v-model="groupDialogVisible" :title="titleDialog" width="35%" :before-close="handleClose">
+    <el-dialog v-model="groupDialogVisible" :title="titleDialog" width="35%" @close="handleClose('groupDialog')">
       <span>
         <el-form :inline="false" :model="addGroupForm" ref="addGroupRuleFormRef" :rules="addGroupFormRules"
           class="addDevice-form" label-width="200px">
@@ -99,7 +100,7 @@
           <el-form-item label="平台名称" prop="name">
             <el-input v-model="addGroupForm.name" placeholder="请输入..." />
           </el-form-item>
-          <el-form-item label="支持压测版本" prop="build">
+          <el-form-item label="压测版本" prop="build">
             <el-input v-model="addGroupForm.build" placeholder="请输入..." />
           </el-form-item>
           <el-form-item label="BuildIp" prop="buildip">
@@ -124,16 +125,21 @@
           <span>设备管理列表</span>
           <el-button type="primary" link @click="openAddDialog('device', 'add', null)"> + 添加设备 </el-button>
         </div>
-        <el-table :data="state.tableData" border stripe>
+        <el-table :data="state.deviceDataShow" border stripe>
           <el-table-column prop="uname" label="设备名称" align="center" />
           <el-table-column prop="ip" label="ip" align="center" />
           <el-table-column prop="tid__name" label="设备类型" align="center" />
-          <el-table-column prop="gid__name" label="gid__name" align="center" />
-          <el-table-column fixed="right" label="Operations" align="center">
+          <el-table-column prop="gid__name" label="测试平台" align="center" />
+          <el-table-column fixed="right" label="更多" align="center">
             <template #default="scope">
               <el-button link type="primary" size="small" @click="openAddDialog('device', 'edit', scope.row.id)">编辑
               </el-button>
-              <el-button link type="primary" size="small" @click="handleDelete('device', scope.row.id)">删除</el-button>
+              <el-popconfirm title="确定删除这个设备?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消"
+                @confirm="handleDelete('device', scope.row.id)">
+                <template #reference>
+                  <el-button link type="danger" size="small">删除</el-button>
+                </template>
+              </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
@@ -143,7 +149,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, toRefs } from "vue";
+import { nextTick, onMounted, toRefs } from "vue";
 import { ref, reactive } from "vue";
 import type { TabsPaneContext } from "element-plus";
 import { ElMessage } from "element-plus";
@@ -161,15 +167,17 @@ const groupDialogVisible = ref(false)
 const isShowMore = ref(false)
 const deviceDrawer = ref(false)
 const direction = ref('rtl')
+const testName = ref('')
 const state: any = reactive({
-  tableData: [],
+  deviceData: [], // 设备管理数据
+  deviceDataShow: [],
   d_typeData: [], // 设备类型数据
   d_groupData: [], // 分组管理数据
   groupIdList: [], // 分组ID集合
   buildData: [], // build管理数据
 })
 const titleDialog = ref("")
-const addDeviceForm = reactive({
+let addDeviceForm = reactive({
   id: "",
   ip: "",
   username: "",
@@ -193,7 +201,7 @@ const addDeviceFormRules = reactive<FormRules>({
 });
 
 // 测试平台管理form
-const addGroupForm = reactive({
+let addGroupForm = reactive({
   id: "",
   name: "",
   ip: "",
@@ -231,13 +239,17 @@ const showMore = () => {
 const openAddDialog = (type, operation, id) => {
   switch (type) {
     case 'device':
-      operation == 'add' ? titleDialog.value = '添加设备' : titleDialog.value = '编辑设备'
-      getOneData(type, id)
+      operation == 'add' ? (titleDialog.value = '添加设备' && (addDeviceForm.gid__name = testName.value)) : titleDialog.value = '编辑设备'
+      nextTick(() => { // nextTick 解决表单重置无效的问题
+        getOneData(type, id)
+      })
       dialogVisible.value = true;
       break;
     case 'group':
-      operation == 'add' ? titleDialog.value = '添加测试平台' : titleDialog.value = '编辑分组'
-      getOneData(type, id)
+      operation == 'add' ? titleDialog.value = '添加测试平台' : titleDialog.value = '编辑测试平台'
+      nextTick(() => {
+        getOneData(type, id)
+      })
       groupDialogVisible.value = true;
       break;
     default:
@@ -245,7 +257,14 @@ const openAddDialog = (type, operation, id) => {
   }
 }
 
-const openAddDeviceDrawer = () => {
+const openAddDeviceDrawer = (data) => {
+  state.deviceDataShow = []
+  testName.value = data.name
+  state.deviceData.map((item) => {
+    if (item.gid__name == testName.value) {
+      state.deviceDataShow.push(item)
+    }
+  })
   deviceDrawer.value = true
 }
 
@@ -253,7 +272,7 @@ const openAddDeviceDrawer = () => {
 const getOneData = (type, id) => {
   switch (type) {
     case "device":
-      state.tableData.map(item => {
+      state.deviceDataShow.map(item => {
         if (item.id === id) {
           addDeviceForm.id = item.id
           addDeviceForm.ip = item.ip
@@ -316,25 +335,29 @@ const onAddGroupForm = async (formEl: FormInstance | undefined) => {
   });
 };
 
-// 取消弹窗 - 设备管理
-const onResetDeviceForm = (formEl: FormInstance | undefined) => {
-  if (!formEl) return;
-  formEl.resetFields();
-  dialogVisible.value = false;
-};
-
 // 取消弹窗 - 测试平台管理
 const onResetGroupRuleForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return;
-  formEl.resetFields();
+  formEl.resetFields()
   groupDialogVisible.value = false;
-}
+};
+
+// 取消弹窗 - 设备管理
+const onResetDeviceForm = (formEl: FormInstance | undefined) => {
+  if (!formEl) return;
+  formEl.resetFields()
+  dialogVisible.value = false;
+};
 
 // 关闭弹窗
-const handleClose = (done: () => void) => {
-  dialogVisible.value = false;
-  deviceTypeDialogVisible.value = false
-  groupDialogVisible.value = false
+const handleClose = (type) => {
+  if (type === 'deviceDialog') {
+    dialogVisible.value = false;
+    addDeviceRuleFormRef.value.resetFields()
+  } else {
+    groupDialogVisible.value = false
+    addGroupRuleFormRef.value.resetFields()
+  }
 };
 
 // 删除
@@ -427,8 +450,8 @@ const deleteD_group = async (id) => {
 // 设备管理 获取接口
 const getDevice = async () => {
   let res = await deviceApi()
-  state.tableData = res.data
-  console.log("设备管理...", state.tableData);
+  state.deviceData = res.data
+  console.log("设备管理...", state.deviceData);
 }
 
 // 设备管理 添加接口
