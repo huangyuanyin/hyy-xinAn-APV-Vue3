@@ -40,3 +40,43 @@ export function deleteTaskApi(params) {
     params,
   });
 }
+
+// 获取任务执行进度包含（任务日志/用例进度）
+export function taskRunApi(params) {
+  return request({
+    url: `/autoapv/taskrun/`,
+    method: "get",
+    urlType: "APV",
+    params,
+  });
+}
+
+// 任务start or stop
+export function taskStatusApi(params) {
+  return request({
+    url: `/autoapv/taskrun/`,
+    method: "post",
+    urlType: "APV",
+    data: qs.stringify(params),
+  });
+}
+
+// 增加测试环境
+export function putTestPlatApi(params) {
+  return request({
+    url: `/autoapv/taskrun/`,
+    method: "PUT",
+    urlType: "APV",
+    data: qs.stringify(params),
+  });
+}
+
+// 移除测试环境
+export function deleteTestPlatApi(params) {
+  return request({
+    url: `/autoapv/taskrun/`,
+    method: "delete",
+    urlType: "APV",
+    data: qs.stringify(params),
+  });
+}
