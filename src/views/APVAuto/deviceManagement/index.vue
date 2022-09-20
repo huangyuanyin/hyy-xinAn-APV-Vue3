@@ -2,62 +2,68 @@
   <div class="performanceManagement">
     <el-tabs v-model="activeName" class="tabs" @tab-click="handleClick">
       <el-tab-pane label="测试平台管理" name="testbedManagement">
-        <el-button type="primary" @click="openAddDialog('group', 'add', null)" style="margin-bottom: 20px">
-          添加测试平台
-        </el-button>
-        <el-table :data="state.d_groupData">
-          <el-table-column prop="name" label="测试平台名称" align="center" />
-          <!-- <el-table-column prop="buildip" label="BuildIp" align="center" /> -->
-          <el-table-column prop="build" label="压测版本" align="center" />
-          <el-table-column label="状态" align="center">
-            <template #default="scope">
-              <span v-if="scope.row.status === false">空闲</span>
-              <span v-else>使用中</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="user" label="使用人" align="center" />
-          <el-table-column fixed="right" label="操作" align="center">
-            <template #default="scope">
-              <el-button link type="primary" size="small" @click="openAddDeviceDrawer(scope.row)">绑定设备
-              </el-button>
-              <el-button link type="primary" size="small" @click="openAddDialog('group', 'edit', scope.row.id)">编辑
-              </el-button>
-              <el-popconfirm title="确定删除这个测试平台?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消"
-                @confirm="handleDelete('group', scope.row.id)">
-                <template #reference>
-                  <el-button link type="danger" size="small">删除</el-button>
-                </template>
-              </el-popconfirm>
-            </template>
-          </el-table-column>
-        </el-table>
+        <el-card class="group-card" shadow="never">
+          <el-button type="primary" @click="openAddDialog('group', 'add', null)" style="margin-bottom: 20px">
+            添加测试平台
+          </el-button>
+          <el-table :data="state.d_groupData" stripe>
+            <el-table-column prop="name" label="测试平台名称" align="center" />
+            <!-- <el-table-column prop="buildip" label="BuildIp" align="center" /> -->
+            <el-table-column prop="build" label="压测版本" align="center" />
+            <el-table-column label="状态" align="center">
+              <template #default="scope">
+                <span v-if="scope.row.status === false">空闲</span>
+                <span v-else>使用中</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="user" label="使用人" align="center" />
+            <el-table-column fixed="right" label="操作" align="center">
+              <template #default="scope">
+                <el-button link type="primary" size="small" @click="openAddDeviceDrawer(scope.row)">绑定设备
+                </el-button>
+                <el-button link type="primary" size="small" @click="changeStatus(scope.row)">状态变更
+                </el-button>
+                <el-button link type="primary" size="small" @click="openAddDialog('group', 'edit', scope.row.id)">编辑
+                </el-button>
+                <el-popconfirm title="确定删除这个测试平台?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消"
+                  @confirm="handleDelete('group', scope.row.id)">
+                  <template #reference>
+                    <el-button link type="danger" size="small">删除</el-button>
+                  </template>
+                </el-popconfirm>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-card>
       </el-tab-pane>
       <el-tab-pane label="build管理" name="buildManagement">
-        <el-upload class="upload-demo" :show-file-list="false" action="action" :http-request="handleUpload"
-          :on-success="handleSuccess">
-          <el-button type="primary" style="margin-bottom: 20px" :auto-upload="false">上传文件</el-button>
-        </el-upload>
-        <el-table :data="state.buildData">
-          <el-table-column prop="name" label="版本名称" align="center" />
-          <el-table-column fixed="right" label="Operations" align="center">
-            <template #default="scope">
-              <el-popconfirm title="确定删除这个文件?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消"
-                @confirm="handleDelete('build', scope.row.name)">
-                <template #reference>
-                  <el-button link type="primary" size="small">删除文件</el-button>
-                </template>
-              </el-popconfirm>
-            </template>
-          </el-table-column>
-        </el-table>
+        <el-card class="build-card" shadow="never">
+          <el-upload class="upload-demo" :show-file-list="false" action="action" :http-request="handleUpload"
+            :on-success="handleSuccess">
+            <el-button type="primary" style="margin-bottom: 20px" :auto-upload="false">上传文件</el-button>
+          </el-upload>
+          <el-table :data="state.buildData" border stripe>
+            <el-table-column prop="name" label="版本名称" align="center" />
+            <el-table-column fixed="right" label="Operations" align="center">
+              <template #default="scope">
+                <el-popconfirm title="确定删除这个文件?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消"
+                  @confirm="handleDelete('build', scope.row.name)">
+                  <template #reference>
+                    <el-button link type="primary" size="small">删除文件</el-button>
+                  </template>
+                </el-popconfirm>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-card>
       </el-tab-pane>
     </el-tabs>
     <!--添加设备弹窗-->
-    <el-dialog v-model="dialogVisible" :title="titleDialog" width="35%" @close="handleClose('deviceDialog')"
+    <el-dialog v-model="dialogVisible" title="添加设备" width="35%" @close="handleClose('deviceDialog')"
       :close-on-click-modal=" false" :close-on-press-escape="false">
       <span>
         <el-form :inline="false" :model="addDeviceForm" ref="addDeviceRuleFormRef" :rules="addDeviceFormRules"
-          class="addDevice-form" label-width="110px">
+          class="addDevice-form" label-width="100px">
           <el-form-item label="IP" prop="ip">
             <el-input v-model="addDeviceForm.ip" placeholder="请输入..." />
           </el-form-item>
@@ -73,12 +79,12 @@
                 :value="item" />
             </el-select>
           </el-form-item>
-          <el-form-item label="测试平台" prop="gid__name">
+          <!-- <el-form-item label="测试平台" prop="gid__name">
             <el-select v-model="addDeviceForm.gid__name" placeholder="请选择..." disabled>
               <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name"
                 :value="item.id" />
             </el-select>
-          </el-form-item>
+          </el-form-item> -->
         </el-form>
       </span>
       <template #footer>
@@ -93,14 +99,14 @@
     <el-dialog v-model="groupDialogVisible" :title="titleDialog" width="35%" @close="handleClose('groupDialog')">
       <span>
         <el-form :inline="false" :model="addGroupForm" ref="addGroupRuleFormRef" :rules="addGroupFormRules"
-          class="addDevice-form" label-width="200px">
+          class="addDevice-form" label-width="100px">
           <el-form-item label="平台IP" prop="ip">
             <el-input v-model="addGroupForm.ip" placeholder="请输入..." />
           </el-form-item>
           <el-form-item label="平台名称" prop="name">
             <el-input v-model="addGroupForm.name" placeholder="请输入..." />
           </el-form-item>
-          <el-form-item label="压测版本" prop="build">
+          <el-form-item label="测试版本" prop="build">
             <el-input v-model="addGroupForm.build" placeholder="请输入..." />
           </el-form-item>
           <el-form-item label="BuildIp" prop="buildip">
@@ -125,24 +131,26 @@
           <span>设备管理列表</span>
           <el-button type="primary" link @click="openAddDialog('device', 'add', null)"> + 添加设备 </el-button>
         </div>
-        <el-table :data="state.deviceDataShow" border stripe>
-          <el-table-column prop="uname" label="设备名称" align="center" />
-          <el-table-column prop="ip" label="ip" align="center" />
-          <el-table-column prop="tid__name" label="设备类型" align="center" />
-          <el-table-column prop="gid__name" label="测试平台" align="center" />
-          <el-table-column fixed="right" label="更多" align="center">
-            <template #default="scope">
-              <el-button link type="primary" size="small" @click="openAddDialog('device', 'edit', scope.row.id)">编辑
-              </el-button>
-              <el-popconfirm title="确定删除这个设备?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消"
-                @confirm="handleDelete('device', scope.row.id)">
-                <template #reference>
-                  <el-button link type="danger" size="small">删除</el-button>
-                </template>
-              </el-popconfirm>
-            </template>
-          </el-table-column>
-        </el-table>
+        <el-card class="deivce-card" shadow="never">
+          <el-table :data="state.deviceDataShow" stripe>
+            <el-table-column prop="uname" label="设备名称" align="center" />
+            <el-table-column prop="ip" label="ip" align="center" />
+            <el-table-column prop="tid__name" label="设备类型" align="center" />
+            <el-table-column prop="gid__name" label="测试平台" align="center" />
+            <el-table-column fixed="right" label="更多" align="center">
+              <template #default="scope">
+                <el-button link type="primary" size="small" @click="openAddDialog('device', 'edit', scope.row.id)">编辑
+                </el-button>
+                <el-popconfirm title="确定删除这个设备?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消"
+                  @confirm="handleDelete('device', scope.row.id)">
+                  <template #reference>
+                    <el-button link type="danger" size="small">删除</el-button>
+                  </template>
+                </el-popconfirm>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-card>
       </template>
     </el-drawer>
   </div>
@@ -592,6 +600,15 @@ const deleteBuild = async (name) => {
   }
 }
 
+// 状态变更
+const changeStatus = (data) => {
+  ElMessage({
+    message: "待接口联调",
+    type: "warning",
+    duration: 2000,
+  });
+}
+
 // 文件上传
 const handleUpload = async (files) => {
   console.log("onChange...", files)
@@ -616,8 +633,10 @@ const handleSuccess: UploadProps['onSuccess'] = () => {
 
 <style lang="scss" scoped>
 .addDevice-form {
+
+  .el-select,
   .el-input {
-    width: 214px;
+    width: 350px;
   }
 }
 
@@ -638,6 +657,18 @@ const handleSuccess: UploadProps['onSuccess'] = () => {
 
   span {
     margin-right: 15px;
+  }
+}
+
+.group-card,
+.deivce-card,
+.build-card {
+  margin-top: 10px;
+}
+
+.deivce-card {
+  :deep(.el-card__body) {
+    height: 70vh;
   }
 }
 </style>
