@@ -11,8 +11,7 @@
           <el-table-column prop="build" label="压测版本" align="center" width="300" />
           <el-table-column prop="groupAfter" label="测试平台" align="center" width="400">
             <template #default="scope">
-              <el-tag class="tagType" v-for="item,index in scope.row.groupAfter" :key="'groupAfter'+index" closable
-                @close="handleCloseTag(item,scope.row.id)">
+              <el-tag class="tagType" v-for="item,index in scope.row.groupAfter" :key="'groupAfter'+index">
                 {{item.label}}
               </el-tag>
             </template>
@@ -49,7 +48,7 @@
                 </template>
                 <div class="moreButton">
                   <el-button link type="primary" size="small" @click="taskProgress(scope.row.id)">任务进度</el-button>
-                  <el-button link type="primary" size="small" @click="openTestPlatformDialog(scope.row)">新增测试平台
+                  <el-button link type="primary" size="small" @click="openTestPlatformDialog(scope.row)">测试平台
                   </el-button>
                 </div>
               </el-popover>
@@ -94,29 +93,47 @@
     <!--任务进度弹窗-->
     <el-dialog v-model="taskProgressDialog" title="任务进度" width="50%" :before-close="handleClose">
       <div class="dashboard">
-        <el-progress type="dashboard" :percentage="percentage2" :color="colors" width="200" />
-        <el-progress type="dashboard" :percentage="percentage2" :color="colors" width="200" />
+        <el-progress type="dashboard" :percentage="percentage2" :color="colors" :width=200 />
+        <el-progress type="dashboard" :percentage="percentage2" :color="colors" :width=200 />
       </div>
       <el-input v-model="textarea" :rows="10" type="textarea" placeholder="暂无log日志..." />
     </el-dialog>
     <!--平台弹窗-->
-    <el-dialog v-model="platformDialog" title="添加测试平台" width="50%" :before-close="handleTestPlatClose">
-      <span>
-        <el-form :inline="false" :model="addTestPlatForm" ref="addTestPlatFormRef" :rules="addTestPlatkFormRules"
-          class="addDevice-form" label-width="110px">
-          <el-form-item label="测试平台" prop="group">
-            <el-select multiple clearable v-model="addTestPlatForm.group" placeholder="请选择..."
-              @change="getTestPlatDataId">
-              <el-option v-for="(item, index) in state.d_groupDataAfter" :key="'d_groupDataAfter' + index"
-                :label="item.name" :value="item.id" :disabled="item.disabled" />
-            </el-select>
-          </el-form-item>
-        </el-form>
-      </span>
+    <el-dialog v-model="platformDialog" title="修改测试平台" custom-class="platformDialog" width="50%"
+      :before-close="handleTestPlatClose">
+      <div class="tagList">
+        <span class="title">已有测试平台：</span>
+        <div>
+          <el-tag class="tagType" v-for="item,index in testPlatList" :key="'testPlatList'+index" closable
+            @close="handleCloseTag(item,item.id)">
+            {{item.label}}
+          </el-tag>
+          <!-- <el-input v-if="inputVisible" ref="InputRef" v-model="inputValue" class="ml-1 w-20" size="small"
+            @keyup.enter="handleInputConfirm" @blur="handleInputConfirm" /> -->
+          <!-- <el-select v-if="inputVisible" ref="InputRef" multiple clearable v-model="addTestPlatForm.group"
+            placeholder="请选择..." @change="getTestPlatDataId" @blur="handleInputConfirm">
+            <el-option v-for="(item, index) in state.d_groupDataAfter" :key="'d_groupDataAfter' + index"
+              :label="item.name" :value="item.id" :disabled="item.disabled" />
+          </el-select>
+          <el-button v-else class="button-new-tag ml-1" size="small" @click="showInput">
+            + New Tag
+          </el-button> -->
+        </div>
+      </div>
+      <el-form :inline="false" :model="addTestPlatForm" ref="addTestPlatFormRef" class="addDevice-form"
+        label-width="130px">
+        <el-form-item label="添加测试平台：">
+          <el-select multiple clearable v-model="addTestPlatForm.group" placeholder="请选择要添加的测试平台..."
+            @change="getTestPlatDataId">
+            <el-option v-for="(item, index) in state.d_groupDataAfter" :key="'d_groupDataAfter' + index"
+              :label="item.name" :value="item.id" :disabled="item.disabled" />
+          </el-select>
+        </el-form-item>
+      </el-form>
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="onResetTaskForm(addTestPlatFormRef)">取消</el-button>
-          <el-button type="primary" @click="onAddTestPlatForm(addTestPlatFormRef)">添加</el-button>
+          <el-button type="primary" @click="onAddTestPlatForm(addTestPlatFormRef)">确定</el-button>
         </span>
       </template>
     </el-dialog>
@@ -129,12 +146,12 @@ import { ref, reactive } from "vue";
 import type { TabsPaneContext } from "element-plus";
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from "element-plus";
+import { ElInput } from 'element-plus'
 import { useRouter } from "vue-router";
 import { deviceApi, addDeviceApi, editDeviceApi, deleteDeviceApi, d_typeApi, addD_typeApi, editD_typeApi, deleteD_typeApi, d_groupApi, addD_groupApi, editD_groupApi, deleteD_groupApi } from '@/api/APV/index.js'
 import { taskApi, addTaskApi, editTaskApi, deleteTaskApi, taskRunApi, taskStatusApi, deleteTestPlatApi, putTestPlatApi } from '@/api/APV/taskManagement.js'
 import { buildApi } from '@/api/APV/buildManagement.js'
 import { utc2beijing } from '@/utils/util.js'
-import { log } from "console";
 
 const activeName = ref("taskManagement");
 const dialogVisible = ref(false);
@@ -144,9 +161,12 @@ const taskProgressDialog = ref(false)
 const platformDialog = ref(false)
 const taskStatus = ref(false)
 const tableLoading = ref(false)
+const inputValue = ref('')
+const inputVisible = ref(false)
+const InputRef = ref<InstanceType<typeof ElInput>>()
 const percentage2 = ref(0)
 const textarea = ref('')
-
+const testPlatList = ref([]) // 已有测试平台集合List
 
 const colors = [
   { color: '#f56c6c', percentage: 20 },
@@ -169,11 +189,6 @@ const addTestPlatForm = reactive({
   group: ''
 })
 const addTestPlatFormRef = ref<FormInstance>();
-const addTestPlatkFormRules = reactive<FormRules>({
-  group: [
-    { required: true, message: "请选择测试平台", trigger: "blur" },
-  ],
-});
 
 const titleDialog = ref("")
 const addTaskForm = reactive({
@@ -403,12 +418,12 @@ const getGroupDataId = (value) => {
 const getTestPlatDataId = (value) => {
   addTestPlatForm.group = value
   console.log("dfafa", addTestPlatForm.group);
-
 }
 
 // 打开添加平台弹窗
 const openTestPlatformDialog = (data) => {
   let group = []
+  testPlatList.value = []
   addTestPlatForm.id = data.id
   state.tableData.map(item => {
     if (item.id === data.id) {
@@ -420,23 +435,49 @@ const openTestPlatformDialog = (data) => {
     state.d_groupDataAfter.forEach(it => {
       if (it.id == item) {
         it.disabled = true
+        testPlatList.value.push({
+          label: it.name,
+          id: it.id
+        })
       }
     })
   })
+  console.log("dada", testPlatList.value);
   platformDialog.value = true
+}
+
+const showInput = () => {
+  inputVisible.value = true
+  nextTick(() => {
+    InputRef.value!.input!.focus()
+  })
+}
+
+const handleInputConfirm = () => {
+  console.log("afaf", addTestPlatForm.group);
+  if (addTestPlatForm.group) {
+    // dynamicTags.value.push(inputValue.value)
+    const params = {
+      id: addTestPlatForm.id,
+      group: "[" + String(addTestPlatForm.group) + "]"
+    }
+    putTestPlat(params)
+  }
+  inputVisible.value = false
+  addTestPlatForm.group = ''
 }
 
 // 添加测试平台
 const onAddTestPlatForm = async (formEl: FormInstance | undefined) => {
-  if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
-    if (valid) {
+    if (addTestPlatForm.group != '') {
       const params = {
         id: addTestPlatForm.id,
         group: "[" + String(addTestPlatForm.group) + "]"
       }
       putTestPlat(params)
     } else {
+      platformDialog.value = false
       console.log("error submit!", fields);
     }
   });
@@ -533,8 +574,8 @@ const getTaskStatus = async (params) => {
 // 任务进度 接口
 const getTaskRun = async (id) => {
   let res = await taskRunApi({ id })
-  if (res) {
-
+  if (res.code === 1000) {
+    textarea.value = res.data.log || ''
   } else {
     ElMessage({
       message: res?.msg || "请求失败",
@@ -552,6 +593,7 @@ const onResetTaskForm = (formEl: FormInstance | undefined) => {
   deviceTypeDialogVisible.value = false;
   groupDialogVisible.value = false;
   platformDialog.value = false;
+  addTestPlatForm.group = ''
 };
 
 // 关闭弹窗
@@ -564,9 +606,10 @@ const handleClose = (done: () => void) => {
   addTaskRuleFormRef.value.resetFields()
 };
 
-//
+// 关闭测试平台弹窗
 const handleTestPlatClose = (done: () => void) => {
   platformDialog.value = false
+  addTestPlatForm.group = ''
   addTestPlatFormRef.value.resetFields()
 };
 
@@ -594,6 +637,32 @@ const handleTestPlatClose = (done: () => void) => {
   display: flex;
   justify-content: space-around;
 }
+
+.platformDialog {
+
+  .tagList {
+    display: flex;
+    align-items: center;
+    height: 80px;
+    font-size: 14px;
+    margin-left: 20px;
+
+
+    .title {
+      width: 98px;
+      margin-right: 12px;
+    }
+
+    .tagType {
+      margin-right: 6px;
+    }
+
+    .el-input {
+      width: 100px;
+    }
+
+  }
+}
 </style>
 
 <style lang="scss">
@@ -609,6 +678,13 @@ const handleTestPlatClose = (done: () => void) => {
       margin-left: 0px;
     }
   }
+}
+
+.platformDialog {
+  .el-dialog__body {
+    padding-top: 0px !important;
+  }
+
 }
 </style>
 

@@ -8,8 +8,7 @@
           </el-button>
           <el-table :data="state.d_groupData" stripe>
             <el-table-column prop="name" label="测试平台名称" align="center" />
-            <!-- <el-table-column prop="buildip" label="BuildIp" align="center" /> -->
-            <el-table-column prop="build" label="压测版本" align="center" />
+            <el-table-column prop="build" label="测试版本" align="center" />
             <el-table-column label="状态" align="center">
               <template #default="scope">
                 <span v-if="scope.row.status === false">空闲</span>
@@ -17,6 +16,7 @@
               </template>
             </el-table-column>
             <el-table-column prop="user" label="使用人" align="center" />
+            <el-table-column prop="uptime" label="更新时间" align="center" />
             <el-table-column fixed="right" label="操作" align="center">
               <template #default="scope">
                 <el-button link type="primary" size="small" @click="openAddDeviceDrawer(scope.row)">绑定设备
@@ -40,7 +40,9 @@
         <el-card class="build-card" shadow="never">
           <el-upload class="upload-demo" :show-file-list="false" action="action" :http-request="handleUpload"
             :on-success="handleSuccess">
-            <el-button type="primary" style="margin-bottom: 20px" :auto-upload="false">上传文件</el-button>
+            <el-button type="primary" style="margin-bottom: 20px" :auto-upload="false" :disabled="fileDisabled">
+              上传文件
+            </el-button>
           </el-upload>
           <el-table :data="state.buildData" border stripe>
             <el-table-column prop="name" label="版本名称" align="center" />
@@ -59,7 +61,7 @@
       </el-tab-pane>
     </el-tabs>
     <!--添加设备弹窗-->
-    <el-dialog v-model="dialogVisible" title="添加设备" width="35%" @close="handleClose('deviceDialog')"
+    <el-dialog v-model="dialogVisible" :title="titleDialog" width="35%" @close="handleClose('deviceDialog')"
       :close-on-click-modal=" false" :close-on-press-escape="false">
       <span>
         <el-form :inline="false" :model="addDeviceForm" ref="addDeviceRuleFormRef" :rules="addDeviceFormRules"
@@ -73,8 +75,8 @@
           <el-form-item label="密码" prop="password">
             <el-input v-model="addDeviceForm.password" placeholder="请输入..." />
           </el-form-item>
-          <el-form-item label="设备类型" prop="tid__name">
-            <el-select v-model="addDeviceForm.tid__name" placeholder="请选择...">
+          <el-form-item label="设备类型" prop="type">
+            <el-select v-model="addDeviceForm.type" placeholder="请选择...">
               <el-option v-for="(item, index) in state.d_typeData" :key="'d_typeData' + index" :label="item"
                 :value="item" />
             </el-select>
@@ -135,7 +137,7 @@
           <el-table :data="state.deviceDataShow" stripe>
             <el-table-column prop="uname" label="设备名称" align="center" />
             <el-table-column prop="ip" label="ip" align="center" />
-            <el-table-column prop="tid__name" label="设备类型" align="center" />
+            <el-table-column prop="type" label="设备类型" align="center" />
             <el-table-column prop="gid__name" label="测试平台" align="center" />
             <el-table-column fixed="right" label="更多" align="center">
               <template #default="scope">
@@ -166,31 +168,31 @@ import type { FormInstance, FormRules, UploadProps } from "element-plus";
 import { useRouter } from "vue-router";
 import { deviceApi, addDeviceApi, editDeviceApi, deleteDeviceApi, d_groupApi, d_typeApi, addD_typeApi, editD_typeApi, deleteD_typeApi, addD_groupApi, editD_groupApi, deleteD_groupApi } from '@/api/APV/index.js'
 import { buildApi, buildUploadApi, deleteBuildApi } from '@/api/APV/buildManagement.js'
+import { utc2beijing } from '@/utils/util.js'
 
-const router = useRouter()
 const activeName = ref("testbedManagement");
 const dialogVisible = ref(false);
-const deviceTypeDialogVisible = ref(false)
 const groupDialogVisible = ref(false)
 const isShowMore = ref(false)
 const deviceDrawer = ref(false)
+const fileDisabled = ref(false)
 const direction = ref('rtl')
-const testName = ref('')
+const testName = ref('') // 绑定设备时传入的 测试平台名称name
 const state: any = reactive({
   deviceData: [], // 设备管理数据
   deviceDataShow: [],
   d_typeData: [], // 设备类型数据
-  d_groupData: [], // 分组管理数据
+  d_groupData: [], // 测试平台管理数据
   groupIdList: [], // 分组ID集合
   buildData: [], // build管理数据
 })
 const titleDialog = ref("")
 let addDeviceForm = reactive({
-  id: "",
+  id: null,
   ip: "",
   username: "",
   password: "",
-  tid__name: "",
+  type: "",
   gid__name: "",
 });
 const addDeviceRuleFormRef = ref<FormInstance>();
@@ -202,7 +204,7 @@ const addDeviceFormRules = reactive<FormRules>({
   password: [
     { required: true, message: "密码不能为空", trigger: "blur" },
   ],
-  tid__name: [{ required: true, message: "请选择设备类型", trigger: "blur" }],
+  type: [{ required: true, message: "请选择设备类型", trigger: "blur" }],
   gid__name: [
     { required: true, message: "请选择测试平台", trigger: "blur" },
   ],
@@ -247,7 +249,8 @@ const showMore = () => {
 const openAddDialog = (type, operation, id) => {
   switch (type) {
     case 'device':
-      operation == 'add' ? (titleDialog.value = '添加设备' && (addDeviceForm.gid__name = testName.value)) : titleDialog.value = '编辑设备'
+      addDeviceForm.gid__name = testName.value
+      operation == 'add' ? titleDialog.value = '添加设备' : titleDialog.value = '编辑设备'
       nextTick(() => { // nextTick 解决表单重置无效的问题
         getOneData(type, id)
       })
@@ -286,7 +289,7 @@ const getOneData = (type, id) => {
           addDeviceForm.ip = item.ip
           addDeviceForm.username = item.username
           addDeviceForm.password = item.password
-          addDeviceForm.tid__name = item.tid__name
+          addDeviceForm.type = item.type
           addDeviceForm.gid__name = item.gid__name
         }
       })
@@ -311,8 +314,8 @@ const onAddDeviceForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
     if (valid) {
-      console.log("添加成功...", addDeviceForm);
       if (titleDialog.value == '添加设备') {
+        delete addDeviceForm.id
         addDevice(addDeviceForm)
       } else {
         editDevice(addDeviceForm)
@@ -330,7 +333,6 @@ const onAddGroupForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
     if (valid) {
-      console.log("添加成功...", addGroupForm);
       if (titleDialog.value == '添加测试平台') {
         delete addGroupForm.id
         addD_group(addGroupForm)
@@ -399,6 +401,9 @@ onMounted(() => {
 const getD_group = async () => {
   let group = await d_groupApi()
   state.d_groupData = group.data
+  state.d_groupData.map((item) => {
+    item.uptime = utc2beijing(item.uptime)
+  })
 }
 
 // 分组管理 添加接口
@@ -611,15 +616,24 @@ const changeStatus = (data) => {
 
 // 文件上传
 const handleUpload = async (files) => {
+  fileDisabled.value = true
   console.log("onChange...", files)
   let formData = new FormData()
   formData.append('file', files.file)
   formData.append('filetype', "apvbuild")
   let res = await buildUploadApi(formData)
   if (res.code === 1000) {
+    fileDisabled.value = false
     ElMessage({
       message: "上传成功",
       type: "success",
+      duration: 2000,
+    });
+  } else {
+    fileDisabled.value = false
+    ElMessage({
+      message: res.msg || "上传失败",
+      type: "error",
       duration: 2000,
     });
   }
