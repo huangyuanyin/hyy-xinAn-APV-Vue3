@@ -17,7 +17,7 @@ export function addTaskApi(params) {
     url: "/autoapv/task/",
     method: "post",
     urlType: "APV",
-    data: qs.stringify(params),
+    data: params,
   });
 }
 
