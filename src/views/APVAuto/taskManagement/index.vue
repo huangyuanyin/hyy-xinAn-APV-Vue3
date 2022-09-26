@@ -88,10 +88,7 @@
           <el-form-item label="任务名称" prop="name">
             <el-input v-model="addTaskForm.name" placeholder="请输入..." />
           </el-form-item>
-          <el-form-item label="负责人" prop="user">
-            <el-input v-model="addTaskForm.user" placeholder="请输入..." />
-          </el-form-item>
-          <el-form-item label="压测版本" prop="build">
+          <el-form-item label="build版本" prop="build">
             <el-select v-model="addTaskForm.build" placeholder="请选择...">
               <el-option v-for="(item, index) in state.buildData" :key="'buildData' + index" :label="item.name"
                 :value="item.name" />
@@ -99,6 +96,16 @@
           </el-form-item>
           <el-form-item label="测试平台" prop="group">
             <el-select multiple clearable v-model="addTaskForm.group" placeholder="请选择..." @change="getGroupDataId">
+              <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name"
+                :value="item.id" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="负责人" prop="user">
+            <el-input v-model="addTaskForm.user" placeholder="请输入..." />
+          </el-form-item>
+          <el-form-item label="用例模块" prop="userModule">
+            <el-select multiple clearable v-model="addTaskForm.userModule" placeholder="暂不支持..."
+              @change="getGroupDataId" disabled>
               <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name"
                 :value="item.id" />
             </el-select>
@@ -210,6 +217,7 @@ const addTaskForm = reactive({
   user: "",
   build: "",
   group: [],
+  userModule: []
 });
 const addTaskRuleFormRef = ref<FormInstance>();
 const addTaskFormRules = reactive<FormRules>({
@@ -291,6 +299,7 @@ const onAddTaskForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
     if (valid) {
+      delete addTaskForm.userModule
       // addTaskForm.group = "[" + String(addTaskForm.group) + "]"
       if (titleDialog.value == '添加任务') {
         delete addTaskForm.id
@@ -437,7 +446,6 @@ const openTestPlatformDialog = (data) => {
       duration: 1000,
     });
   }
-
   console.log("state.d_groupData", state.d_groupData);
   let group = []
   testPlatList.value = []
@@ -536,10 +544,13 @@ const deleteTestPlat = async (params) => {
 // 任务进度
 const taskProgress = (id) => {
   taskProgressDialog.value = true
+  textarea.value = ''
   setInterval(() => {
     percentage2.value = (percentage2.value % 100) + 10
   }, 500)
-  getTaskRun(id)
+  setTimeout(() => {
+    getTaskRun(id)
+  }, 5000)
 }
 
 // 任务启动/终止
@@ -576,7 +587,7 @@ const getTaskStatus = async (params) => {
 const getTaskRun = async (id) => {
   let res = await taskRunApi({ id })
   if (res.code === 1000) {
-    textarea.value = res.data.log || ''
+    textarea.value += res.data.log || ''
   } else {
     ElMessage({
       message: res?.msg || "请求失败",

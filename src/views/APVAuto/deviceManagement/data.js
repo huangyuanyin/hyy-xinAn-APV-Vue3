@@ -36,3 +36,5 @@ export const instrumentManagementData = [
     tag: "Office",
   },
 ];
+
+export const buildOptions = ['8.6', '8.6.1', '10.3.0', '10.3.1', '10.4.0', '10.4.1', '10.4.2', '10.4.3', '10.5.0']

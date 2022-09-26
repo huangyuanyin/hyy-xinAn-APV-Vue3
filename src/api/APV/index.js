@@ -97,7 +97,7 @@ export function addD_groupApi(params) {
     url: "/autoapv/d_group/",
     method: "post",
     urlType: "APV",
-    data: qs.stringify(params),
+    data: params,
   });
 }
 

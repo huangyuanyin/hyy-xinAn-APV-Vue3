@@ -108,11 +108,13 @@
           <el-form-item label="平台名称" prop="name">
             <el-input v-model="addGroupForm.name" placeholder="请输入..." />
           </el-form-item>
-          <el-form-item label="测试版本" prop="build">
-            <el-input v-model="addGroupForm.build" placeholder="请输入..." />
-          </el-form-item>
           <el-form-item label="BuildIp" prop="buildip">
             <el-input v-model="addGroupForm.buildip" placeholder="请输入..." />
+          </el-form-item>
+          <el-form-item label="测试版本" prop="build">
+            <el-select v-model="addGroupForm.build" multiple placeholder="请输入选择..." @change="getBuildName">
+              <el-option v-for="item in buildOptions" :key="item" :label="item" :value="item" />
+            </el-select>
           </el-form-item>
         </el-form>
       </span>
@@ -169,6 +171,7 @@ import { useRouter } from "vue-router";
 import { deviceApi, addDeviceApi, editDeviceApi, deleteDeviceApi, d_groupApi, d_typeApi, addD_typeApi, editD_typeApi, deleteD_typeApi, addD_groupApi, editD_groupApi, deleteD_groupApi } from '@/api/APV/index.js'
 import { buildApi, buildUploadApi, deleteBuildApi } from '@/api/APV/buildManagement.js'
 import { utc2beijing } from '@/utils/util.js'
+import { buildOptions } from './data.js'
 
 const activeName = ref("testbedManagement");
 const dialogVisible = ref(false);
@@ -241,8 +244,8 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
   console.log(tab, event);
 };
 
-const showMore = () => {
-  isShowMore.value = !isShowMore.value
+const getBuildName = (value) => {
+  console.log("dada", value);
 }
 
 // 打开添加/编辑弹窗
