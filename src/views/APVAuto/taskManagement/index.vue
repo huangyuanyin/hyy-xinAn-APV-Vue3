@@ -7,6 +7,27 @@
           添加任务
         </el-button>
         <el-table :data="state.tableData" stripe style="width: 100%" v-loading="tableLoading">
+          <el-table-column type="expand">
+            <template #default="props">
+              <el-timeline>
+                <el-timeline-item timestamp="2018/4/12" placement="top" size='large' type='primary' hollow>
+                  <el-card shadow="never">
+                    <h4>准备阶段</h4>
+                    <p>平台一</p>
+                  </el-card>
+                </el-timeline-item>
+                <el-timeline-item timestamp="2018/4/3" placement="top" color='#0bbd87'>
+                  <el-card shadow="never">
+                    <h4>运行阶段</h4>
+                    <p>用例执行中...</p>
+                  </el-card>
+                </el-timeline-item>
+                <el-timeline-item timestamp="2018/4/2" placement="top" color="#f56c6c">
+                  任务完成
+                </el-timeline-item>
+              </el-timeline>
+            </template>
+          </el-table-column>
           <el-table-column prop="name" label="任务名称" align="center" width="200" />
           <el-table-column prop="build" label="build版本" align="center" width="300" />
           <el-table-column prop="groupAfter" label="测试平台" align="center" width="400">
@@ -303,10 +324,10 @@ const onAddTaskForm = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       delete addTaskForm.userModule
+      console.log("添加成功...", JSON.parse(JSON.stringify(addTaskForm)));
       // addTaskForm.group = "[" + String(addTaskForm.group) + "]"
       if (titleDialog.value == '添加任务') {
         delete addTaskForm.id
-        console.log("添加成功...", addTaskForm.group);
         addTask(addTaskForm)
       } else {
         addTask(addTaskForm)
