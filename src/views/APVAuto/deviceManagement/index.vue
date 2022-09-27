@@ -34,6 +34,9 @@
               </template>
             </el-table-column>
           </el-table>
+          <el-pagination v-model:currentPage="groupCurrentPage" v-model:page-size="groupPageSize"
+            :page-sizes="[10, 20, 30, 40]" layout="total, sizes, prev, pager, next, jumper" :total="groupTotal"
+            @size-change="handleGroupSizeChange" @current-change="handleGroupCurrentChange" />
         </el-card>
       </el-tab-pane>
       <el-tab-pane label="build管理" name="buildManagement">
@@ -57,6 +60,9 @@
               </template>
             </el-table-column>
           </el-table>
+          <el-pagination v-model:currentPage="buildCurrentPage" v-model:page-size="buildPageSize"
+            :page-sizes="[10, 20, 30, 40]" layout="total, sizes, prev, pager, next, jumper" :total="buildTotal"
+            @size-change="handleBuildSizeChange" @current-change="handleBuildCurrentChange" />
         </el-card>
       </el-tab-pane>
     </el-tabs>
@@ -403,7 +409,7 @@ onMounted(() => {
 // 分组管理 接口
 const getD_group = async () => {
   let group = await d_groupApi()
-  state.d_groupData = group.data
+  state.d_groupData = group.data.data
   state.d_groupData.map((item) => {
     item.uptime = utc2beijing(item.uptime)
   })
@@ -467,6 +473,7 @@ const deleteD_group = async (id) => {
 const getDevice = async () => {
   let res = await deviceApi()
   state.deviceData = res.data
+  groupTotal.value = res.total
   console.log("设备管理...", state.deviceData);
 }
 
@@ -589,6 +596,7 @@ const deleteD_type = async (id) => {
 const getBuild = async () => {
   let res = await buildApi({ filetype: "apvbuild" })
   state.buildData = res.data.map(item => ({ name: item }))
+  buildTotal.value = res.dada?.total || 0
 }
 
 // build管理 删除接口
@@ -646,6 +654,25 @@ const handleSuccess: UploadProps['onSuccess'] = () => {
   getBuild()
 }
 
+const groupCurrentPage = ref(1)
+const groupPageSize = ref(10)
+const groupTotal = ref(0)
+const handleGroupSizeChange = (val: number) => {
+  console.log(`${val} items per page`)
+}
+const handleGroupCurrentChange = (val: number) => {
+  console.log(`current page: ${val}`)
+}
+
+const buildCurrentPage = ref(1)
+const buildPageSize = ref(10)
+const buildTotal = ref(0)
+const handleBuildSizeChange = (val: number) => {
+  console.log(`${val} items per page`)
+}
+const handleBuildCurrentChange = (val: number) => {
+  console.log(`current page: ${val}`)
+}
 </script>
 
 <style lang="scss" scoped>
@@ -687,6 +714,12 @@ const handleSuccess: UploadProps['onSuccess'] = () => {
   :deep(.el-card__body) {
     height: 70vh;
   }
+}
+
+.el-pagination {
+  display: flex;
+  justify-content: end;
+  margin-top: 25px;
 }
 </style>
 

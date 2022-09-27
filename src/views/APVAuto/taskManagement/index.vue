@@ -77,6 +77,9 @@
             </template>
           </el-table-column>
         </el-table>
+        <el-pagination v-model:currentPage="taskCurrentPage" v-model:page-size="taskPageSize"
+          :page-sizes="[10, 20, 30, 40]" layout="total, sizes, prev, pager, next, jumper" :total="taskTotal"
+          @size-change="handleTaskSizeChange" @current-change="handleTaskCurrentChange" />
       </el-card>
       <!-- </el-tab-pane> -->
     </el-tabs>
@@ -120,7 +123,8 @@
       </template>
     </el-dialog>
     <!--任务进度弹窗-->
-    <el-dialog v-model="taskProgressDialog" title="任务进度" width="50%" :before-close="handleClose">
+    <el-dialog v-model="taskProgressDialog" title="任务进度" width="50%" :before-close="handleClose"
+      @close="closeTaskProgressDialog">
       <div class="dashboard">
         <el-progress type="dashboard" :percentage="percentage2" :color="colors" :width=200 />
         <el-progress type="dashboard" :percentage="percentage2" :color="colors" :width=200 />
@@ -187,6 +191,7 @@ const percentage2 = ref(0)
 const textarea = ref('')
 const testPlatList = ref([]) // 已有测试平台集合List
 const buttonText = ref("添加")
+const timer = ref(null) // 定时器
 
 const colors = [
   { color: '#f56c6c', percentage: 20 },
@@ -367,6 +372,7 @@ const getTask = async () => {
   let res = await taskApi()
   if (res.code == 1000) {
     state.tableData = res.data
+    taskTotal.value = res.total || 0
   } else {
     ElMessage({
       message: res.msg || "请求失败",
@@ -417,7 +423,7 @@ const deleteTask = async (id) => {
 // 分组管理 获取接口
 const getD_group = async () => {
   let group = await d_groupApi()
-  state.d_groupData = group.data
+  state.d_groupData = group.data?.data
 }
 
 // 压测版本 获取接口
@@ -548,7 +554,7 @@ const taskProgress = (id) => {
   setInterval(() => {
     percentage2.value = (percentage2.value % 100) + 10
   }, 500)
-  setTimeout(() => {
+  timer.value = setInterval(() => {
     getTaskRun(id)
   }, 5000)
 }
@@ -625,9 +631,31 @@ const handleTestPlatClose = (done: () => void) => {
   addTestPlatFormRef.value.resetFields()
 };
 
+// 关闭任务进度弹窗
+const closeTaskProgressDialog = () => {
+  clearInterval(timer.value)
+  timer.value = null
+}
+
+const taskCurrentPage = ref(1)
+const taskPageSize = ref(10)
+const taskTotal = ref(0)
+const handleTaskSizeChange = (val: number) => {
+  console.log(`${val} items per page`)
+}
+const handleTaskCurrentChange = (val: number) => {
+  console.log(`current page: ${val}`)
+}
+
 </script>
 
 <style lang="scss" scoped>
+.el-pagination {
+  display: flex;
+  justify-content: end;
+  margin-top: 25px;
+}
+
 .status-point {
   display: inline-block;
   width: 10px;
