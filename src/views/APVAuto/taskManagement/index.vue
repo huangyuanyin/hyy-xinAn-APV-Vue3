@@ -30,7 +30,7 @@
           </el-table-column>
           <el-table-column prop="name" label="任务名称" align="center" width="200" />
           <el-table-column prop="build" label="build版本" align="center" width="300" />
-          <el-table-column prop="groupAfter" label="测试平台" align="center" width="400">
+          <el-table-column prop="groupAfter" label="测试平台" align="center">
             <template #default="scope">
               <el-tag class="tagType" v-for="item,index in scope.row.groupAfter" :key="'groupAfter'+index">
                 {{item.label}}
