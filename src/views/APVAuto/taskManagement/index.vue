@@ -8,7 +8,7 @@
         </el-button>
         <el-table :data="state.tableData" stripe style="width: 100%" v-loading="tableLoading">
           <el-table-column prop="name" label="任务名称" align="center" width="200" />
-          <el-table-column prop="build" label="压测版本" align="center" width="300" />
+          <el-table-column prop="build" label="build版本" align="center" width="300" />
           <el-table-column prop="groupAfter" label="测试平台" align="center" width="400">
             <template #default="scope">
               <el-tag class="tagType" v-for="item,index in scope.row.groupAfter" :key="'groupAfter'+index">
@@ -227,7 +227,7 @@ const addTaskFormRules = reactive<FormRules>({
   user: [
     { required: true, message: "负责人不能为空", trigger: "blur" },
   ],
-  build: [{ required: true, message: "请选择压测版本", trigger: "blur" }],
+  build: [{ required: true, message: "请选择测build版本", trigger: "blur" }],
   group: [
     { required: true, message: "请选择测试平台", trigger: "blur" },
   ],
