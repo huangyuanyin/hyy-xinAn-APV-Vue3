@@ -123,13 +123,12 @@
       </template>
     </el-dialog>
     <!--任务进度弹窗-->
-    <el-dialog v-model="taskProgressDialog" title="任务进度" width="50%" :before-close="handleClose"
-      @close="closeTaskProgressDialog">
-      <div class="dashboard">
-        <el-progress type="dashboard" :percentage="percentage2" :color="colors" :width=200 />
-        <el-progress type="dashboard" :percentage="percentage2" :color="colors" :width=200 />
-      </div>
-      <el-input v-model="textarea" :rows="10" type="textarea" placeholder="暂无log日志..." />
+    <el-dialog custom-class="taskProgressDialog" v-model="taskProgressDialog" title="任务进度" width="1050px"
+      :before-close="handleClose" @close="closeTaskProgressDialog">
+      <reportDetailVue></reportDetailVue>
+      <el-card :body-style='bodyStyle'>
+        <el-input v-model="textarea" :rows="13" type="textarea" placeholder="暂无log日志..." />
+      </el-card>
     </el-dialog>
     <!--平台弹窗-->
     <el-dialog v-model="platformDialog" title="修改测试平台" custom-class="platformDialog" width="50%"
@@ -170,11 +169,11 @@ import type { TabsPaneContext } from "element-plus";
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from "element-plus";
 import { ElInput } from 'element-plus'
-import { useRouter } from "vue-router";
 import { deviceApi, addDeviceApi, editDeviceApi, deleteDeviceApi, d_typeApi, addD_typeApi, editD_typeApi, deleteD_typeApi, d_groupApi, addD_groupApi, editD_groupApi, deleteD_groupApi } from '@/api/APV/index.js'
 import { taskApi, addTaskApi, editTaskApi, deleteTaskApi, taskRunApi, taskStatusApi, deleteTestPlatApi, putTestPlatApi } from '@/api/APV/taskManagement.js'
 import { buildApi } from '@/api/APV/buildManagement.js'
 import { utc2beijing } from '@/utils/util.js'
+import reportDetailVue from "./components/reportDetailEchart.vue";
 
 const activeName = ref("taskManagement");
 const dialogVisible = ref(false);
@@ -182,16 +181,15 @@ const deviceTypeDialogVisible = ref(false)
 const groupDialogVisible = ref(false)
 const taskProgressDialog = ref(false)
 const platformDialog = ref(false)
-const taskStatus = ref(false)
 const tableLoading = ref(false)
-const inputValue = ref('')
-const inputVisible = ref(false)
-const InputRef = ref<InstanceType<typeof ElInput>>()
 const percentage2 = ref(0)
 const textarea = ref('')
 const testPlatList = ref([]) // 已有测试平台集合List
 const buttonText = ref("添加")
 const timer = ref(null) // 定时器
+const bodyStyle = {
+  padding: '0px'
+}
 
 const colors = [
   { color: '#f56c6c', percentage: 20 },
@@ -554,6 +552,7 @@ const taskProgress = (id) => {
   setInterval(() => {
     percentage2.value = (percentage2.value % 100) + 10
   }, 500)
+  getTaskRun(id)
   timer.value = setInterval(() => {
     getTaskRun(id)
   }, 5000)
@@ -684,6 +683,8 @@ const handleTaskCurrentChange = (val: number) => {
 .dashboard {
   display: flex;
   justify-content: space-around;
+  width: 100%;
+  height: 300px;
 }
 
 .platformDialog {
@@ -812,7 +813,8 @@ const handleTaskCurrentChange = (val: number) => {
   }
 }
 
-.platformDialog {
+.platformDialog,
+.taskProgressDialog {
   .el-dialog__body {
     padding-top: 0px !important;
   }
