@@ -145,7 +145,7 @@
     </el-dialog>
     <!--任务进度弹窗-->
     <el-dialog custom-class="taskProgressDialog" v-model="taskProgressDialog" title="任务进度" width="1050px"
-      :before-close="handleClose" @close="closeTaskProgressDialog">
+      @close="closeTaskProgressDialog">
       <reportDetailVue></reportDetailVue>
       <el-card :body-style='bodyStyle'>
         <el-input v-model="textarea" :rows="13" type="textarea" placeholder="暂无log日志..." />
@@ -330,7 +330,7 @@ const onAddTaskForm = async (formEl: FormInstance | undefined) => {
         delete addTaskForm.id
         addTask(addTaskForm)
       } else {
-        addTask(addTaskForm)
+        editTask(addTaskForm)
       }
       addTaskRuleFormRef.value.resetFields()
       dialogVisible.value = false;
@@ -416,6 +416,26 @@ const addTask = async (params) => {
   } else {
     ElMessage({
       message: res?.msg || "添加失败",
+      type: "error",
+      duration: 3000,
+    });
+  }
+}
+
+// 任务管理 编辑接口
+const editTask = async (params) => {
+  let res = await editTaskApi(params)
+  if (res.code === 1000) {
+    await getTask()
+    await handle()
+    ElMessage({
+      message: "编辑成功",
+      type: "success",
+      duration: 1000,
+    });
+  } else {
+    ElMessage({
+      message: res?.msg || "编辑失败",
       type: "error",
       duration: 3000,
     });
@@ -640,7 +660,6 @@ const handleClose = (done: () => void) => {
   deviceTypeDialogVisible.value = false
   groupDialogVisible.value = false
   taskProgressDialog.value = false
-  platformDialog.value = false
   addTaskRuleFormRef.value.resetFields()
 };
 
@@ -653,6 +672,7 @@ const handleTestPlatClose = (done: () => void) => {
 
 // 关闭任务进度弹窗
 const closeTaskProgressDialog = () => {
+  platformDialog.value = false
   clearInterval(timer.value)
   timer.value = null
 }

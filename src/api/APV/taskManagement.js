@@ -27,7 +27,7 @@ export function editTaskApi(params) {
     url: "/autoapv/task/",
     method: "PUT",
     urlType: "APV",
-    data: qs.stringify(params),
+    data: params,
   });
 }
 
@@ -67,7 +67,7 @@ export function putTestPlatApi(params) {
     url: `/autoapv/taskrun/`,
     method: "PUT",
     urlType: "APV",
-    data: qs.stringify(params),
+    data: params,
   });
 }
 
@@ -77,6 +77,6 @@ export function deleteTestPlatApi(params) {
     url: `/autoapv/taskrun/`,
     method: "delete",
     urlType: "APV",
-    data: qs.stringify(params),
+    params,
   });
 }
