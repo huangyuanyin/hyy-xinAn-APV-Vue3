@@ -26,7 +26,7 @@
               <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
-          <div>
+          <!-- <div>
             <el-form-item label="">
               <el-input v-model="formInline.id" placeholder="搜索任务名称、报告ID、负责人..." style="width: 300px;" />
             </el-form-item>
@@ -34,7 +34,7 @@
               <el-button type="primary">搜索</el-button>
               <el-button>重置</el-button>
             </el-form-item>
-          </div>
+          </div> -->
         </el-form>
         <el-table :data="detailTableData2" border style="width: 100%">
           <el-table-column type="expand">
@@ -52,9 +52,13 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="接口名" prop="date" />
-          <el-table-column label="请求地址" prop="name" />
-          <el-table-column label="请求方法" prop="methods" />
+          <el-table-column label="case_ID" prop="date" />
+          <el-table-column label="case_脚本" prop="name">
+            <template #default="scope">
+              <el-button link type="primary" size="small">详情</el-button>
+            </template>
+          </el-table-column>
+          <el-table-column label="Comment" prop="methods" />
           <el-table-column label="响应时间" prop="time" />
           <el-table-column label="测试结果" prop="result" />
         </el-table>

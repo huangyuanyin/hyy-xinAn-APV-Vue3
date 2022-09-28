@@ -2,7 +2,7 @@
   <el-card>
     <el-form :inline="true" :model="formInline" class="exportForm">
       <el-form-item label="">
-        <el-input v-model="formInline.id" placeholder="搜索任务名称、报告ID、负责人..." />
+        <el-input v-model="formInline.id" placeholder="搜索build版本、测试平台、负责人..." />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onQuery">搜索</el-button>
@@ -16,9 +16,9 @@
       <el-table-column property="id" label="报告ID" width="120" align="center" />
       <el-table-column property="name" label="任务名称" width="200" align="center">
         <template #default="scope">
-          <el-icon color="#409eff" style="margin-right:3px">
+          <!-- <el-icon color="#409eff" style="margin-right:3px">
             <Document />
-          </el-icon>
+          </el-icon> -->
           <el-button link type="primary" size="small" @click="toDetail(scope.row.id)">{{ scope.row.name }}</el-button>
         </template>
       </el-table-column>
@@ -30,7 +30,7 @@
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="scope">
           <el-button link type="primary" size="small" disabled>历史报告</el-button>
-          <el-button link type="danger" size="small">移除</el-button>
+          <el-button link type="danger" size="small">删除</el-button>
           <!-- <el-button link type=" primary" size="small" @click="openReportDialog(scope.row.id)">生成报告</el-button>
           <el-upload :action="upload.url" :on-success="onSuccess" :on-error="onError" :headers="upload.header"
             :beforeUpload="beforeUpload">

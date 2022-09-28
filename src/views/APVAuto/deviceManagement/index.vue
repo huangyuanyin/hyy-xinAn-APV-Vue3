@@ -8,7 +8,13 @@
           </el-button>
           <el-table :data="state.d_groupData" stripe>
             <el-table-column prop="name" label="测试平台名称" align="center" />
-            <el-table-column prop="build" label="测试版本" align="center" />
+            <el-table-column prop="build" label="测试版本" align="center">
+              <template #default="scope">
+                <el-tag class="tagType" v-for="item,index in scope.row.build" :key="'build'+index">
+                  {{item}}
+                </el-tag>
+              </template>
+            </el-table-column>
             <el-table-column label="状态" align="center">
               <template #default="scope">
                 <span v-if="scope.row.status === false">空闲</span>
