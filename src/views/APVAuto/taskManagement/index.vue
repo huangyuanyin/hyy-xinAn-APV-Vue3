@@ -2,42 +2,52 @@
   <div class="performanceManagement">
     <el-tabs v-model="activeName" class="tabs" @tab-click="handleClick">
       <!-- <el-tab-pane label="任务管理" name="taskManagement"> -->
+      <el-card class="box-card" shadow="never" style="margin-bottom:20px">
+        <el-form :model="searchForm" label-width="120px" :inline="true" class="searchForm">
+          <el-form-item label="build版本" prop="build">
+            <el-select v-model="searchForm.build" placeholder="请选择build版本...">
+              <el-option v-for="(item, index) in state.buildData" :key="'buildData' + index" :label="item.name"
+                :value="item.name" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="测试平台" prop="group">
+            <el-select multiple clearable v-model="searchForm.group" placeholder="请选择测试平台..." @change="getGroupDataId">
+              <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name"
+                :value="item.id" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="负责人" prop="user">
+            <el-input v-model="searchForm.user" placeholder="请输入要搜索的负责人..." />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="onQuery">搜索</el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="default" @click="onResert">重置</el-button>
+          </el-form-item>
+        </el-form>
+      </el-card>
       <el-card class="box-card" shadow="never">
         <el-button type="primary" @click="openAddDialog('task', 'add', null)" style="margin-bottom: 20px">
           添加任务
         </el-button>
         <el-table :data="state.tableData" stripe style="width: 100%" v-loading="tableLoading">
-          <el-table-column type="expand">
-            <template #default="props">
-              <el-timeline>
-                <el-timeline-item timestamp="2018/4/12" placement="top" size='large' type='primary' hollow>
-                  <el-card shadow="never">
-                    <h4>准备阶段</h4>
-                    <p>平台一</p>
-                  </el-card>
-                </el-timeline-item>
-                <el-timeline-item timestamp="2018/4/3" placement="top" color='#0bbd87'>
-                  <el-card shadow="never">
-                    <h4>运行阶段</h4>
-                    <p>用例执行中...</p>
-                  </el-card>
-                </el-timeline-item>
-                <el-timeline-item timestamp="2018/4/2" placement="top" color="#f56c6c">
-                  任务完成
-                </el-timeline-item>
-              </el-timeline>
-            </template>
-          </el-table-column>
           <el-table-column prop="name" label="任务名称" align="center" width="200" />
           <el-table-column prop="build" label="build版本" align="center" width="300" />
-          <el-table-column prop="groupAfter" label="测试平台" align="center">
+          <el-table-column prop="groupAfter" label="测试平台" align="center" width="306">
             <template #default="scope">
               <el-tag class="tagType" v-for="item,index in scope.row.groupAfter" :key="'groupAfter'+index">
                 {{item.label}}
               </el-tag>
+              <el-tooltip content="点击可重新运行该测试平台" placement="top" effect="dark">
+                <el-tag class="tagType errorTagType" type="danger" @click="runAgain(scope.row)">
+                  失败的测试平台
+                </el-tag>
+              </el-tooltip>
             </template>
           </el-table-column>
-          <el-table-column prop="example" label="用例数" align="center" width="120" />
+          <el-table-column prop="example" label="总用例数" align="center" width="120" />
+          <el-table-column prop="example" label="失败用例数" align="center" width="120" />
           <el-table-column prop="state" label="任务状态" align="center" width="120">
             <template #default="scope">
               <div class="stateStyle" v-if="scope.row.state === 'stop'">
@@ -60,7 +70,7 @@
           </el-table-column>
           <el-table-column prop="user" label="负责人" align="center" width="120" />
           <el-table-column prop="uptimeAfter" label="更新时间" align="center" width="186" />
-          <el-table-column fixed="right" label="操作" align="center" width="200">
+          <el-table-column fixed="right" label="操作" align="center" width="150">
             <template #default="scope">
               <el-popover placement="bottom" :width="10" trigger="click" popper-class="morePopover">
                 <template #reference>
@@ -79,20 +89,21 @@
               <el-button link type="primary" size="small" @click="openAddDialog('task', 'edit', scope.row)">
                 编辑
               </el-button>
-              <el-popconfirm title="确定删除此项任务?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消"
-                @confirm="handleDelete('task', scope.row)">
-                <template #reference>
-                  <el-button link type="danger" size="small">删除</el-button>
-                </template>
-              </el-popconfirm>
-              <el-popover placement="bottom" :width="10" trigger="hover" popper-class="morePopover">
+              <el-popover placement="bottom" :width="10" trigger="click" popper-class="morePopover">
                 <template #reference>
                   <el-button link type="info" size="small">更多</el-button>
                 </template>
                 <div class="moreButton">
-                  <el-button link type="primary" size="small" @click="taskProgress(scope.row.id)">任务进度</el-button>
-                  <el-button link type="primary" size="small" @click="openTestPlatformDialog(scope.row)">测试平台
+                  <el-button link type="primary" size="small" @click="taskProgress(scope.row.id)"> 任务进度</el-button>
+                  <el-button link type="primary" size="small" @click="openTestPlatformDialog(scope.row)"
+                    style="margin-left: 0px;">测试平台
                   </el-button>
+                  <el-popconfirm title="确定删除此项任务?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消"
+                    @confirm="handleDelete('task', scope.row)">
+                    <template #reference>
+                      <el-button link type="danger" size="small">删除</el-button>
+                    </template>
+                  </el-popconfirm>
                 </div>
               </el-popover>
             </template>
@@ -146,10 +157,23 @@
     <!--任务进度弹窗-->
     <el-dialog custom-class="taskProgressDialog" v-model="taskProgressDialog" title="任务进度" width="1050px"
       @close="closeTaskProgressDialog">
-      <reportDetailVue></reportDetailVue>
-      <el-card :body-style='bodyStyle'>
-        <el-input v-model="textarea" :rows="13" type="textarea" placeholder="暂无log日志..." />
-      </el-card>
+      <el-timeline>
+        <el-timeline-item timestamp="2018/4/12" placement="top" size='large' type='primary' hollow>
+          <!-- <el-card shadow="never" :body-style='bodyStyle'> -->
+          <h4>准备阶段</h4>
+          <el-input v-model="textarea" :rows="13" type="textarea" placeholder="暂无log日志..." />
+          <!-- </el-card> -->
+        </el-timeline-item>
+        <el-timeline-item timestamp="2018/4/3" placement="top" color='#0bbd87'>
+          <!-- <el-card shadow="never"> -->
+          <h4>运行阶段</h4>
+          <reportDetailVue></reportDetailVue>
+          <!-- </el-card> -->
+        </el-timeline-item>
+        <el-timeline-item timestamp="2018/4/2" placement="top" color="#f56c6c">
+          任务完成
+        </el-timeline-item>
+      </el-timeline>
     </el-dialog>
     <!--平台弹窗-->
     <el-dialog v-model="platformDialog" title="修改测试平台" custom-class="platformDialog" width="50%"
@@ -225,6 +249,12 @@ const state: any = reactive({
   getD_group: [],  // 测试平台数据
   buildData: [], // 压测版本数据
   d_groupDataAfter: []
+})
+
+const searchForm = ref({
+  build: "",
+  group: "",
+  user: ""
 })
 
 // 添加测试平台数据
@@ -535,9 +565,17 @@ const onAddTestPlatForm = async (formEl: FormInstance | undefined) => {
 // 添加测试平台 api
 const putTestPlat = async (params) => {
   let res = await putTestPlatApi(params)
-  if (res) {
-
+  if (res.code === 1000) {
+    await getTask()
+    await handle()
+    platformDialog.value = false
+    ElMessage({
+      message: res?.msg || "添加成功",
+      type: "success",
+      duration: 2500,
+    });
   } else {
+    platformDialog.value = false
     ElMessage({
       message: res?.msg || "请求失败",
       type: "error",
@@ -594,9 +632,9 @@ const taskProgress = (id) => {
     percentage2.value = (percentage2.value % 100) + 10
   }, 500)
   getTaskRun(id)
-  timer.value = setInterval(() => {
-    getTaskRun(id)
-  }, 5000)
+  // timer.value = setInterval(() => {
+  //   getTaskRun(id)
+  // }, 5000)
 }
 
 // 任务启动/终止
@@ -643,6 +681,10 @@ const getTaskRun = async (id) => {
   }
 }
 
+const runAgain = (data) => {
+  console.log("runAgain", data);
+}
+
 // 取消弹窗
 const onResetTaskForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return;
@@ -677,6 +719,10 @@ const closeTaskProgressDialog = () => {
   timer.value = null
 }
 
+const onQuery = () => { }
+
+const onResert = () => { }
+
 const taskCurrentPage = ref(1)
 const taskPageSize = ref(10)
 const taskTotal = ref(0)
@@ -690,6 +736,12 @@ const handleTaskCurrentChange = (val: number) => {
 </script>
 
 <style lang="scss" scoped>
+.searchForm {
+  .el-form-item {
+    margin-bottom: 0px !important;
+  }
+}
+
 .el-pagination {
   display: flex;
   justify-content: end;
@@ -719,6 +771,10 @@ const handleTaskCurrentChange = (val: number) => {
 
 .tagType {
   margin: 2px;
+}
+
+.errorTagType:hover {
+  cursor: pointer;
 }
 
 .dashboard {

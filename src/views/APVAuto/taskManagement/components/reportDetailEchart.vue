@@ -1,5 +1,5 @@
 <template>
-  <div class="reportDetailEchart-wrap" id="reportDetailEchart" style="width: 1000px;height:300px;">
+  <div class="reportDetailEchart-wrap" id="reportDetailEchart" style="width: 942px;height:300px;">
   </div>
 </template>
 

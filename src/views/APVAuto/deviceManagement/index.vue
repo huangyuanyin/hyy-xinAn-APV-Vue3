@@ -120,7 +120,7 @@
           <el-form-item label="平台名称" prop="name">
             <el-input v-model="addGroupForm.name" placeholder="请输入..." />
           </el-form-item>
-          <el-form-item label="BuildIp" prop="buildip">
+          <el-form-item label="ServerIp" prop="buildip">
             <el-input v-model="addGroupForm.buildip" placeholder="请输入..." />
           </el-form-item>
           <el-form-item label="测试版本" prop="build">
@@ -246,7 +246,7 @@ const addGroupFormRules = reactive<FormRules>({
     { required: true, message: "支持测试版本不能为空", trigger: "blur" },
   ],
   buildip: [
-    { required: true, message: "buildip不能为空", trigger: "blur" },
+    { required: true, message: "ServerIp不能为空", trigger: "blur" },
   ],
   // status: [{ required: true, message: "请选择状态", trigger: "blur" }],
 });

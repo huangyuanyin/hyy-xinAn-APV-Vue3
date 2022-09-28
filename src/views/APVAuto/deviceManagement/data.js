@@ -37,4 +37,4 @@ export const instrumentManagementData = [
   },
 ];
 
-export const buildOptions = ['8.6.0', '8.6.1', '10.3.0', '10.3.1', '10.4.0', '10.4.1', '10.4.2', '10.4.3', '10.5.0']
+export const buildOptions = ['8.6.x', '10.3.x', '10.4.x', '10.5.x']
