@@ -39,17 +39,14 @@
         <el-table :data="detailTableData2" border style="width: 100%">
           <el-table-column type="expand">
             <template #default="props">
-              <div m="4">
-                <p m="t-0 b-2">State: {{ props.row.state }}</p>
-                <h3>Family</h3>
-                <el-table :data="props.row.family" border>
-                  <el-table-column label="Name" prop="name" />
-                  <el-table-column label="State" prop="state" />
-                  <el-table-column label="City" prop="city" />
-                  <el-table-column label="Address" prop="address" />
-                  <el-table-column label="Zip" prop="zip" />
-                </el-table>
-              </div>
+              <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
+                <el-tab-pane label="请求详情" name="first">
+                  <json-viewer :value="jsonData" copyable boxed sort />
+                </el-tab-pane>
+                <el-tab-pane label="响应详情" name="second">
+                  <json-viewer :value="jsonData" copyable boxed sort />
+                </el-tab-pane>
+              </el-tabs>
             </template>
           </el-table-column>
           <el-table-column label="case_ID" prop="date" />
@@ -114,6 +111,7 @@ import DataTemplateDialog from './components/dataTemplateDialog.vue';
 import { getDataApi } from "@/utils/getApi.js"
 import { detailTableData } from './data.js'
 import * as monaco from 'monaco-editor'
+import type { TabsPaneContext } from 'element-plus'
 
 export default defineComponent({
   components: {
@@ -132,6 +130,19 @@ export default defineComponent({
       { name: "用时", value: "0" },
       { name: "负责人", value: "hyy" }
     ])
+    let obj = {
+      name: "qiu",//字符串
+      age: 18,//数组
+      isMan: false,//布尔值
+      date: new Date(),
+      fn: () => { },
+      arr: [1, 2, 5]
+    };
+    const jsonData = reactive(obj);
+    const activeName = ref('first');
+    const handleClick = (tab: TabsPaneContext, event: Event) => {
+      console.log(tab, event)
+    }
     const formInline = ref({
       value: "",
       id: ""
@@ -502,13 +513,18 @@ export default defineComponent({
       itemList,
       getDatas,
       handleData,
-      toBack, contentItemList, formInline, value, options, detailTableData2, showOverview, toDetailCase, isShowCaseScriptDialog, caseScriptValue, language, editorMounted, closeCaseScriptDialog
+      toBack, contentItemList, formInline, value, options, detailTableData2, showOverview, toDetailCase, isShowCaseScriptDialog, caseScriptValue, language, editorMounted, closeCaseScriptDialog, jsonData,
+      activeName, handleClick
     }
   },
 })
 </script>
 
 <style lang="scss" scoped>
+.demo-tabs {
+  padding: 0px 5px !important;
+}
+
 .report-card {
   .top {
     display: flex;
