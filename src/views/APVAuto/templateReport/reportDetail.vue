@@ -55,7 +55,7 @@
           <el-table-column label="case_ID" prop="date" />
           <el-table-column label="case_脚本" prop="name">
             <template #default="scope">
-              <el-button link type="primary" size="small">详情</el-button>
+              <el-button link type="primary" size="small" @click="toDetailCase">详情</el-button>
             </template>
           </el-table-column>
           <el-table-column label="Comment" prop="methods" />
@@ -65,6 +65,14 @@
       </el-tab-pane>
     </el-tabs>
   </el-card>
+  <!--case脚本详情-->
+  <el-dialog :model-value="isShowCaseScriptDialog" custom-class="caseScriptDialog" title="case脚本详情"
+    @close="closeCaseScriptDialog">
+    <div class="detailCaseScript">
+      <monacoEditor v-model="caseScriptValue" :language="language" width="800px" height="500px" theme="vs-dark"
+        @editor-mounted="editorMounted"></monacoEditor>
+    </div>
+  </el-dialog>
 
   <!-- <el-card class="detail-card" style="margin-top:30px">
     <template #header>
@@ -105,6 +113,8 @@ import { ArrowLeftBold } from "@element-plus/icons-vue";
 import DataTemplateDialog from './components/dataTemplateDialog.vue';
 import { getDataApi } from "@/utils/getApi.js"
 import { detailTableData } from './data.js'
+import * as monaco from 'monaco-editor'
+
 export default defineComponent({
   components: {
     ArrowLeftBold, DataTemplateDialog
@@ -152,6 +162,16 @@ export default defineComponent({
     let echarts: any = inject("echarts");
     const dataX: any = ref([])
     const dialogData = ref([])
+    const isShowCaseScriptDialog = ref(false)
+
+    const caseScriptValue = ref("[2022-09-28 06:05:10]: 测试任务开始执行\n[2022-09-28 06:05:10]: 测试任务状态修改成功\n[2022-09-28 06:05:10]: 开始校验ArrayOS-Beta_APV_10_5_0_36.array文件\n[2022-09-28 06:05:10]: 测试环境 29 验证通过\n[2022-09-28 06:05:10]: 开始同步测试用例\n[2022-09-28 06:05:15]: ArrayOS-Beta_APV_10_5_0_36.array, 同步测试用例成功\n[2022-09-28 06:05:15]: smart_huawei.pl\n[2022-09-28 06:05:15]: 测试用例同步成功\n[2022-09-28 06:05:15]: 开始向测试环境上传build文件\n[2022-09-28 06:05:15]: 29 开始上传build\n[2022-09-28 06:05:20]: 29 build 上传成功\n[2022-09-28 06:05:20]: 向测试环境上传build文件结束\n[2022-09-28 06:05:20]: 开始进行APV设备，build版本升级\n[2022-09-28 06:05:20]: 开始测试环境29，apv设备，build升级\n[2022-09-28 06:05:20]: 测试设备29build升级成功\n[2022-09-28 06:05:46]: apv 设备ttyS0(172.16.35.66)build升级成功\n[2022-09-28 06:05:46]: 测试设备29build升级成功\n[2022-09-28 06:05:46]: APV设备升级结束\n[2022-09-28 06:05:55]: 测试环境29执行测试成功\n[2022-09-28 06:05:55]: 测试环境[29]正常启动，开始执行测试任务\n")
+    const language = ref('perl')
+    const editorMounted = (editor: monaco.editor.IStandaloneCodeEditor) => {
+      console.log('editor实例加载完成', editor)
+    }
+    const closeCaseScriptDialog = () => {
+      isShowCaseScriptDialog.value = false
+    }
 
     const showOverview = () => {
       const chartBox = echarts.init(document.getElementById('overview'));
@@ -461,6 +481,9 @@ export default defineComponent({
     const closeDialog = (value) => {
       isShowDialog.value = value
     }
+    const toDetailCase = () => {
+      isShowCaseScriptDialog.value = true
+    }
     onMounted(async () => {
       await getDatas();
       showOverview()
@@ -479,7 +502,7 @@ export default defineComponent({
       itemList,
       getDatas,
       handleData,
-      toBack, contentItemList, formInline, value, options, detailTableData2, showOverview
+      toBack, contentItemList, formInline, value, options, detailTableData2, showOverview, toDetailCase, isShowCaseScriptDialog, caseScriptValue, language, editorMounted, closeCaseScriptDialog
     }
   },
 })
@@ -593,5 +616,13 @@ export default defineComponent({
 </style>
 
 <style lang="scss">
+.caseScriptDialog {
+  .el-dialog__body {
+    padding-top: 0px !important;
+  }
 
+  .codeEditBox {
+    width: 100%;
+  }
+}
 </style>
