@@ -234,22 +234,43 @@ let addGroupForm = reactive({
   buildip: "",
   // status: null,
 })
+let validateIPAddress = (rule, value, callback) => {
+  if (value == '') {
+    return callback(new Error('IP地址不能为空'));
+  }
+  let regexp = /^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}$/g;
+  let valdata = value.split(',');
+  let isCorrect = true;
+  if (valdata.length) {
+    for (let i = 0; i < valdata.length; i++) {
+      if (regexp.test(valdata[i]) == false) {
+        isCorrect = false;
+      }
+    }
+  }
+  if (!isCorrect) {
+    callback(new Error('请输入正确的IP地址'));
+  } else {
+    callback()
+  }
+}
 const addGroupRuleFormRef = ref<FormInstance>();
 const addGroupFormRules = reactive<FormRules>({
   name: [
     { required: true, message: "平台名称不能为空", trigger: "blur" },
   ],
   ip: [
-    { required: true, message: "平台ip不能为空", trigger: "blur" },
+    { required: true, validator: validateIPAddress, trigger: "blur" },
   ],
   build: [
     { required: true, message: "支持测试版本不能为空", trigger: "blur" },
   ],
   buildip: [
-    { required: true, message: "ServerIp不能为空", trigger: "blur" },
+    { required: true, validator: validateIPAddress, trigger: "blur" },
   ],
   // status: [{ required: true, message: "请选择状态", trigger: "blur" }],
 });
+
 
 // 切换Tab
 const handleClick = (tab: TabsPaneContext, event: Event) => {
