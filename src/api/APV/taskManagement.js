@@ -80,3 +80,13 @@ export function deleteTestPlatApi(params) {
     params,
   });
 }
+
+// 获取用例集
+export function getCaseApi(params) {
+  return request({
+    url: `/autoapv/case/`,
+    method: "get",
+    urlType: "APV",
+    params,
+  });
+}

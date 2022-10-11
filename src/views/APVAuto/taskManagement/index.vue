@@ -96,7 +96,8 @@
                 <div class="moreButton">
                   <el-button link type="primary" size="small" @click="taskProgress(scope.row.id)"> 任务进度</el-button>
                   <el-button link type="primary" size="small" @click="openTestPlatformDialog(scope.row)"
-                    style="margin-left: 0px;">测试平台
+                    style="margin-left: 0px;">
+                    测试平台
                   </el-button>
                   <el-popconfirm title="确定删除此项任务?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消"
                     @confirm="handleDelete('task', scope.row)">
@@ -138,12 +139,9 @@
           <el-form-item label="负责人" prop="user">
             <el-input v-model="addTaskForm.user" placeholder="请输入..." />
           </el-form-item>
-          <el-form-item label="用例模块" prop="userModule">
-            <el-select multiple clearable v-model="addTaskForm.userModule" placeholder="暂不支持..."
-              @change="getGroupDataId" disabled>
-              <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name"
-                :value="item.id" />
-            </el-select>
+          <el-form-item label="用例集" prop="cases">
+            <el-cascader :options="casesOptions" :props="casesProps" @change="getCasesOptions"
+              popper-class="casesProps-tree" collapse-tags collapse-tags-tooltip clearable />
           </el-form-item>
         </el-form>
       </span>
@@ -215,7 +213,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from "element-plus";
 import { ElInput } from 'element-plus'
 import { deviceApi, addDeviceApi, editDeviceApi, deleteDeviceApi, d_typeApi, addD_typeApi, editD_typeApi, deleteD_typeApi, d_groupApi, addD_groupApi, editD_groupApi, deleteD_groupApi } from '@/api/APV/index.js'
-import { taskApi, addTaskApi, editTaskApi, deleteTaskApi, taskRunApi, taskStatusApi, deleteTestPlatApi, putTestPlatApi } from '@/api/APV/taskManagement.js'
+import { taskApi, addTaskApi, editTaskApi, deleteTaskApi, taskRunApi, taskStatusApi, deleteTestPlatApi, putTestPlatApi, getCaseApi } from '@/api/APV/taskManagement.js'
 import { buildApi } from '@/api/APV/buildManagement.js'
 import { utc2beijing } from '@/utils/util.js'
 import reportDetailVue from "./components/reportDetailEchart.vue";
@@ -232,6 +230,45 @@ const textarea = ref('')
 const testPlatList = ref([]) // 已有测试平台集合List
 const buttonText = ref("添加")
 const timer = ref(null) // 定时器
+const casesProps = {
+  multiple: true,
+  label: 'name',
+  value: 'name'
+}
+const casesOptions = ref([])
+
+// 调用 获取用例集接口
+const getCase = async () => {
+  let res = await getCaseApi()
+  casesOptions.value = res.data || []
+}
+
+// 处理用例集字段传参
+const getCasesOptions = (data) => {
+  let cases_name = []
+  let modules_name = []
+  let arr = [];
+  for (var i = 0; i < data.length; i++) {
+    cases_name.push(data[i][0])
+  }
+  cases_name = [...new Set(cases_name)]
+  cases_name.map(item => {
+    arr.push({
+      'cases_name': item,
+      'module_name': []
+    })
+  })
+  for (var i = 0; i < arr.length; i++) {
+    for (var j = 0; j < data.length; j++) {
+      if (arr[i].cases_name == data[j][0]) {
+        arr[i].module_name.push(data[j][1])
+      }
+    }
+  }
+  addTaskForm.cases = arr
+  console.log("dada", cases_name, modules_name, arr);
+}
+
 const bodyStyle = {
   padding: '0px'
 }
@@ -271,7 +308,7 @@ const addTaskForm = reactive({
   user: "",
   build: "",
   group: [],
-  userModule: []
+  cases: {}
 });
 const addTaskRuleFormRef = ref<FormInstance>();
 const addTaskFormRules = reactive<FormRules>({
@@ -285,6 +322,9 @@ const addTaskFormRules = reactive<FormRules>({
   group: [
     { required: true, message: "请选择测试平台", trigger: "blur" },
   ],
+  cases: [
+    { required: true, message: "请选择用例集", trigger: "blur" },
+  ]
 });
 
 // 切换Tab
@@ -293,10 +333,13 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
 };
 
 // 打开添加/编辑弹窗
-const openAddDialog = (type, operation, data) => {
+const openAddDialog = async (type, operation, data) => {
   switch (type) {
     case 'task':
       operation == 'add' ? (titleDialog.value = '添加任务') && (buttonText.value = '添加') : (titleDialog.value = '编辑任务') && (buttonText.value = '确定')
+      if (operation == 'add') {
+        await getCase()
+      }
       if (data && data.state === 'running') {
         return ElMessage({
           message: "任务运行中，禁止编辑！",
@@ -353,7 +396,6 @@ const onAddTaskForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
     if (valid) {
-      delete addTaskForm.userModule
       console.log("添加成功...", JSON.parse(JSON.stringify(addTaskForm)));
       // addTaskForm.group = "[" + String(addTaskForm.group) + "]"
       if (titleDialog.value == '添加任务') {
@@ -914,6 +956,22 @@ const handleTaskCurrentChange = (val: number) => {
 .taskProgressDialog {
   .el-dialog__body {
     padding-top: 0px !important;
+  }
+}
+
+.addDevice-form {
+  .el-cascader {
+    width: 300px;
+
+    .el-input {
+      height: 32px;
+    }
+  }
+
+  .casesProps-tree {
+    .el-checkbox {
+      margin-right: 5px !important;
+    }
   }
 
 }

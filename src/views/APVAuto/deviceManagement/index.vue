@@ -71,6 +71,9 @@
             @size-change="handleBuildSizeChange" @current-change="handleBuildCurrentChange" />
         </el-card>
       </el-tab-pane>
+      <el-tab-pane label="测试用例展示" name="showTestCase">
+        <ShowTestCase />
+      </el-tab-pane>
     </el-tabs>
     <!--添加设备弹窗-->
     <el-dialog v-model="dialogVisible" :title="titleDialog" width="35%" @close="handleClose('deviceDialog')"
@@ -184,6 +187,7 @@ import { deviceApi, addDeviceApi, editDeviceApi, deleteDeviceApi, d_groupApi, d_
 import { buildApi, buildUploadApi, deleteBuildApi } from '@/api/APV/buildManagement.js'
 import { utc2beijing } from '@/utils/util.js'
 import { buildOptions } from './data.js'
+import ShowTestCase from './components/showTestCase.vue'
 
 const activeName = ref("testbedManagement");
 const dialogVisible = ref(false);
