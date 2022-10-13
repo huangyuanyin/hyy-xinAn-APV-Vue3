@@ -84,6 +84,10 @@
                   <el-button link type="primary" size="small" v-else @click="changeTaskStatus('start',scope.row.id)">
                     任务启动
                   </el-button>
+                  <el-button link type="primary" size="small" v-if="scope.row.state === 'running'"
+                    @click="changeTaskStatus('restart',scope.row.id)">
+                    任务重启
+                  </el-button>
                 </div>
               </el-popover>
               <el-button link type="primary" size="small" @click="openAddDialog('task', 'edit', scope.row)">
@@ -140,8 +144,20 @@
             <el-input v-model="addTaskForm.user" placeholder="请输入..." />
           </el-form-item>
           <el-form-item label="用例集" prop="cases">
-            <el-cascader :options="casesOptions" :props="casesProps" @change="getCasesOptions"
+            <el-cascader v-model="casValue" :options="casesOptions" :props="casesProps" @change="getCasesOptions"
               popper-class="casesProps-tree" collapse-tags collapse-tags-tooltip clearable />
+          </el-form-item>
+          <el-form-item label="物理机" prop="config">
+            <el-radio-group v-model="isPhysicalMachine">
+              <el-radio label="1">是</el-radio>
+              <el-radio label="0">否</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item v-show="isPhysicalMachine == '1'" label="物理设备ip" prop="TipServer">
+            <el-input v-model="addTaskForm.config.TipServer" />
+          </el-form-item>
+          <el-form-item v-show="isPhysicalMachine == '1'" label="物理设备port" prop="TipPort">
+            <el-input v-model="addTaskForm.config.TipPort" />
           </el-form-item>
         </el-form>
       </span>
@@ -243,8 +259,21 @@ const getCase = async () => {
   casesOptions.value = res.data || []
 }
 
+const tag = ref(-1);
+const casValue: any = ref([]);
 // 处理用例集字段传参
 const getCasesOptions = (data) => {
+  /* 解决父节点为单选，子节点为多选的需求 */
+  data.forEach((i: any) => {
+    if (i[0] != tag.value) {
+      tag.value = i[0];
+    }
+  });
+  let filterd = data.filter((v: any) => v[0] == tag.value);
+  casValue.value = [];
+  casValue.value.push(...filterd);
+  /* 解决父节点为单选，子节点为多选的需求 */
+
   let cases_name = []
   let modules_name = []
   let arr = [];
@@ -265,8 +294,14 @@ const getCasesOptions = (data) => {
       }
     }
   }
-  addTaskForm.cases = arr
-  console.log("dada", cases_name, modules_name, arr);
+
+  // 如果可以多选用这个方法
+  // addTaskForm.cases = arr
+
+  // 只单选
+  addTaskForm.cases = arr[0]
+
+  // console.log("dada", cases_name, modules_name, arr);
 }
 
 const bodyStyle = {
@@ -301,6 +336,7 @@ const addTestPlatForm = reactive({
 })
 const addTestPlatFormRef = ref<FormInstance>();
 
+const isPhysicalMachine = ref('0')
 const titleDialog = ref("")
 const addTaskForm = reactive({
   id: "",
@@ -308,9 +344,36 @@ const addTaskForm = reactive({
   user: "",
   build: "",
   group: [],
-  cases: {}
+  cases: null,
+  config: {
+    TipServer: "",
+    TipPort: ""
+  }
 });
+
 const addTaskRuleFormRef = ref<FormInstance>();
+const validateTipServer = (rule: any, value: any, callback: any) => {
+  if (isPhysicalMachine.value == '0') {
+    return callback()
+  } else {
+    if (addTaskForm.config.TipServer === '') {
+      callback(new Error('请输入物理机ip'))
+    } else {
+      callback()
+    }
+  }
+}
+const validateTipPort = (rule: any, value: any, callback: any) => {
+  if (isPhysicalMachine.value == '0') {
+    return callback()
+  } else {
+    if (addTaskForm.config.TipPort === '') {
+      callback(new Error('请输入物理机port'))
+    } else {
+      callback()
+    }
+  }
+}
 const addTaskFormRules = reactive<FormRules>({
   name: [
     { required: true, message: "任务名称不能为空", trigger: "blur" },
@@ -324,6 +387,15 @@ const addTaskFormRules = reactive<FormRules>({
   ],
   cases: [
     { required: true, message: "请选择用例集", trigger: "blur" },
+  ],
+  config: [
+    { required: true, message: "请选择是否需要物理机", trigger: "blur" },
+  ],
+  TipServer: [
+    { required: true, validator: validateTipServer, trigger: "blur" },
+  ],
+  TipPort: [
+    { required: true, validator: validateTipPort, trigger: "blur" },
   ]
 });
 
@@ -398,6 +470,9 @@ const onAddTaskForm = async (formEl: FormInstance | undefined) => {
     if (valid) {
       console.log("添加成功...", JSON.parse(JSON.stringify(addTaskForm)));
       // addTaskForm.group = "[" + String(addTaskForm.group) + "]"
+      if (isPhysicalMachine.value == '0') {
+        delete addTaskForm.config
+      }
       if (titleDialog.value == '添加任务') {
         delete addTaskForm.id
         addTask(addTaskForm)
