@@ -4,8 +4,9 @@
       <template #default="props">
         <div m="4">
           <h3>模块数详情：</h3>
-          <el-table style="width: 100%" :data="props.row.children" :border="childBorder" :show-header="false">
-            <el-table-column v-for="(item, index) in casesHeaders" :key="index" :prop="item.prop" :label="item.label">
+          <el-table style="width: 100%" :data="props.row.valueList" :border="childBorder" :show-header="true">
+            <el-table-column v-for="(item, index) in props.row.headList" :key="index" :prop="item.value"
+              :label="item.key" width="120px" align="center">
             </el-table-column>
           </el-table>
         </div>
@@ -23,30 +24,7 @@ import { getCaseApi } from '@/api/APV/taskManagement.js'
 
 const parentBorder = ref(false)
 const childBorder = ref(true)
-const casesHeaders = ref([
-  {
-    prop: 'name',
-    label: '模块名',
-  },
-  {
-    prop: 'value',
-    label: 'runCase数',
-  }
-])
 const casesTableData = ref([])
-
-const getHeaders = computed(() => {
-  //["title", "模块名", "runCase"]
-  return casesTableData.value.reduce((pre, cur, index) => pre.concat(`value${index}`), ['title'])
-})
-
-// watch(() => props.row.children,)
-
-const getValues = computed(() => {
-  return casesHeaders.value.map((item) => {
-    console.log("casesTableData.value", casesTableData.value);
-  })
-})
 
 const optionsProps = {
   label: 'name',
@@ -55,22 +33,38 @@ const optionsProps = {
 // 调用 获取用例集接口
 const getCase = async () => {
   let res = await getCaseApi()
+  res.data.map((item) => {
+    item.headList = [],
+      item.valueList = [],
+      item.moduleLength = item.children.length
+  })
   casesTableData.value = res.data || []
   await handleData(casesTableData.value)
 }
 
-// 改造 用例集数据
+// 处理用例集数据展示
 const handleData = (data) => {
-  console.log("data", data);
 
-  data.map((item) => {
-    item.moduleLength = item.children.length
-  })
+  data.map((val) => {
+    let headList: any = [{ key: '模块名', value: 'taghead' }];
+    let valueList: any = [
+      {
+        taghead: 'runCase',
+      },
+    ];
+    val.children.map((v: any) => {
+      headList.push({
+        key: String(v.name),
+        value: String(v.name),
+      });
+      valueList[0][`${v.name}`] = v.value;
+    });
+    val.headList = headList;
+    val.valueList = valueList;
+  });
 }
 
 onMounted(() => {
-  console.log("get", getValues);
-
   getCase()
 })
 
