@@ -1,5 +1,5 @@
 <template>
-  <el-table :data="casesTableData" :border="parentBorder" style="width: 100%">
+  <el-table :data="casesTableData" :border="parentBorder" style="width: 100%" stripe>
     <el-table-column type="expand">
       <template #default="props">
         <div m="4">

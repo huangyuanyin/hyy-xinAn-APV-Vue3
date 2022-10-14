@@ -411,18 +411,18 @@ const openAddDialog = async (type, operation, data) => {
       operation == 'add' ? (titleDialog.value = '添加任务') && (buttonText.value = '添加') : (titleDialog.value = '编辑任务') && (buttonText.value = '确定')
       if (operation == 'add') {
         casValue.value = []
-        await getCase()
+      } else {
+        if (data && data.state === 'running') {
+          return ElMessage({
+            message: "任务运行中，禁止编辑！",
+            type: "warning",
+            duration: 1000,
+          });
+        }
+        nextTick(() => {
+          getOneData(type, data?.id)
+        })
       }
-      if (data && data.state === 'running') {
-        return ElMessage({
-          message: "任务运行中，禁止编辑！",
-          type: "warning",
-          duration: 1000,
-        });
-      }
-      nextTick(() => {
-        getOneData(type, data?.id)
-      })
       dialogVisible.value = true;
       break;
     default:
@@ -442,6 +442,7 @@ const getOneData = (type, id) => {
           addTaskForm.build = item.build
           addTaskForm.group = item.group
           handleSelectData(addTaskForm.group)
+          handleCaseValue(item.cases)
         }
       })
       break;
@@ -450,7 +451,7 @@ const getOneData = (type, id) => {
   }
 }
 
-// 处理 测试平台回显数据
+// 处理 编辑弹窗 - 测试平台字段回显数据
 const handleSelectData = (data) => {
   let arr = []
   data.forEach((item) => {
@@ -461,7 +462,26 @@ const handleSelectData = (data) => {
     })
   })
   addTaskForm.group = arr
-  console.log("测试平台回显数据", addTaskForm.group);
+}
+
+// 处理 编辑弹窗 - 用例集字段回显数据
+const handleCaseValue = (data) => {
+  let module_nameList = []
+  if (data.module_name && data.module_name[0] == 'all') {
+    // 获取当前版本下全部的模块名
+    casesOptions.value.map((item) => {
+      if (data.cases_name === item.name) {
+        item.children.map(it => module_nameList.push(it.name))
+      }
+    })
+  } else {
+    // 获取当前版本下返回的模块名
+    module_nameList = data.module_name || []
+  }
+  // casValue.value数据结构： [["10_5_runcase","AAA"],["10_5_runcase","Boundary"]]
+  module_nameList.map((item) => {
+    casValue.value = casValue.value.concat([[data.cases_name, item]])
+  })
 }
 
 // 添加任务
@@ -512,6 +532,7 @@ onMounted(async () => {
   await getBuild()
   await handle()
   await getTaskConfig()
+  await getCase()
 })
 
 // 处理数据 - 表格 测试平台/更新时间 字段回显
