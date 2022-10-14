@@ -4,47 +4,36 @@
       <template #default="props">
         <div m="4">
           <h3>模块数详情：</h3>
-          <el-table style="width: 100%;margin: 10px;" v-if="props.row.headList.length>0" :data="props.row.valueList"
-            :border="childBorder" :show-header="true">
-            <el-table-column v-for="(item, index) in props.row.headList.slice(0,10)" :key="index" :prop="item.value"
-              :label="item.key" align="center">
-            </el-table-column>
-          </el-table>
-          <el-table style="width: 100%;margin: 10px;" v-if="props.row.headList.length>9" :data="props.row.valueList"
-            :border="childBorder" :show-header="true">
-            <el-table-column prop="runCase" label="模块名" align="center">runCase</el-table-column>
-            <el-table-column v-for="(item, index) in props.row.headList.slice(10,19)" :key="index" :prop="item.value"
-              :label="item.key" align="center">
-            </el-table-column>
-          </el-table>
-          <el-table style="width: 100%;margin: 10px;" v-if="props.row.headList.length>19" :data="props.row.valueList"
-            :border="childBorder" :show-header="true">
-            <el-table-column prop="runCase" label="模块名" align="center">runCase</el-table-column>
-            <el-table-column v-for="(item, index) in props.row.headList.slice(19,28)" :key="index" :prop="item.value"
-              :label="item.key" align="center">
-            </el-table-column>
-          </el-table>
-          <el-table style="width: 100%;margin: 10px;" v-if="props.row.headList.length>28" :data="props.row.valueList"
-            :border="childBorder" :show-header="true">
-            <el-table-column prop="runCase" label="模块名" align="center">runCase</el-table-column>
-            <el-table-column v-for="(item, index) in props.row.headList.slice(28,37)" :key="index" :prop="item.value"
-              :label="item.key" align="center">
-            </el-table-column>
-          </el-table>
-          <el-table style="width: 100%;margin: 10px;" v-if=" props.row.headList.length>=37" :data="props.row.valueList"
-            :border="childBorder" :show-header="true">
-            <el-table-column prop="runCase" label="模块名" align="center">runCase</el-table-column>
-            <el-table-column v-for="(item, index) in props.row.headList.slice(37,46)" :key="index" :prop="item.value"
-              :label="item.key" align="center">
-            </el-table-column>
-          </el-table>
-          <el-table style="width: 100%;margin: 10px;" v-if="props.row.headList.length>=47" :data="props.row.valueList"
-            :border="childBorder" :show-header="true">
-            <el-table-column prop="runCase" label="模块名" align="center">runCase</el-table-column>
-            <el-table-column v-for="(item, index) in props.row.headList.slice(46,55)" :key="index" :prop="item.value"
-              :label="item.key" align="center">
-            </el-table-column>
-          </el-table>
+          <div class="card-wrap">
+            <el-card v-if="props.row.children.length >= 0">
+              <el-table style="margin: 10px;" :data="props.row.children.slice(0,12)" :border="childBorder"
+                :show-header="true">
+                <el-table-column prop="name" label="模块名" align="center"></el-table-column>
+                <el-table-column prop="value" label="数量" align="center"></el-table-column>
+              </el-table>
+            </el-card>
+            <el-card v-if="props.row.children.length >= 12">
+              <el-table style=" margin: 10px;" :data="props.row.children.slice(12,24)" :border="childBorder"
+                :show-header="true">
+                <el-table-column prop="name" label="模块名" align="center"></el-table-column>
+                <el-table-column prop="value" label="数量" align="center"></el-table-column>
+              </el-table>
+            </el-card>
+            <el-card v-if="props.row.children.length >= 24">
+              <el-table style="margin: 10px;" :data="props.row.children.slice(24,36)" :border="childBorder"
+                :show-header="true">
+                <el-table-column prop="name" label="模块名" align="center"></el-table-column>
+                <el-table-column prop="value" label="数量" align="center"></el-table-column>
+              </el-table>
+            </el-card>
+            <el-card v-if="props.row.children.length >= 36">
+              <el-table style="margin: 10px;" :data="props.row.children.slice(36,38)" :border="childBorder"
+                :show-header="true">
+                <el-table-column prop="name" label="模块名" align="center"></el-table-column>
+                <el-table-column prop="value" label="数量" align="center"></el-table-column>
+              </el-table>
+            </el-card>
+          </div>
         </div>
       </template>
     </el-table-column>
@@ -59,7 +48,7 @@ import { ref, computed, onMounted } from 'vue'
 import { getCaseApi } from '@/api/APV/taskManagement.js'
 
 const parentBorder = ref(false)
-const childBorder = ref(true)
+const childBorder = ref(false)
 const casesTableData = ref([])
 
 const optionsProps = {
@@ -75,7 +64,7 @@ const getCase = async () => {
       item.moduleLength = item.children.length
   })
   casesTableData.value = res.data || []
-  await handleData(casesTableData.value)
+  // await handleData(casesTableData.value)
 }
 
 // 处理用例集数据展示
@@ -84,7 +73,7 @@ const handleData = (data) => {
     let headList: any = [{ key: '模块名', value: 'taghead' }];
     let valueList: any = [
       {
-        taghead: 'runCase',
+        taghead: '数量',
       },
     ];
     val.children.map((v: any) => {
@@ -128,5 +117,22 @@ onMounted(() => {
 
 .el-carousel__item:nth-child(2n + 1) {
   background-color: #d3dce6;
+}
+
+.card-wrap {
+  display: flex;
+  flex-wrap: wrap;
+
+  .el-card {
+    width: 21%;
+    margin-bottom: 10px;
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+
+  :deep(.el-table td.el-table__cell,
+    .el-table th.el-table__cell.is-leaf) {
+    border-bottom: none;
+  }
 }
 </style>

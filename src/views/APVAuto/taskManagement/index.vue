@@ -409,20 +409,17 @@ const openAddDialog = async (type, operation, data) => {
   switch (type) {
     case 'task':
       operation == 'add' ? (titleDialog.value = '添加任务') && (buttonText.value = '添加') : (titleDialog.value = '编辑任务') && (buttonText.value = '确定')
-      if (operation == 'add') {
-        casValue.value = []
-      } else {
-        if (data && data.state === 'running') {
-          return ElMessage({
-            message: "任务运行中，禁止编辑！",
-            type: "warning",
-            duration: 1000,
-          });
-        }
-        nextTick(() => {
-          getOneData(type, data?.id)
-        })
+      casValue.value = []
+      if (data && data.state === 'running') {
+        return ElMessage({
+          message: "任务运行中，禁止编辑！",
+          type: "warning",
+          duration: 1000,
+        });
       }
+      nextTick(() => {
+        getOneData(type, data?.id)
+      })
       dialogVisible.value = true;
       break;
     default:
