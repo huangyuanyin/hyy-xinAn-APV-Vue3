@@ -90,3 +90,13 @@ export function getCaseApi(params) {
     params,
   });
 }
+
+// 获取参数配置列表
+export function getTaskConfigApi(params) {
+  return request({
+    url: `/autoapv/task_config/`,
+    method: "get",
+    urlType: "APV",
+    params,
+  });
+}

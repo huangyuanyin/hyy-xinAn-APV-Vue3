@@ -31,7 +31,8 @@ service.interceptors.request.use(
       config.url !== "/base/build/" &&
       config.url !== "/base/files/" &&
       config.url !== "/autoapv/taskrun/" &&
-      config.url !== "/autoapv/case/"
+      config.url !== "/autoapv/case/" &&
+      config.url !== "/autoapv/task_config/"
     ) {
       config.headers["token"] = hastoken;
     }

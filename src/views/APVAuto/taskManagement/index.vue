@@ -154,10 +154,10 @@
             </el-radio-group>
           </el-form-item>
           <el-form-item v-show="isPhysicalMachine == '1'" label="物理设备ip" prop="TipServer">
-            <el-input v-model="addTaskForm.config.TipServer" />
+            <el-input v-model="addTaskForm.config.TipServer" :placeholder="placeholderTipServer" />
           </el-form-item>
           <el-form-item v-show="isPhysicalMachine == '1'" label="物理设备port" prop="TipPort">
-            <el-input v-model="addTaskForm.config.TipPort" />
+            <el-input v-model="addTaskForm.config.TipPort" :placeholder="placeholderTipPort" />
           </el-form-item>
         </el-form>
       </span>
@@ -229,7 +229,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from "element-plus";
 import { ElInput } from 'element-plus'
 import { deviceApi, addDeviceApi, editDeviceApi, deleteDeviceApi, d_typeApi, addD_typeApi, editD_typeApi, deleteD_typeApi, d_groupApi, addD_groupApi, editD_groupApi, deleteD_groupApi } from '@/api/APV/index.js'
-import { taskApi, addTaskApi, editTaskApi, deleteTaskApi, taskRunApi, taskStatusApi, deleteTestPlatApi, putTestPlatApi, getCaseApi } from '@/api/APV/taskManagement.js'
+import { taskApi, addTaskApi, editTaskApi, deleteTaskApi, taskRunApi, taskStatusApi, deleteTestPlatApi, putTestPlatApi, getCaseApi, getTaskConfigApi } from '@/api/APV/taskManagement.js'
 import { buildApi } from '@/api/APV/buildManagement.js'
 import { utc2beijing } from '@/utils/util.js'
 import reportDetailVue from "./components/reportDetailEchart.vue";
@@ -401,7 +401,7 @@ const addTaskFormRules = reactive<FormRules>({
 
 // 切换Tab
 const handleClick = (tab: TabsPaneContext, event: Event) => {
-  console.log(tab, event);
+  // console.log(tab, event);
 };
 
 // 打开添加/编辑弹窗
@@ -410,6 +410,7 @@ const openAddDialog = async (type, operation, data) => {
     case 'task':
       operation == 'add' ? (titleDialog.value = '添加任务') && (buttonText.value = '添加') : (titleDialog.value = '编辑任务') && (buttonText.value = '确定')
       if (operation == 'add') {
+        casValue.value = []
         await getCase()
       }
       if (data && data.state === 'running') {
@@ -510,6 +511,7 @@ onMounted(async () => {
   await getTask()
   await getBuild()
   await handle()
+  await getTaskConfig()
 })
 
 // 处理数据 - 表格 测试平台/更新时间 字段回显
@@ -546,7 +548,6 @@ const getTask = async () => {
       duration: 2000,
     });
   }
-  console.log("任务管理...", state.tableData);
 }
 
 // 任务管理 添加接口
@@ -620,7 +621,6 @@ const getBuild = async () => {
 
 // 分组名称 下拉选择框
 const getGroupDataId = (value) => {
-  console.log("选择...", value);
   addTaskForm.group = value
 }
 
@@ -638,7 +638,6 @@ const openTestPlatformDialog = (data) => {
       duration: 1000,
     });
   }
-  console.log("state.d_groupData", state.d_groupData);
   let group = []
   testPlatList.value = []
   addTestPlatForm.id = data.id
@@ -766,7 +765,6 @@ const changeTaskStatus = (val, id) => {
 // 任务start or stop api
 const getTaskStatus = async (params) => {
   let res = await taskStatusApi(params)
-  console.log("aaa", res);
   if (res.code === 1000) {
     await getTask()
     await handle()
@@ -796,6 +794,15 @@ const getTaskRun = async (id) => {
       duration: 2500,
     });
   }
+}
+
+const placeholderTipServer = ref("")
+const placeholderTipPort = ref("")
+// 获取物理机参数配置信息
+const getTaskConfig = async () => {
+  let res = await getTaskConfigApi()
+  placeholderTipServer.value = res.data.TipServer || ''
+  placeholderTipPort.value = res.data.TipPort || ''
 }
 
 const runAgain = (data) => {
