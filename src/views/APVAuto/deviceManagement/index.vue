@@ -71,7 +71,7 @@
             @size-change="handleBuildSizeChange" @current-change="handleBuildCurrentChange" />
         </el-card>
       </el-tab-pane>
-      <el-tab-pane label="测试用例展示" name="showTestCase">
+      <el-tab-pane label="测试用例清单" name="showTestCase">
         <ShowTestCase />
       </el-tab-pane>
     </el-tabs>
