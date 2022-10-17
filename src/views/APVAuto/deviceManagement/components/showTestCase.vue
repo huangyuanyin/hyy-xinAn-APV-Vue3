@@ -8,29 +8,29 @@
             <el-card v-if="props.row.children.length >= 0">
               <el-table style="margin: 10px;" :data="props.row.children.slice(0,12)" :border="childBorder"
                 :show-header="true">
-                <el-table-column prop="name" label="模块名" align="center"></el-table-column>
-                <el-table-column prop="value" label="数量" align="center"></el-table-column>
+                <el-table-column prop="name" label="模块名"></el-table-column>
+                <el-table-column prop="value" label="数量"></el-table-column>
               </el-table>
             </el-card>
             <el-card v-if="props.row.children.length >= 12">
               <el-table style=" margin: 10px;" :data="props.row.children.slice(12,24)" :border="childBorder"
                 :show-header="true">
-                <el-table-column prop="name" label="模块名" align="center"></el-table-column>
-                <el-table-column prop="value" label="数量" align="center"></el-table-column>
+                <el-table-column prop="name" label="模块名"></el-table-column>
+                <el-table-column prop="value" label="数量"></el-table-column>
               </el-table>
             </el-card>
             <el-card v-if="props.row.children.length >= 24">
               <el-table style="margin: 10px;" :data="props.row.children.slice(24,36)" :border="childBorder"
                 :show-header="true">
-                <el-table-column prop="name" label="模块名" align="center"></el-table-column>
-                <el-table-column prop="value" label="数量" align="center"></el-table-column>
+                <el-table-column prop="name" label="模块名"></el-table-column>
+                <el-table-column prop="value" label="数量"></el-table-column>
               </el-table>
             </el-card>
             <el-card v-if="props.row.children.length >= 36">
-              <el-table style="margin: 10px;" :data="props.row.children.slice(36,38)" :border="childBorder"
+              <el-table style="margin: 10px;" :data="props.row.children.slice(36,48)" :border="childBorder"
                 :show-header="true">
-                <el-table-column prop="name" label="模块名" align="center"></el-table-column>
-                <el-table-column prop="value" label="数量" align="center"></el-table-column>
+                <el-table-column prop="name" label="模块名"></el-table-column>
+                <el-table-column prop="value" label="数量"></el-table-column>
               </el-table>
             </el-card>
           </div>

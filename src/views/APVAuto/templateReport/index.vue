@@ -30,7 +30,7 @@
       <el-table-column property="user" label="负责人" align="center" />
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="scope">
-          <el-button link type="primary" size="small" disabled>历史报告</el-button>
+          <el-button link type="primary" size="small">历史报告</el-button>
           <el-button link type="danger" size="small">删除</el-button>
           <!-- <el-button link type=" primary" size="small" @click="openReportDialog(scope.row.id)">生成报告</el-button>
           <el-upload :action="upload.url" :on-success="onSuccess" :on-error="onError" :headers="upload.header"

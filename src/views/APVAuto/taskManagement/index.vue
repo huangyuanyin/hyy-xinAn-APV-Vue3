@@ -2,35 +2,54 @@
   <div class="performanceManagement">
     <el-tabs v-model="activeName" class="tabs" @tab-click="handleClick">
       <!-- <el-tab-pane label="任务管理" name="taskManagement"> -->
-      <el-card class="box-card" shadow="never" style="margin-bottom:20px">
-        <el-form :model="searchForm" label-width="120px" :inline="true" class="searchForm">
-          <el-form-item label="build版本" prop="build">
-            <el-select v-model="searchForm.build" placeholder="请选择build版本...">
+      <!-- <el-card class="box-card" shadow="never" style="margin-bottom:20px"> -->
+      <!-- <el-form :model="searchForm" label-width="120px" :inline="true" class="searchForm">
+        <el-form-item label="build版本" prop="build">
+          <el-select v-model="searchForm.build" placeholder="请选择build版本...">
+            <el-option v-for="(item, index) in state.buildData" :key="'buildData' + index" :label="item.name"
+              :value="item.name" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="任务状态" prop="group">
+          <el-select clearable v-model="searchForm.group" placeholder="请选择任务状态..." @change="getGroupDataId">
+            <el-option v-for="(item, index) in state.selectStatusList" :key="'selectStatusList' + index"
+              :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="负责人" prop="user">
+          <el-input v-model="searchForm.user" placeholder="请输入要搜索的负责人..." />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="onQuery">搜索</el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="default" @click="onResert">重置</el-button>
+        </el-form-item>
+      </el-form> -->
+      <!-- </el-card> -->
+      <el-card class="box-card" shadow="never">
+        <div class="search-wrap">
+          <div>
+            <el-button size="large" type="primary" @click="openAddDialog('task', 'add', null)"
+              style="margin-bottom: 20px">
+              添加任务
+            </el-button>
+          </div>
+          <div>
+            <el-select size="large" clearable v-model="searchForm.build" placeholder="请选择要搜索的build版本...">
               <el-option v-for="(item, index) in state.buildData" :key="'buildData' + index" :label="item.name"
                 :value="item.name" />
             </el-select>
-          </el-form-item>
-          <el-form-item label="测试平台" prop="group">
-            <el-select multiple clearable v-model="searchForm.group" placeholder="请选择测试平台..." @change="getGroupDataId">
-              <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name"
-                :value="item.id" />
+            <el-select size="large" clearable v-model="searchForm.group" placeholder="请选择要搜索的任务状态..."
+              @change="getGroupDataId">
+              <el-option v-for="(item, index) in state.selectStatusList" :key="'selectStatusList' + index"
+                :label="item.label" :value="item.value" />
             </el-select>
-          </el-form-item>
-          <el-form-item label="负责人" prop="user">
-            <el-input v-model="searchForm.user" placeholder="请输入要搜索的负责人..." />
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="onQuery">搜索</el-button>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="default" @click="onResert">重置</el-button>
-          </el-form-item>
-        </el-form>
-      </el-card>
-      <el-card class="box-card" shadow="never">
-        <el-button type="primary" @click="openAddDialog('task', 'add', null)" style="margin-bottom: 20px">
-          添加任务
-        </el-button>
+            <el-input size="large" clearable v-model="searchForm.user" placeholder="请输入要搜索的负责人..."
+              :suffix-icon="Search" />
+          </div>
+        </div>
+
         <el-table :data="state.tableData" stripe style="width: 100%" v-loading="tableLoading">
           <el-table-column prop="name" label="任务名称" align="center" width="200" />
           <el-table-column prop="build" label="build版本" align="center" width="300" />
@@ -42,7 +61,7 @@
               <el-tag class="tagType" v-for="(item,index) in scope.row.groupAfter" :key="'groupAfter'+index">
                 {{item.label}}
               </el-tag>
-              <el-tooltip content="点击可重新运行该测试平台" placement="top" effect="dark"
+              <el-tooltip content="点击可重新运行该测试平台失败用例" placement="top" effect="dark"
                 v-for="(item,index) in scope.row.failGroupAfter" :key="'failGroupAfter'+index">
                 <el-tag class="tagType errorTagType" type="danger" @click="runAgain(item.value,scope.row)">
                   {{item.label}}
@@ -81,17 +100,21 @@
                   <el-button link type="primary" size="small">启停</el-button>
                 </template>
                 <div class="moreButton">
-                  <el-button link type="primary" size="small" v-if="scope.row.state === 'running'"
-                    @click="changeTaskStatus('stop',scope.row.id)">
-                    任务终止
-                  </el-button>
+                  <el-tooltip content="该任务下所有测试平台均停止运行" placement="top" effect="dark"
+                    v-if="scope.row.state === 'running'">
+                    <el-button link type="primary" size="small" @click="changeTaskStatus('stop',scope.row.id)">
+                      任务终止
+                    </el-button>
+                  </el-tooltip>
                   <el-button link type="primary" size="small" v-else @click="changeTaskStatus('start',scope.row.id)">
                     任务启动
                   </el-button>
-                  <el-button link type="primary" size="small" v-if="scope.row.state === 'running'"
-                    @click="changeTaskStatus('restart',scope.row.id)">
-                    任务重启
-                  </el-button>
+                  <el-tooltip content="重新启动该任务下失败用例" placement="top" effect="dark">
+                    <el-button link type="primary" size="small" v-if="scope.row.state === 'running'"
+                      @click="changeTaskStatus('restart',scope.row.id)">
+                      任务重启
+                    </el-button>
+                  </el-tooltip>
                 </div>
               </el-popover>
               <el-button link type="primary" size="small" @click="openAddDialog('task', 'edit', scope.row)">
@@ -102,11 +125,15 @@
                   <el-button link type="info" size="small">更多</el-button>
                 </template>
                 <div class="moreButton">
-                  <el-button link type="primary" size="small" @click="taskProgress(scope.row.id)"> 任务进度</el-button>
-                  <el-button link type="primary" size="small" @click="openTestPlatformDialog(scope.row)"
-                    style="margin-left: 0px;">
-                    测试平台
-                  </el-button>
+                  <el-tooltip content="可查看当前任务的进度详情" placement="top" effect="dark">
+                    <el-button link type="primary" size="small" @click="taskProgress(scope.row.id)"> 任务进度</el-button>
+                  </el-tooltip>
+                  <el-tooltip content="可修改当前任务下所有的测试平台" placement="top" effect="dark">
+                    <el-button link type="primary" size="small" @click="openTestPlatformDialog(scope.row)"
+                      style="margin-left: 0px;">
+                      测试平台
+                    </el-button>
+                  </el-tooltip>
                   <el-popconfirm title="确定删除此项任务?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消"
                     @confirm="handleDelete('task', scope.row)">
                     <template #reference>
@@ -231,6 +258,7 @@ import { ref, reactive } from "vue";
 import type { TabsPaneContext } from "element-plus";
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from "element-plus";
+import { Calendar, Search } from '@element-plus/icons-vue'
 import { ElInput } from 'element-plus'
 import { deviceApi, addDeviceApi, editDeviceApi, deleteDeviceApi, d_typeApi, addD_typeApi, editD_typeApi, deleteD_typeApi, d_groupApi, addD_groupApi, editD_groupApi, deleteD_groupApi } from '@/api/APV/index.js'
 import { taskApi, addTaskApi, editTaskApi, deleteTaskApi, taskRunApi, taskStatusApi, deleteTestPlatApi, putTestPlatApi, getCaseApi, getTaskConfigApi } from '@/api/APV/taskManagement.js'
@@ -320,7 +348,21 @@ const state: any = reactive({
   tableData: [],  // 任务管理数据
   getD_group: [],  // 测试平台数据
   buildData: [], // 压测版本数据
-  d_groupDataAfter: []
+  d_groupDataAfter: [],
+  selectStatusList: [
+    {
+      value: 'running',
+      label: '运行中',
+    },
+    {
+      value: 'fail',
+      label: '已失败',
+    },
+    {
+      value: 'stop',
+      label: '已停止',
+    }
+  ]
 })
 
 const searchForm = ref({
@@ -1071,6 +1113,20 @@ const handleTaskCurrentChange = (val: number) => {
 
 :deep(.el-table td.el-table__cell) {
   padding: 20px 0px;
+}
+
+.search-wrap {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+
+  .el-select {
+    margin: 0 10px;
+  }
+
+  .el-input {
+    width: 220px;
+  }
 }
 </style>
 

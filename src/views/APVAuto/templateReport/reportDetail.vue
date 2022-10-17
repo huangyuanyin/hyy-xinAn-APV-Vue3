@@ -22,13 +22,17 @@
       <el-tab-pane label="详情" class="detailsPane">
         <el-form :inline="true" :model="formInline" class="detailForm">
           <el-form-item label="">
-            <el-select v-model="formInline.value" class="m-2" placeholder="选择状态类型" size="default">
+            <el-select clearable v-model="formInline.value" class="m-2" placeholder="选择状态类型" size="default">
               <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
           <el-form-item label="">
-            <el-cascader v-model="casValue" :options="casesOptions" :props="casesProps" @change="getCasesOptions"
-              placeholder="选择模块" popper-class="casesProps-tree" collapse-tags collapse-tags-tooltip clearable />
+            <!-- <el-cascader v-model="casValue" :options="casesOptions" :props="casesProps" @change="getCasesOptions"
+              placeholder="选择模块" popper-class="casesProps-tree" collapse-tags collapse-tags-tooltip clearable /> -->
+            <el-select clearable v-model="casValue" multiple collapse-tags collapse-tags-tooltip placeholder="选择模块"
+              style="width: 240px">
+              <el-option v-for="item in caseOptions" :key="item.value" :label="item.label" :value="item.value" />
+            </el-select>
           </el-form-item>
           <!-- <div>
             <el-form-item label="">
@@ -44,12 +48,17 @@
           <el-table-column type="expand">
             <template #default="props">
               <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-                <el-tab-pane label="脚本执行日志" name="first">
+                <el-tab-pane label="用例脚本" name="first">
                   <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
                   <el-input v-model="logData" :autosize="{ minRows: 2, maxRows: 12}" type="textarea"
                     placeholder="Please input" />
                 </el-tab-pane>
-                <el-tab-pane label="APV交互日志" name="second">
+                <el-tab-pane label="脚本执行日志" name="second">
+                  <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
+                  <el-input v-model="logData" :autosize="{ minRows: 2, maxRows: 12}" type="textarea"
+                    placeholder="Please input" />
+                </el-tab-pane>
+                <el-tab-pane label="APV交互日志" name="three">
                   <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
                   <el-input v-model="logData" :autosize="{ minRows: 2, maxRows: 12 }" type="textarea"
                     placeholder="Please input" />
@@ -58,6 +67,11 @@
             </template>
           </el-table-column>
           <el-table-column label="case_ID" prop="date" />
+          <el-table-column label="用例脚本" prop="name">
+            <template #default="scope">
+              <el-button link type="primary" size="small" @click="toDetailCase">详情</el-button>
+            </template>
+          </el-table-column>
           <el-table-column label="脚本执行日志" prop="name">
             <template #default="scope">
               <el-button link type="primary" size="small" @click="toDetailCase">详情</el-button>
@@ -168,6 +182,51 @@ export default defineComponent({
         label: 'known_Issue',
       },
     ]
+    const caseOptions = [
+      {
+        value: 'AA',
+        label: 'AA',
+      },
+      {
+        value: 'Boundary',
+        label: 'Boundary',
+      },
+      {
+        value: 'Bugs',
+        label: 'Bugs',
+      },
+      {
+        value: 'Cache',
+        label: 'Cache',
+      },
+      {
+        value: 'CC',
+        label: 'CC',
+      }, {
+        value: 'CLICHECK',
+        label: 'CLICHECK',
+      },
+      {
+        value: 'cluster',
+        label: 'cluster',
+      },
+      {
+        value: 'compression',
+        label: 'compression',
+      },
+      {
+        value: 'Date_Time',
+        label: 'Date_Time',
+      },
+      {
+        value: 'dns64',
+        label: 'dns64',
+      },
+      {
+        value: 'Generic',
+        label: 'Generic',
+      },
+    ]
     const itemList: any = ref([])
     const route = useRoute();
     const router = useRouter()
@@ -176,7 +235,7 @@ export default defineComponent({
     const dialogData = ref([])
     const isShowCaseScriptDialog = ref(false)
 
-    const caseScriptValue = ref("[2022-09-28 06:05:10]: 测试任务开始执行\n[2022-09-28 06:05:10]: 测试任务状态修改成功\n[2022-09-28 06:05:10]: 开始校验ArrayOS-Beta_APV_10_5_0_36.array文件\n[2022-09-28 06:05:10]: 测试环境 29 验证通过\n[2022-09-28 06:05:10]: 开始同步测试用例\n[2022-09-28 06:05:15]: ArrayOS-Beta_APV_10_5_0_36.array, 同步测试用例成功\n[2022-09-28 06:05:15]: smart_huawei.pl\n[2022-09-28 06:05:15]: 测试用例同步成功\n[2022-09-28 06:05:15]: 开始向测试环境上传build文件\n[2022-09-28 06:05:15]: 29 开始上传build\n[2022-09-28 06:05:20]: 29 build 上传成功\n[2022-09-28 06:05:20]: 向测试环境上传build文件结束\n[2022-09-28 06:05:20]: 开始进行APV设备，build版本升级\n[2022-09-28 06:05:20]: 开始测试环境29，apv设备，build升级\n[2022-09-28 06:05:20]: 测试设备29build升级成功\n[2022-09-28 06:05:46]: apv 设备ttyS0(172.16.35.66)build升级成功\n[2022-09-28 06:05:46]: 测试设备29build升级成功\n[2022-09-28 06:05:46]: APV设备升级结束\n[2022-09-28 06:05:55]: 测试环境29执行测试成功\n[2022-09-28 06:05:55]: 测试环境[29]正常启动，开始执行测试任务\n")
+    const caseScriptValue = ref("20 | 400 | slb_rr_100.pl | Thursday, September 08, 2022 AM02:30:04 CST \n20 | 200 |  TIP all 10015100161000710008 \n20 | 200 |  TIP  10015:10016 \n20 | 200 |  2:30:4-172.16.26.215-ttyS0 :  user sunyb pass click1 \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : script dir /home/sunyb/sunyb.ws/src_apv/result/log//2022-09-08-02:29:22--Beta_APV_10_5_0_42.array/smoke_test//result/mnet_env//T_0001/shell-ttyS0.txt \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : Test Machine ip 172.16.26.215 \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : login user root \n20 | 200 |   \n20 | 200 |  the last prompt \n20 | 200 |  command timed-out at ../../util/cli/ca.pm line 159 \n20 | 200 |   \n 50 | 255 | Unkonw | FAIL | Unkonw Exit Code 255 \n20 | 500 | slb_rr_100.pl | Thursday, September 08, 2022 AM02:30:54 CST \nunable to update smoke test result")
     const language = ref('perl')
     const editorMounted = (editor: monaco.editor.IStandaloneCodeEditor) => {
       console.log('editor实例加载完成', editor)
@@ -516,7 +575,7 @@ export default defineComponent({
       getDatas,
       handleData,
       toBack, contentItemList, formInline, value, options, detailTableData2, showOverview, toDetailCase, isShowCaseScriptDialog, caseScriptValue, language, editorMounted, closeCaseScriptDialog, jsonData,
-      activeName, handleClick, logData, casesProps, casValue, casesOptions, getCase, getCasesOptions
+      activeName, handleClick, logData, casesProps, casValue, casesOptions, getCase, getCasesOptions, caseOptions
     }
   },
 })
@@ -566,7 +625,7 @@ export default defineComponent({
         width: 300px;
       }
 
-      :deep(.el-cascader__tags) {
+      :deep(.el-select__tags) {
         z-index: 1000;
       }
     }
