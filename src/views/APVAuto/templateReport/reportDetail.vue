@@ -1,7 +1,7 @@
 <template>
   <el-card class="report-card">
     <div class="top">
-      <span>报告信息</span>
+      <span>{{route.query.isHistory == 'history' ? '历史报告信息' : '报告信息'}}</span>
       <div>
         <el-button type="primary" @click="toBack">返回</el-button>
         <el-button type="primary" disabled>导出报告</el-button>

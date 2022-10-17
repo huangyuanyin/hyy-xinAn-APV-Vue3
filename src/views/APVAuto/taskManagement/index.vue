@@ -63,9 +63,11 @@
               </el-tag>
               <el-tooltip content="点击可重新运行该测试平台失败用例" placement="top" effect="dark"
                 v-for="(item,index) in scope.row.failGroupAfter" :key="'failGroupAfter'+index">
-                <el-tag class="tagType errorTagType" type="danger" @click="runAgain(item.value,scope.row)">
-                  {{item.label}}
-                </el-tag>
+                <span>
+                  <el-tag class="tagType errorTagType" type="danger" @click="runAgain(item.value,scope.row)">
+                    {{item.label}}
+                  </el-tag>
+                </span>
               </el-tooltip>
             </template>
           </el-table-column>
@@ -100,20 +102,24 @@
                   <el-button link type="primary" size="small">启停</el-button>
                 </template>
                 <div class="moreButton">
-                  <el-tooltip content="该任务下所有测试平台均停止运行" placement="top" effect="dark"
-                    v-if="scope.row.state === 'running'">
-                    <el-button link type="primary" size="small" @click="changeTaskStatus('stop',scope.row.id)">
-                      任务终止
-                    </el-button>
+                  <el-tooltip content="该任务下所有测试平台均停止运行" v-if="scope.row.state === 'running'" placement="top"
+                    effect="dark">
+                    <span>
+                      <el-button link type="primary" size="small" @click="changeTaskStatus('stop',scope.row.id)">
+                        任务终止
+                      </el-button>
+                    </span>
                   </el-tooltip>
                   <el-button link type="primary" size="small" v-else @click="changeTaskStatus('start',scope.row.id)">
                     任务启动
                   </el-button>
                   <el-tooltip content="重新启动该任务下失败用例" placement="top" effect="dark">
-                    <el-button link type="primary" size="small" v-if="scope.row.state === 'running'"
-                      @click="changeTaskStatus('restart',scope.row.id)">
-                      任务重启
-                    </el-button>
+                    <span>
+                      <el-button link type="primary" size="small" v-if="scope.row.state === 'running'"
+                        @click="changeTaskStatus('restart',scope.row.id)">
+                        任务重启
+                      </el-button>
+                    </span>
                   </el-tooltip>
                 </div>
               </el-popover>
