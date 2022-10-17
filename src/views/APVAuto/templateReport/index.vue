@@ -16,16 +16,17 @@
       <el-table-column property="id" label="报告ID" width="120" align="center" />
       <el-table-column property="name" label="任务名称" width="200" align="center">
         <template #default="scope">
-          <!-- <el-icon color="#409eff" style="margin-right:3px">
-            <Document />
-          </el-icon> -->
           <el-button link type="primary" size="small" @click="toDetail(scope.row.id)">{{ scope.row.name }}</el-button>
         </template>
       </el-table-column>
       <el-table-column property="status" label="用例总数" width="120" align="center" />
       <el-table-column property="apv_model" label="成功数" width="200" align="center" />
-      <el-table-column property="errorNumber" label="失败数" show-overflow-tooltip align="center" />
-      <el-table-column property="ipversion" label="创建时间" width="120" align="center" />
+      <el-table-column property="errorNumber" label="失败数" show-overflow-tooltip align="center">
+        <template #default="scope">
+          <el-button link type="primary" size="small">详情</el-button>
+        </template>
+      </el-table-column>
+      <el-table-column property="ipversion" label="更新时间" width="120" align="center" />
       <el-table-column property="user" label="负责人" align="center" />
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="scope">

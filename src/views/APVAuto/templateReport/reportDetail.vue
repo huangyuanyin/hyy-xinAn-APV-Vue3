@@ -17,14 +17,18 @@
   <el-card class="detail-card">
     <el-tabs type="border-card">
       <el-tab-pane label="概览">
-        <div id="overview" style="width: 100%;height:500px;"></div>
+        <div id="overview" style="width: 90vw;height:500px;"></div>
       </el-tab-pane>
       <el-tab-pane label="详情" class="detailsPane">
         <el-form :inline="true" :model="formInline" class="detailForm">
           <el-form-item label="">
-            <el-select v-model="formInline.value" class="m-2" placeholder="选择类型" size="default">
+            <el-select v-model="formInline.value" class="m-2" placeholder="选择状态类型" size="default">
               <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
+          </el-form-item>
+          <el-form-item label="">
+            <el-cascader v-model="casValue" :options="casesOptions" :props="casesProps" @change="getCasesOptions"
+              placeholder="选择模块" popper-class="casesProps-tree" collapse-tags collapse-tags-tooltip clearable />
           </el-form-item>
           <!-- <div>
             <el-form-item label="">
@@ -40,24 +44,33 @@
           <el-table-column type="expand">
             <template #default="props">
               <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-                <el-tab-pane label="请求详情" name="first">
-                  <json-viewer :value="jsonData" copyable boxed sort />
+                <el-tab-pane label="脚本执行日志" name="first">
+                  <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
+                  <el-input v-model="logData" :autosize="{ minRows: 2, maxRows: 12}" type="textarea"
+                    placeholder="Please input" />
                 </el-tab-pane>
-                <el-tab-pane label="响应详情" name="second">
-                  <json-viewer :value="jsonData" copyable boxed sort />
+                <el-tab-pane label="APV交互日志" name="second">
+                  <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
+                  <el-input v-model="logData" :autosize="{ minRows: 2, maxRows: 12 }" type="textarea"
+                    placeholder="Please input" />
                 </el-tab-pane>
               </el-tabs>
             </template>
           </el-table-column>
           <el-table-column label="case_ID" prop="date" />
-          <el-table-column label="case_脚本" prop="name">
+          <el-table-column label="脚本执行日志" prop="name">
             <template #default="scope">
               <el-button link type="primary" size="small" @click="toDetailCase">详情</el-button>
             </template>
           </el-table-column>
-          <el-table-column label="Comment" prop="methods" />
+          <el-table-column label="APV交互日志" prop="name">
+            <template #default="scope">
+              <el-button link type="primary" size="small" @click="toDetailCase">详情</el-button>
+            </template>
+          </el-table-column>
           <el-table-column label="响应时间" prop="time" />
-          <el-table-column label="测试结果" prop="result" />
+          <el-table-column label="Comment" prop="methods" />
+          <el-table-column label="结果" prop="result" />
         </el-table>
       </el-tab-pane>
     </el-tabs>
@@ -70,35 +83,6 @@
         @editor-mounted="editorMounted"></monacoEditor>
     </div>
   </el-dialog>
-
-  <!-- <el-card class="detail-card" style="margin-top:30px">
-    <template #header>
-      <div class="card-header">
-        <span>报告详情</span>
-        <el-button class="button" link type="primary" @click="openDialog">生成报告</el-button>
-      </div>
-    </template>
-    <div class="card-detail">
-      <div class="item" v-for="(item, index) in itemList" :key="'itemList' + index">
-        <span>{{ item.label }}</span>
-        <span class="right">{{ item.value }}</span>
-      </div>
-      <el-table :data="tableData" border stripe style="width: 100%;margin-top: 30px;">
-        <el-table-column prop="cc" label="cc" align="center" />
-        <el-table-column prop="cps" label="cps" align="center" />
-        <el-table-column prop="cpu" label="cpu" align="center" />
-        <el-table-column prop="dut_cc" label="dut_cc" align="center" />
-        <el-table-column prop="dut_rps" label="dut_rps" align="center" />
-        <el-table-column prop="response" label="response" align="center" />
-        <el-table-column prop="ssl_ae" label="ssl_ae" align="center" />
-        <el-table-column prop="ssl_se" label="ssl_se" align="center" />
-        <el-table-column prop="throughput" label="throughput" align="center" />
-        <el-table-column prop="tps" label="tps" align="center" />
-        <el-table-column prop="unsuccessful" label="unsuccessful" align="center" />
-      </el-table>
-    </div>
-    <div id="detail"></div>
-  </el-card> -->
   <DataTemplateDialog :dialogData="dialogData" :isShowDialog="isShowDialog" @closeDialog="closeDialog" />
 </template>
 
@@ -112,6 +96,7 @@ import { getDataApi } from "@/utils/getApi.js"
 import { detailTableData } from './data.js'
 import * as monaco from 'monaco-editor'
 import type { TabsPaneContext } from 'element-plus'
+import { getCaseApi } from '@/api/APV/taskManagement.js'
 
 export default defineComponent({
   components: {
@@ -124,7 +109,7 @@ export default defineComponent({
       { name: "报告名称", value: "123" },
       { name: "成功", value: "6" },
       { name: "失败", value: "6" },
-      { name: "错误", value: "33" },
+      { name: "known_Issue", value: "0" },
       { name: "总数", value: "63" },
       { name: "开始时间", value: "2022-09-01T15:27:29" },
       { name: "用时", value: "0" },
@@ -139,7 +124,27 @@ export default defineComponent({
       arr: [1, 2, 5]
     };
     const jsonData = reactive(obj);
+    const logData = ref("20 | 400 | slb_rr_100.pl | Thursday, September 08, 2022 AM02:30:04 CST \n20 | 200 |  TIP all 10015100161000710008 \n20 | 200 |  TIP  10015:10016 \n20 | 200 |  2:30:4-172.16.26.215-ttyS0 :  user sunyb pass click1 \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : script dir /home/sunyb/sunyb.ws/src_apv/result/log//2022-09-08-02:29:22--Beta_APV_10_5_0_42.array/smoke_test//result/mnet_env//T_0001/shell-ttyS0.txt \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : Test Machine ip 172.16.26.215 \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : login user root \n20 | 200 |   \n20 | 200 |  the last prompt \n20 | 200 |  command timed-out at ../../util/cli/ca.pm line 159 \n20 | 200 |   \n 50 | 255 | Unkonw | FAIL | Unkonw Exit Code 255 \n20 | 500 | slb_rr_100.pl | Thursday, September 08, 2022 AM02:30:54 CST \nunable to update smoke test result")
     const activeName = ref('first');
+    const casesProps = {
+      multiple: true,
+      label: 'name',
+      value: 'name'
+    }
+    const casValue: any = ref([]);
+    const casesOptions = ref([])
+
+    // 调用 获取用例集接口
+    const getCase = async () => {
+      let res = await getCaseApi()
+      casesOptions.value = res.data || []
+      console.log("dada", casesOptions.value);
+
+    }
+    const getCasesOptions = () => {
+
+    }
+
     const handleClick = (tab: TabsPaneContext, event: Event) => {
       console.log(tab, event)
     }
@@ -159,13 +164,9 @@ export default defineComponent({
         label: 'failed',
       },
       {
-        value: 'error',
-        label: 'error',
+        value: 'known_Issue',
+        label: 'known_Issue',
       },
-      {
-        value: 'skipped',
-        label: 'skipped',
-      }
     ]
     const itemList: any = ref([])
     const route = useRoute();
@@ -194,7 +195,7 @@ export default defineComponent({
         name: '失败数',
         value: 10
       }, {
-        name: '错误数',
+        name: 'known_Issue',
         value: 30
       }, {
         name: '总数',
@@ -313,7 +314,7 @@ export default defineComponent({
         legend: {
           icon: "circle",
           orient: 'horizontal',
-          data: ['成功数', '失败数', '错误数', '总数'],
+          data: ['成功数', '失败数', 'known_Issue', '总数'],
           right: 250,
           bottom: 100,
           align: 'right',
@@ -496,8 +497,9 @@ export default defineComponent({
       isShowCaseScriptDialog.value = true
     }
     onMounted(async () => {
+      await showOverview()
       await getDatas();
-      showOverview()
+      await getCase()
     });
     return {
       dialogData,
@@ -514,7 +516,7 @@ export default defineComponent({
       getDatas,
       handleData,
       toBack, contentItemList, formInline, value, options, detailTableData2, showOverview, toDetailCase, isShowCaseScriptDialog, caseScriptValue, language, editorMounted, closeCaseScriptDialog, jsonData,
-      activeName, handleClick
+      activeName, handleClick, logData, casesProps, casValue, casesOptions, getCase, getCasesOptions
     }
   },
 })
@@ -558,7 +560,15 @@ export default defineComponent({
   .detailsPane {
     .detailForm {
       display: flex !important;
-      justify-content: space-between !important;
+
+      :deep(.el-cascader .el-input) {
+        height: 32px;
+        width: 300px;
+      }
+
+      :deep(.el-cascader__tags) {
+        z-index: 1000;
+      }
     }
   }
 }
