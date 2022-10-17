@@ -36,12 +36,16 @@
           <el-table-column prop="build" label="build版本" align="center" width="300" />
           <el-table-column prop="groupAfter" label="测试平台" align="center" width="306">
             <template #default="scope">
-              <el-tag class="tagType" v-for="item,index in scope.row.groupAfter" :key="'groupAfter'+index">
+              <el-tag v-if="scope.row.groupAfter == 0 &&  scope.row.failGroupAfter == 0" class="ml-2" type="info">
+                暂无测试平台
+              </el-tag>
+              <el-tag class="tagType" v-for="(item,index) in scope.row.groupAfter" :key="'groupAfter'+index">
                 {{item.label}}
               </el-tag>
-              <el-tooltip content="点击可重新运行该测试平台" placement="top" effect="dark">
-                <el-tag class="tagType errorTagType" type="danger" @click="runAgain(scope.row)">
-                  失败的测试平台
+              <el-tooltip content="点击可重新运行该测试平台" placement="top" effect="dark"
+                v-for="(item,index) in scope.row.failGroupAfter" :key="'failGroupAfter'+index">
+                <el-tag class="tagType errorTagType" type="danger" @click="runAgain(item.value,scope.row)">
+                  {{item.label}}
                 </el-tag>
               </el-tooltip>
             </template>
@@ -304,10 +308,6 @@ const getCasesOptions = (data) => {
   // console.log("dada", cases_name, modules_name, arr);
 }
 
-const bodyStyle = {
-  padding: '0px'
-}
-
 const colors = [
   { color: '#f56c6c', percentage: 20 },
   { color: '#e6a23c', percentage: 40 },
@@ -537,7 +537,8 @@ const handle = () => {
   state.tableData.map((item, index) => {
     item.uptimeAfter = utc2beijing(item.uptime) // '2022-09-16T17:44:08Z' => '2022/9/16 16:43:40'
     // let groupData = item.group.replace(/\[|]/g, '').split(",") // 将 '[21,22,23]' => [21,22,23]
-    item.groupAfter = []
+    item.groupAfter = []      // 成功的测试平台回显展示
+    item.failGroupAfter = []  // 失败的测试平台回显展示
     item.group.map((it) => {
       state.d_groupData.forEach((d_item, index) => {
         if (it == d_item.id) {
@@ -548,7 +549,18 @@ const handle = () => {
         }
       })
     })
+    item.fail_group.map((it) => {
+      state.d_groupData.forEach((d_item, index) => {
+        if (it == d_item.id) {
+          item.failGroupAfter.push({
+            value: d_item.id,
+            label: d_item.name
+          })
+        }
+      })
+    })
   })
+
   tableLoading.value = false
 }
 
@@ -711,7 +723,7 @@ const putTestPlat = async (params) => {
   } else {
     platformDialog.value = false
     ElMessage({
-      message: res?.msg || "请求失败",
+      message: res?.msg || "添加失败",
       type: "error",
       duration: 2500,
     });
@@ -747,13 +759,17 @@ const handleCloseTag = (data, id) => {
 // 删除测试环境平台 api
 const deleteTestPlat = async (params) => {
   let res = await deleteTestPlatApi(params)
-  if (res) {
-
+  if (res.code === 1000) {
+    ElMessage({
+      message: res?.msg || "删除成功",
+      type: "success",
+      duration: 1500,
+    });
   } else {
     ElMessage({
-      message: res?.msg || "请求失败",
+      message: res?.msg || "删除失败",
       type: "error",
-      duration: 2500,
+      duration: 1500,
     });
   }
 }
@@ -823,8 +839,29 @@ const getTaskConfig = async () => {
   placeholderTipPort.value = res.data.TipPort || ''
 }
 
-const runAgain = (data) => {
-  console.log("runAgain", data);
+const runAgain = async (value, data) => {
+  const params = {
+    group: value,
+    id: data.id
+  }
+  let res = await putTestPlatApi(params)
+  if (res.code === 1000) {
+    await getTask()
+    await handle()
+    platformDialog.value = false
+    ElMessage({
+      message: res?.msg || "运行成功",
+      type: "success",
+      duration: 1500,
+    });
+  } else {
+    platformDialog.value = false
+    ElMessage({
+      message: res?.msg || "运行失败",
+      type: "error",
+      duration: 1500,
+    });
+  }
 }
 
 // 取消弹窗
