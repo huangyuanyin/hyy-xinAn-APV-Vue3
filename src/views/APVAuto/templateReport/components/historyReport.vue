@@ -5,14 +5,15 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column property="id" label="历史报告ID" width="200" align="center">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click="toDetail(scope.row.id)">{{scope.row.id}}</el-button>
+          <el-button link type="primary" size="small" @click="toDetail(scope.row.id,'history')">{{scope.row.id}}
+          </el-button>
         </template>
       </el-table-column>
       <el-table-column property="status" label="用例总数" align="center" />
       <el-table-column property="apv_model" label="成功数" align="center" />
       <el-table-column property="errorNumber" label="失败数" show-overflow-tooltip align="center">
         <template #default="scope">
-          <el-button link type="primary" size="small">22</el-button>
+          <el-button link type="primary" size="small" @click="toDetail(scope.row.id,'FailNumDetail')">22</el-button>
         </template>
       </el-table-column>
       <el-table-column property="ipversion" label="创建时间" align="center" />
@@ -140,14 +141,27 @@ export default defineComponent({
     const closeDialog = () => {
       isShowDialog.value = false
     }
-    // 报告详情
-    const toDetail = (id) => {
-      router.push({
-        path: "/APVAuto/reportDetail",
-        query: {
-          resultid: id,
-        }
-      })
+    // 跳转详情
+    const toDetail = (id, type) => {
+      switch (type) {
+        case 'history':
+          router.push({
+            path: "/APVAuto/reportDetail",
+            query: {
+              resultid: id,
+            }
+          })
+          break;
+        case 'FailNumDetail':
+          router.push({
+            path: "/APVAuto/failNumDetail",
+            query: {
+              resultid: id,
+            }
+          })
+        default:
+          break;
+      }
     }
 
     const onSuccess = () => {

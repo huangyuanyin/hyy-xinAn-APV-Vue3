@@ -16,7 +16,7 @@
       <el-table-column property="id" label="报告ID" width="120" align="center" />
       <el-table-column property="name" label="任务名称" width="200" align="center">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click="toDetail(scope.row.id)">{{ scope.row.name }}
+          <el-button link type="primary" size="small" @click="toDetail(scope.row.id,'detail')">{{ scope.row.name }}
           </el-button>
         </template>
       </el-table-column>
@@ -24,7 +24,7 @@
       <el-table-column property="apv_model" label="成功数" width="200" align="center" />
       <el-table-column property="errorNumber" label="失败数" show-overflow-tooltip align="center">
         <template #default="scope">
-          <el-button link type="primary" size="small">22</el-button>
+          <el-button link type="primary" size="small" @click="toDetail(scope.row.id,'FailNumDetail')">22</el-button>
         </template>
       </el-table-column>
       <el-table-column property="ipversion" label="更新时间" width="120" align="center" />
@@ -162,14 +162,36 @@ export default defineComponent({
     const closeDialog = () => {
       isShowDialog.value = false
     }
-    // 报告详情
-    const toDetail = (id, ...args) => {
-      router.push({
-        path: args.length != 0 ? "/APVAuto/historyReport" : "/APVAuto/reportDetail",
-        query: {
-          resultid: id,
+    // 跳转详情
+    const toDetail = (id, type) => {
+      switch (type) {
+        case 'detail': {
+          router.push({
+            path: "/APVAuto/reportDetail",
+            query: {
+              resultid: id,
+            }
+          })
+          break;
         }
-      })
+        case 'history':
+          router.push({
+            path: "/APVAuto/historyReport",
+            query: {
+              resultid: id,
+            }
+          })
+          break;
+        case 'FailNumDetail':
+          router.push({
+            path: "/APVAuto/failNumDetail",
+            query: {
+              resultid: id,
+            }
+          })
+        default:
+          break;
+      }
     }
 
     const onSuccess = () => {

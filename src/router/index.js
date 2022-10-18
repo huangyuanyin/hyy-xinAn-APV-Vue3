@@ -119,6 +119,15 @@ const routes = [
             component: () =>
               import("@/views/APVAuto/templateReport/components/historyReport.vue"),
           },
+          {
+            path: "/APVAuto/failNumDetail",
+            name: "FailNumDetail",
+            meta: {
+              title: "失败数详情",
+            },
+            component: () =>
+              import("@/views/APVAuto/templateReport/components/FailNumDetail.vue"),
+          }
         ],
       },
       {
