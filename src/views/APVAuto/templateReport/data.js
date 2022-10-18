@@ -6,7 +6,7 @@ export const detailTableData = [
     city: 'San Francisco',
     address: '3650 21st St, San Francisco',
     zip: 'CA 94114',
-    methods: "POST",
+    methods: " ",
     time: '3.53',
     result: "success",
     family: [
@@ -40,7 +40,7 @@ export const detailTableData = [
     city: 'San Francisco',
     address: '3650 21st St, San Francisco',
     zip: 'CA 94114',
-    methods: "POST",
+    methods: " ",
     time: '3.53',
     result: "success",
     family: [
@@ -74,7 +74,7 @@ export const detailTableData = [
     city: 'San Francisco',
     address: '3650 21st St, San Francisco',
     zip: 'CA 94114',
-    methods: "POST",
+    methods: " ",
     time: '3.53',
     result: "success",
     family: [
@@ -108,7 +108,7 @@ export const detailTableData = [
     city: 'San Francisco',
     address: '3650 21st St, San Francisco',
     zip: 'CA 94114',
-    methods: "POST",
+    methods: " ",
     time: '3.53',
     result: "success",
     family: [
@@ -142,7 +142,7 @@ export const detailTableData = [
     city: 'San Francisco',
     address: '3650 21st St, San Francisco',
     zip: 'CA 94114',
-    methods: "POST",
+    methods: " ",
     time: '3.53',
     result: "success",
     family: [
@@ -176,7 +176,7 @@ export const detailTableData = [
     city: 'San Francisco',
     address: '3650 21st St, San Francisco',
     zip: 'CA 94114',
-    methods: "POST",
+    methods: " ",
     time: '3.53',
     result: "success",
     family: [
@@ -210,7 +210,7 @@ export const detailTableData = [
     city: 'San Francisco',
     address: 'https://127.0.0.1:63451/NSGetCertsListInfo?randtmp=0.19821518126979387',
     zip: 'CA 94114',
-    methods: "POST",
+    methods: " ",
     time: '3.53',
     result: "success",
     family: [

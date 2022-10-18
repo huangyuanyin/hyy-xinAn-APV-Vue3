@@ -110,6 +110,15 @@ const routes = [
             component: () =>
               import("@/views/APVAuto/templateReport/reportDetail.vue"),
           },
+          {
+            path: "/APVAuto/historyReport",
+            name: "historyReport",
+            meta: {
+              title: "历史报告",
+            },
+            component: () =>
+              import("@/views/APVAuto/templateReport/components/historyReport.vue"),
+          },
         ],
       },
       {

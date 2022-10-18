@@ -1,7 +1,10 @@
 <template>
   <el-card class="report-card">
+    <div class='ribbon'>
+      <span>打的标记</span>
+    </div>
     <div class="top">
-      <span>{{route.query.isHistory == 'history' ? '历史报告信息' : '报告信息'}}</span>
+      <span>报告信息</span>
       <div>
         <el-button type="primary" @click="toBack">返回</el-button>
         <el-button type="primary" disabled>导出报告</el-button>
@@ -546,7 +549,6 @@ export default defineComponent({
     const openDialog = () => {
       isShowDialog.value = true
       dialogData.value = tableData.value[0]
-      console.log("测试数据...", dialogData.value)
     }
     // 关闭弹窗
     const closeDialog = (value) => {
@@ -557,7 +559,7 @@ export default defineComponent({
     }
     onMounted(async () => {
       await showOverview()
-      await getDatas();
+      // await getDatas();
       await getCase()
     });
     return {
@@ -587,6 +589,8 @@ export default defineComponent({
 }
 
 .report-card {
+  position: relative;
+
   .top {
     display: flex;
     align-items: center;
@@ -603,12 +607,34 @@ export default defineComponent({
     flex-wrap: wrap;
 
     .content-item {
-      width: 400px;
+      width: 350px;
       margin: 10px 0;
 
       span {
         font-size: 14px;
       }
+    }
+  }
+
+  :deep(.el-card__body) {
+    padding-left: 75px;
+  }
+
+  .ribbon {
+    background-color: #1890FF;
+    overflow: hidden;
+    white-space: nowrap;
+    position: absolute;
+    left: -55px; // 根据实际调整即可
+    top: 17px; // 根据实际调整即可
+    transform: rotate(-45deg);
+    box-shadow: 0 0 10px #888;
+    opacity: 0.8;
+
+    span {
+      color: #fff;
+      padding: 5px 50px;
+      display: block;
     }
   }
 }

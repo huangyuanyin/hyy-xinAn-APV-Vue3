@@ -1,44 +1,25 @@
 <template>
   <el-card shadow="never">
-    <el-form :inline="true" :model="formInline" class="exportForm">
-      <el-form-item label="">
-        <el-input v-model="formInline.id" placeholder="搜索build版本、测试平台、负责人..." />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="onQuery">搜索</el-button>
-        <el-button @click="onReset">重置</el-button>
-      </el-form-item>
-    </el-form>
-
     <el-table ref="multipleTableRef" :data="tableData" style="width: 100%; margin-top: 10px"
       @selection-change="handleSelectionChange" v-loading="loading">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column property="id" label="报告ID" width="120" align="center" />
-      <el-table-column property="name" label="任务名称" width="200" align="center">
+      <el-table-column property="id" label="历史报告ID" width="200" align="center">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click="toDetail(scope.row.id)">{{ scope.row.name }}
-          </el-button>
+          <el-button link type="primary" size="small" @click="toDetail(scope.row.id)">{{scope.row.id}}</el-button>
         </template>
       </el-table-column>
-      <el-table-column property="status" label="用例总数" width="120" align="center" />
-      <el-table-column property="apv_model" label="成功数" width="200" align="center" />
+      <el-table-column property="status" label="用例总数" align="center" />
+      <el-table-column property="apv_model" label="成功数" align="center" />
       <el-table-column property="errorNumber" label="失败数" show-overflow-tooltip align="center">
         <template #default="scope">
           <el-button link type="primary" size="small">22</el-button>
         </template>
       </el-table-column>
-      <el-table-column property="ipversion" label="更新时间" width="120" align="center" />
-      <el-table-column property="user" label="负责人" align="center" />
+      <el-table-column property="ipversion" label="创建时间" align="center" />
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="scope">
           <el-button link type="primary" size="small" @click="toMark(scope.row.id)">打标记</el-button>
-          <el-button link type="primary" size="small" @click="toDetail(scope.row.id,'history')">历史报告</el-button>
           <el-button link type="danger" size="small">删除</el-button>
-          <!-- <el-button link type=" primary" size="small" @click="openReportDialog(scope.row.id)">生成报告</el-button>
-          <el-upload :action="upload.url" :on-success="onSuccess" :on-error="onError" :headers="upload.header"
-            :beforeUpload="beforeUpload">
-            <el-button type="primary" link size="small">上传文件</el-button>
-          </el-upload> -->
         </template>
       </el-table-column>
     </el-table>
@@ -52,7 +33,6 @@
         @size-change="handleSizeChange" @current-change="handleCurrentChange" />
     </div>
   </el-card>
-  <!-- <DataTemplateDialog :dialogData="dialogData" :isShowDialog="isShowDialog" @closeDialog="closeDialog" /> -->
   <MarkDialog :markData="markData" :isShowDialog="isShowMarkDialog" v-on:closeMarkDialog="closeMarkDialog(res)" />
 </template>
 
@@ -63,11 +43,9 @@ import { filterData } from "@/utils/util.js";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { getDataApi } from "@/utils/getApi.js"
-import DataTemplateDialog from './components/dataTemplateDialog.vue';
-import MarkDialog from './components/MarkDialog.vue';
-import {
-  Document,
-} from "@element-plus/icons-vue";
+import DataTemplateDialog from './dataTemplateDialog.vue';
+import MarkDialog from './MarkDialog.vue';
+import { Document } from "@element-plus/icons-vue";
 export default defineComponent({
   components: {
     DataTemplateDialog, MarkDialog, Document
@@ -163,9 +141,9 @@ export default defineComponent({
       isShowDialog.value = false
     }
     // 报告详情
-    const toDetail = (id, ...args) => {
+    const toDetail = (id) => {
       router.push({
-        path: args.length != 0 ? "/APVAuto/historyReport" : "/APVAuto/reportDetail",
+        path: "/APVAuto/reportDetail",
         query: {
           resultid: id,
         }
@@ -243,7 +221,6 @@ export default defineComponent({
       pageSize,
       dialogData,
       isShowDialog,
-      isShowMarkDialog,
       router,
       formInline,
       onQuery,
@@ -263,7 +240,8 @@ export default defineComponent({
       beforeUpload,
       loading,
       handleSizeChange,
-      handleCurrentChange, toMark, markData, closeMarkDialog
+      handleCurrentChange,
+      toMark, closeMarkDialog, isShowMarkDialog, markData
     };
   },
 });
