@@ -53,7 +53,7 @@
         <el-table :data="state.tableData" stripe style="width: 100%" v-loading="tableLoading">
           <el-table-column prop="name" label="任务名称" align="center" width="200" />
           <el-table-column prop="build" label="build版本" align="center" width="300" />
-          <el-table-column prop="groupAfter" label="测试平台" align="center" width="306">
+          <el-table-column prop="groupAfter" label="测试平台" align="center" width="500">
             <template #default="scope">
               <el-tag v-if="scope.row.groupAfter == 0 &&  scope.row.failGroupAfter == 0" class="ml-2" type="info">
                 暂无测试平台
@@ -71,8 +71,8 @@
               </el-tooltip>
             </template>
           </el-table-column>
-          <el-table-column prop="example" label="总用例数" align="center" width="120" />
-          <el-table-column prop="example" label="失败用例数" align="center" width="120" />
+          <el-table-column prop="counts" label="总用例数" align="center" width="150" />
+          <el-table-column prop="fail_cases" label="失败用例数" align="center" width="150" />
           <el-table-column prop="state" label="任务状态" align="center" width="120">
             <template #default="scope">
               <div class="stateStyle" v-if="scope.row.state === 'stop'">
@@ -93,8 +93,8 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="user" label="负责人" align="center" width="120" />
-          <el-table-column prop="uptimeAfter" label="更新时间" align="center" width="186" />
+          <el-table-column prop="user" label="负责人" align="center" width="150" />
+          <el-table-column prop="uptimeAfter" label="更新时间" align="center" width="200" />
           <el-table-column fixed="right" label="操作" align="center" width="150">
             <template #default="scope">
               <el-popover placement="bottom" :width="10" trigger="click" popper-class="morePopover">
@@ -458,6 +458,17 @@ const openAddDialog = async (type, operation, data) => {
     case 'task':
       operation == 'add' ? (titleDialog.value = '添加任务') && (buttonText.value = '添加') : (titleDialog.value = '编辑任务') && (buttonText.value = '确定')
       casValue.value = []
+      if (operation == 'add') {
+        isPhysicalMachine.value = '0'
+      } else {
+        if (JSON.stringify(data.config) === "{}") {
+          isPhysicalMachine.value = '0'
+        } else {
+          isPhysicalMachine.value = '1'
+          addTaskForm.config.TipServer = data.config.TipServer
+          addTaskForm.config.TipPort = data.config.TipPort
+        }
+      }
       if (data && data.state === 'running') {
         return ElMessage({
           message: "任务运行中，禁止编辑！",
@@ -486,6 +497,7 @@ const getOneData = (type, id) => {
           addTaskForm.user = item.user
           addTaskForm.build = item.build
           addTaskForm.group = item.group
+          addTaskForm.cases = item.cases
           handleSelectData(addTaskForm.group)
           handleCaseValue(item.cases)
         }
@@ -1128,6 +1140,7 @@ const handleTaskCurrentChange = (val: number) => {
 
   .el-select {
     margin: 0 10px;
+    width: 220px;
   }
 
   .el-input {
