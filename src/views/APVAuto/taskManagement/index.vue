@@ -53,7 +53,7 @@
         <el-table :data="state.tableData" stripe style="width: 100%" v-loading="tableLoading">
           <el-table-column prop="name" label="任务名称" align="center" width="150" />
           <el-table-column prop="build" label="build版本" align="center" width="250" />
-          <el-table-column prop="groupAfter" label="测试平台" align="center" width="400">
+          <el-table-column prop="groupAfter" label="测试平台" align="center" width="350">
             <template #default="scope">
               <el-tag v-if="scope.row.groupAfter == 0 &&  scope.row.failGroupAfter == 0" type="info">
                 暂无测试平台
@@ -83,9 +83,17 @@
               </el-popover>
             </template>
           </el-table-column>
-          <el-table-column prop="counts" label="总用例数" align="center" width="120" />
-          <el-table-column prop="fail_cases" label="失败用例数" align="center" width="120" />
-          <el-table-column prop="state" label="任务状态" align="center" width="120">
+          <el-table-column prop="number" label="总用例数 / 失败用例数" align="center" width="170">
+            <template #default="scope">
+              <span>{{scope.row.number[0]}}</span>
+              <span style="margin:0 2px">/</span>
+              <span class="failNumStyle" style="color:rgb(64, 158, 255)"
+                @click="toDetail(scope.row.id)">{{scope.row.number[0]}}</span>
+            </template>
+          </el-table-column>
+          <!-- <el-table-column prop="counts" label="总用例数" align="center" width="120" />
+          <el-table-column prop="fail_cases" label="失败用例数" align="center" width="120" /> -->
+          <el-table-column prop="state" label="任务状态" align="center" width="150">
             <template #default="scope">
               <div class="stateStyle" v-if="scope.row.state === 'stop'">
                 <div class="status-point" style=" background-color:#909399"></div>
@@ -288,7 +296,9 @@ import { taskApi, addTaskApi, editTaskApi, deleteTaskApi, taskRunApi, taskStatus
 import { buildApi } from '@/api/APV/buildManagement.js'
 import { utc2beijing } from '@/utils/util.js'
 import reportDetailVue from "./components/reportDetailEchart.vue";
+import { useRouter } from "vue-router";
 
+const router = useRouter()
 const activeName = ref("taskManagement");
 const dialogVisible = ref(false);
 const deviceTypeDialogVisible = ref(false)
@@ -612,6 +622,7 @@ onMounted(async () => {
 // 处理数据 - 表格 测试平台/更新时间 字段回显
 const handle = () => {
   state.tableData.map((item, index) => {
+    item.number = [].concat(item.counts, item.fail_cases)
     item.uptimeAfter = utc2beijing(item.uptime) // '2022-09-16T17:44:08Z' => '2022/9/16 16:43:40'
     // let groupData = item.group.replace(/\[|]/g, '').split(",") // 将 '[21,22,23]' => [21,22,23]
     item.groupAfter = []      // 成功的测试平台回显展示
@@ -941,6 +952,15 @@ const runAgain = async (value, data) => {
   }
 }
 
+const toDetail = (id) => {
+  router.push({
+    path: "/APVAuto/failNumDetail",
+    query: {
+      resultid: id,
+    }
+  })
+}
+
 // 取消弹窗
 const onResetTaskForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return;
@@ -1167,6 +1187,10 @@ const handleTaskCurrentChange = (val: number) => {
   .el-input {
     width: 220px;
   }
+}
+
+.failNumStyle:hover {
+  cursor: pointer;
 }
 </style>
 

@@ -143,9 +143,6 @@ const getReportDetail = async (id) => {
         item.value = res.data['fail'] + res.data['issue']
       }
     })
-    contentItemList.value[0].value = res.name
-    contentItemList.value[5].value = res.start_time
-    contentItemList.value[7].value = res.user
     res.data && res.data['pass'] ? (contentItemList.value[1].value = res.data['pass']) : (contentItemList.value[1].value = '0')
     res.modules && res.modules.map(item => {
       caseOptions.value.push({
