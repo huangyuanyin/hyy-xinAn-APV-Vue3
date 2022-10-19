@@ -53,14 +53,19 @@
         <el-table :data="state.tableData" stripe style="width: 100%" v-loading="tableLoading">
           <el-table-column prop="name" label="任务名称" align="center" width="150" />
           <el-table-column prop="build" label="build版本" align="center" width="250" />
-          <el-table-column prop="groupAfter" label="测试平台" align="center" width="350">
+          <el-table-column prop="groupAfter" label="测试平台" class-name="testStyle" width="350" header-align="center">
             <template #default="scope">
               <el-tag v-if="scope.row.groupAfter == 0 &&  scope.row.failGroupAfter == 0" type="info">
                 暂无测试平台
               </el-tag>
               <el-popover placement="top" width="auto" trigger="hover" v-if="scope.row.groupAfter != 0 ">
                 <template #reference>
-                  <el-tag class="tagType">成功的测试平台集合</el-tag>
+                  <!-- <el-tag class="tagType">成功的测试平台集合</el-tag> -->
+                  <div class="wrapper">
+                    <div class="circle">
+                      <div class="small-circle"></div>
+                    </div>
+                  </div>
                 </template>
                 <el-tag class="tagType" v-for="(item,index) in scope.row.groupAfter" :key="'groupAfter'+index">
                   {{item.label}}
@@ -68,7 +73,12 @@
               </el-popover>
               <el-popover placement="top" width="auto" trigger="hover" v-if="scope.row.failGroupAfter != 0">
                 <template #reference>
-                  <el-tag class="tagType errorTagType" type="danger">失败的测试平台集合</el-tag>
+                  <!-- <el-tag class="tagType errorTagType" type="danger">失败的测试平台集合</el-tag> -->
+                  <div class="wrapper">
+                    <div class="circle">
+                      <div class="small-circle" style="background-color: #FF6600;"></div>
+                    </div>
+                  </div>
                 </template>
                 <el-table :data="scope.row.failGroupAfter" stripe style="width: 100%">
                   <el-table-column prop="label" label="测试平台名称" align="center" width="200" />
@@ -1012,6 +1022,33 @@ const handleTaskCurrentChange = (val: number) => {
 </script>
 
 <style lang="scss" scoped>
+.wrapper {
+  width: 60px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+
+  .circle {
+    width: 30px;
+    height: 30px;
+    background: #fff;
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 1px 2px 0px 0px #899599;
+  }
+
+  .small-circle {
+    width: 25px;
+    height: 25px;
+    background: #99CC33;
+    border-radius: 50%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
 .searchForm {
   .el-form-item {
     margin-bottom: 0px !important;
@@ -1229,6 +1266,13 @@ const handleTaskCurrentChange = (val: number) => {
     .el-checkbox {
       margin-right: 5px !important;
     }
+  }
+}
+
+.testStyle {
+  .cell {
+    display: flex !important;
+    justify-content: center !important;
   }
 
 }
