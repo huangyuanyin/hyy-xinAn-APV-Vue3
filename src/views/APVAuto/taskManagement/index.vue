@@ -51,37 +51,49 @@
         </div>
 
         <el-table :data="state.tableData" stripe style="width: 100%" v-loading="tableLoading">
-          <el-table-column prop="name" label="任务名称" align="center" width="200" />
-          <el-table-column prop="build" label="build版本" align="center" width="300" />
-          <el-table-column prop="groupAfter" label="测试平台" align="center" width="500">
+          <el-table-column prop="name" label="任务名称" align="center" width="150" />
+          <el-table-column prop="build" label="build版本" align="center" width="250" />
+          <el-table-column prop="groupAfter" label="测试平台" align="center" width="400">
             <template #default="scope">
-              <el-tag v-if="scope.row.groupAfter == 0 &&  scope.row.failGroupAfter == 0" class="ml-2" type="info">
+              <el-tag v-if="scope.row.groupAfter == 0 &&  scope.row.failGroupAfter == 0" type="info">
                 暂无测试平台
               </el-tag>
-              <el-tag class="tagType" v-for="(item,index) in scope.row.groupAfter" :key="'groupAfter'+index">
-                {{item.label}}
-              </el-tag>
-              <el-tooltip content="点击可重新运行该测试平台失败用例" placement="top" effect="dark"
-                v-for="(item,index) in scope.row.failGroupAfter" :key="'failGroupAfter'+index">
-                <span>
-                  <el-tag class="tagType errorTagType" type="danger" @click="runAgain(item.value,scope.row)">
-                    {{item.label}}
-                  </el-tag>
-                </span>
-              </el-tooltip>
+              <el-popover placement="top" width="auto" trigger="hover" v-if="scope.row.groupAfter != 0 ">
+                <template #reference>
+                  <el-tag class="tagType">成功的测试平台集合</el-tag>
+                </template>
+                <el-tag class="tagType" v-for="(item,index) in scope.row.groupAfter" :key="'groupAfter'+index">
+                  {{item.label}}
+                </el-tag>
+              </el-popover>
+              <el-popover placement="top" width="auto" trigger="hover" v-if="scope.row.failGroupAfter != 0">
+                <template #reference>
+                  <el-tag class="tagType errorTagType" type="danger">失败的测试平台集合</el-tag>
+                </template>
+                <el-table :data="scope.row.failGroupAfter" stripe style="width: 100%">
+                  <el-table-column prop="label" label="测试平台名称" align="center" width="200" />
+                  <el-table-column fixed="right" label="操作" align="center">
+                    <template #default="item">
+                      <el-button link type="primary" size="small" @click="runAgain(item.row.value,scope.row)">
+                        重新运行
+                      </el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </el-popover>
             </template>
           </el-table-column>
-          <el-table-column prop="counts" label="总用例数" align="center" width="150" />
-          <el-table-column prop="fail_cases" label="失败用例数" align="center" width="150" />
+          <el-table-column prop="counts" label="总用例数" align="center" width="120" />
+          <el-table-column prop="fail_cases" label="失败用例数" align="center" width="120" />
           <el-table-column prop="state" label="任务状态" align="center" width="120">
             <template #default="scope">
               <div class="stateStyle" v-if="scope.row.state === 'stop'">
-                <div class="status-point" style=" background-color:#696969"></div>
-                <span style="color:#696969">已停止</span>
+                <div class="status-point" style=" background-color:#909399"></div>
+                <span style="color:#909399">已停止</span>
               </div>
               <div class="stateStyle fail" v-if="scope.row.state === 'fail'">
-                <div class="status-point" style=" background-color:#f56c6c"></div>
-                <span style="color:#f56c6c">已失败</span>
+                <div class="status-point" style=" background-color:#F56C6C"></div>
+                <span style="color:#F56C6C">已失败</span>
               </div>
               <div class="stateStyle hhh" v-if="scope.row.state === 'running'">
                 <div class="status-point hhh" style=" background-color:#67C23A"></div>
@@ -91,11 +103,15 @@
                 <div class="status-point" style=" background-color:#E6A23C"></div>
                 <span style="color:#E6A23C">已创建</span>
               </div>
+              <div class="stateStyle" v-if="scope.row.state === 'complete'">
+                <div class="status-point" style=" background-color:#409EFF"></div>
+                <span style="color:#409EFF">已完成</span>
+              </div>
             </template>
           </el-table-column>
-          <el-table-column prop="user" label="负责人" align="center" width="150" />
+          <el-table-column prop="user" label="负责人" align="center" width="120" />
           <el-table-column prop="uptimeAfter" label="更新时间" align="center" width="200" />
-          <el-table-column fixed="right" label="操作" align="center" width="150">
+          <el-table-column fixed="right" label="操作" align="center">
             <template #default="scope">
               <el-popover placement="bottom" :width="10" trigger="click" popper-class="morePopover">
                 <template #reference>
@@ -132,7 +148,8 @@
                 </template>
                 <div class="moreButton">
                   <el-tooltip content="可查看当前任务的进度详情" placement="top" effect="dark">
-                    <el-button link type="primary" size="small" @click="taskProgress(scope.row.id)"> 任务进度</el-button>
+                    <el-button link type="primary" size="small" @click="taskProgress(scope.row.id)"> 任务进度
+                    </el-button>
                   </el-tooltip>
                   <el-tooltip content="可修改当前任务下所有的测试平台" placement="top" effect="dark">
                     <el-button link type="primary" size="small" @click="openTestPlatformDialog(scope.row)"
@@ -461,7 +478,7 @@ const openAddDialog = async (type, operation, data) => {
       if (operation == 'add') {
         isPhysicalMachine.value = '0'
       } else {
-        if (JSON.stringify(data.config) === "{}") {
+        if (JSON.stringify(data.config) === "{}" || data.config == null) {
           isPhysicalMachine.value = '0'
         } else {
           isPhysicalMachine.value = '1'
@@ -1010,6 +1027,10 @@ const handleTaskCurrentChange = (val: number) => {
 
 .tagType {
   margin: 2px;
+}
+
+.tagType:hover {
+  cursor: pointer;
 }
 
 .errorTagType:hover {
