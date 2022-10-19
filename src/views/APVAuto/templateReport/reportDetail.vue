@@ -25,18 +25,19 @@
       <el-tab-pane label="详情" class="detailsPane">
         <el-form :inline="true" :model="formInline" class="detailForm">
           <el-form-item label="">
-            <el-select clearable v-model="formInline.value" class="m-2" placeholder="选择状态类型" size="default">
-              <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
+            <el-select clearable v-model="status" class="m-2" placeholder="选择状态类型" size="default"
+              @change="selectSearch()">
+              <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
           <el-form-item label="">
-            <el-select clearable v-model="casValue" multiple collapse-tags collapse-tags-tooltip placeholder="选择模块"
-              style="width: 240px">
+            <el-select clearable v-model="casValue" collapse-tags collapse-tags-tooltip placeholder="选择模块"
+              style="width: 240px" @change="selectSearch()">
               <el-option v-for="item in caseOptions" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
         </el-form>
-        <el-table :data="detailTableData2" border style="width: 100%">
+        <el-table :data="detailTableData" border style="width: 100%">
           <el-table-column type="expand">
             <template #default="props">
               <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
@@ -58,24 +59,24 @@
               </el-tabs>
             </template>
           </el-table-column>
-          <el-table-column label="case_ID" prop="date" />
-          <el-table-column label="用例脚本" prop="name">
+          <el-table-column label="case_ID" prop="case_id" />
+          <el-table-column label="用例脚本" prop="case_script">
             <template #default="scope">
-              <el-button link type="primary" size="small" @click="toDetailCase">详情</el-button>
+              <el-button link type="primary" size="small" @click="toDetailCase(scope.row.case_script)">详情</el-button>
             </template>
           </el-table-column>
-          <el-table-column label="脚本执行日志" prop="name">
+          <el-table-column label="脚本执行日志" prop="case_log">
             <template #default="scope">
-              <el-button link type="primary" size="small" @click="toDetailCase">详情</el-button>
+              <el-button link type="primary" size="small" @click="toDetailCase(scope.row.case_log)">详情</el-button>
             </template>
           </el-table-column>
-          <el-table-column label="APV交互日志" prop="name">
+          <el-table-column label="APV交互日志" prop="shell_log">
             <template #default="scope">
-              <el-button link type="primary" size="small" @click="toDetailCase">详情</el-button>
+              <el-button link type="primary" size="small" @click="toDetailCase(scope.row.shell_log)">详情</el-button>
             </template>
           </el-table-column>
-          <el-table-column label="响应时间" prop="time" />
-          <el-table-column label="Comment" prop="methods" />
+          <el-table-column label="响应时间" prop="use_time" />
+          <el-table-column label="Comment" prop="comment" />
           <el-table-column label="结果" prop="result" />
         </el-table>
       </el-tab-pane>
@@ -94,26 +95,29 @@
 
 <script lang="ts" setup>
 import { onMounted, ref, reactive, inject, nextTick } from 'vue'
-import { getReportDetailApi } from "@/api/APV/testReport.js"
+import { getReportDetailApi, getLogApi } from "@/api/APV/testReport.js"
 import { useRoute, useRouter } from 'vue-router';
 import DataTemplateDialog from './components/dataTemplateDialog.vue';
 import { getDataApi } from "@/utils/getApi.js"
-import { detailTableData } from './data.js'
+import { options } from './data.js'
 import * as monaco from 'monaco-editor'
 import type { TabsPaneContext } from 'element-plus'
-import { getCaseApi } from '@/api/APV/taskManagement.js'
 
+const route = useRoute()
+const router = useRouter()
+const reportId = route.query.resultid || ''
 const isShowDialog = ref(false)
 const tableData = ref([]) // 详情数据
+const detailTableData = ref([])
 const contentItemList = ref([
   { name: "报告名称", label: "name", value: "" },
   { name: "成功", label: "pass", value: "" },
   { name: "失败", label: "fail", value: "" },
   { name: "known_Issue", label: "issue", value: "" },
   { name: "总数", label: "total", value: "" },
-  { name: "开始时间", label: "name", value: "" },
+  { name: "开始时间", label: "start_time", value: "" },
   { name: "用时(min)", label: "time(min)", value: "" },
-  { name: "负责人", label: "name", value: "" }
+  { name: "负责人", label: "user", value: "" }
 ])
 let obj = {
   name: "qiu",//字符串
@@ -126,22 +130,8 @@ let obj = {
 const jsonData = reactive(obj);
 const logData = ref("20 | 400 | slb_rr_100.pl | Thursday, September 08, 2022 AM02:30:04 CST \n20 | 200 |  TIP all 10015100161000710008 \n20 | 200 |  TIP  10015:10016 \n20 | 200 |  2:30:4-172.16.26.215-ttyS0 :  user sunyb pass click1 \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : script dir /home/sunyb/sunyb.ws/src_apv/result/log//2022-09-08-02:29:22--Beta_APV_10_5_0_42.array/smoke_test//result/mnet_env//T_0001/shell-ttyS0.txt \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : Test Machine ip 172.16.26.215 \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : login user root \n20 | 200 |   \n20 | 200 |  the last prompt \n20 | 200 |  command timed-out at ../../util/cli/ca.pm line 159 \n20 | 200 |   \n 50 | 255 | Unkonw | FAIL | Unkonw Exit Code 255 \n20 | 500 | slb_rr_100.pl | Thursday, September 08, 2022 AM02:30:54 CST \nunable to update smoke test result")
 const activeName = ref('first');
-const casesProps = {
-  multiple: true,
-  label: 'name',
-  value: 'name'
-}
 const casValue: any = ref([]);
 const caseOptions = ref([])
-// const casesOptions = ref([])
-
-// // 调用 获取用例集接口
-// const getCase = async () => {
-//   let res = await getCaseApi()
-//   casesOptions.value = res.data || []
-//   // caseOptions
-//   console.log("dada", casesOptions.value);
-// }
 
 // 调用 测试报告详情接口 
 const getReportDetail = async (id) => {
@@ -154,6 +144,8 @@ const getReportDetail = async (id) => {
       }
     })
     contentItemList.value[0].value = res.name
+    contentItemList.value[5].value = res.start_time
+    contentItemList.value[7].value = res.user
     res.data && res.data['pass'] ? (contentItemList.value[1].value = res.data['pass']) : (contentItemList.value[1].value = '0')
     res.modules && res.modules.map(item => {
       caseOptions.value.push({
@@ -164,8 +156,11 @@ const getReportDetail = async (id) => {
   }
 }
 
-const getReportModuleDetail = async (id) => {
-  let res = await getReportDetailApi({ id, details: 'True' })
+const getReportModuleDetail = async (params) => {
+  let res = await getReportDetailApi(params)
+  if (res.code == 1000) {
+    detailTableData.value = res.data || []
+  }
 }
 
 const handleClick = (tab: TabsPaneContext, event: Event) => {
@@ -175,29 +170,21 @@ const formInline = ref({
   value: "",
   id: ""
 })
-const detailTableData2 = ref(detailTableData)
-const value = ref('')
-const options = [
-  {
-    value: 'pass',
-    label: 'pass',
-  },
-  {
-    value: 'pass_issue',
-    label: 'pass_issue',
-  },
-  {
-    value: 'fail',
-    label: 'fail',
-  },
-  {
-    value: 'fail_issue',
-    label: 'fail_issue',
-  },
-]
-const itemList: any = ref([])
-const route = useRoute();
-const router = useRouter()
+
+const statusOptions = ref(options)
+const status = ref("")
+
+// 选择状态/模块
+const selectSearch = async () => {
+  const params = {
+    id: route.query.resultid,
+    details: 'True',
+    result: status.value ? status.value : undefined,
+    module: casValue.value ? casValue.value : undefined
+  }
+  getReportModuleDetail(params)
+}
+
 let echarts: any = inject("echarts");
 const dataX: any = ref([])
 const dialogData = ref([])
@@ -363,15 +350,6 @@ const showOverview = () => {
   });
 }
 
-// 获取数据
-const getDatas = () => {
-  getDataApi(route.query.resultid).then(res => {
-    tableData.value = res;
-    handleData(tableData.value)
-  }).then(() => {
-    changetype()
-  })
-};
 // 折线图
 const changetype = () => {
   // 获取组件实例
@@ -495,39 +473,28 @@ const changetype = () => {
     machart.resize();
   });
 };
-// 处理数据
-const handleData = (tableData) => {
-  itemList.value = [
-    { label: '任务ID:', value: tableData[0]?.id },
-    { label: "测试时间:", value: tableData[0].time },
-    { label: "测试结果状态:", value: tableData[0].status },
-    { label: "设备型号:", value: tableData[0].apv_model },
-    { label: "版本:", value: tableData[0].build },
-    { label: "ipversion:", value: tableData[0].ipversion },
-  ]
-  let { apv_model, build, dut_throughput, id, ipversion, protocol, test_case, status, time, ...params } = tableData[0]
-  dataX.value = Object.values(params)
-}
+
 const toBack = () => {
   router.go(-1)
 }
-// 生成报告 弹窗
-const openDialog = () => {
-  isShowDialog.value = true
-  dialogData.value = tableData.value[0]
-}
+
 // 关闭弹窗
 const closeDialog = (value) => {
   isShowDialog.value = value
 }
-const toDetailCase = () => {
+
+const getLog = async (log) => {
+  let res = await getLogApi(log)
+}
+
+const toDetailCase = (log) => {
+  getLog(log)
   isShowCaseScriptDialog.value = true
 }
+
 onMounted(async () => {
-  // await getDatas();
-  // await getCase()
-  await getReportDetail(route.query.resultid)
-  await getReportModuleDetail(route.query.resultid)
+  await getReportDetail(reportId)
+  await getReportModuleDetail({ id: reportId, details: 'True', })
   await showOverview()
 })
 

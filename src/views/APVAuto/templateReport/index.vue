@@ -32,13 +32,13 @@
         <template #default="scope">
           <el-button link type="primary" size="small" @click="toMark(scope.row.id)">标记</el-button>
           <el-button link type="primary" size="small" @click="toDetail(scope.row.id,'history')">历史报告</el-button>
-          <el-button link type="danger" size="small">删除</el-button>
+          <!-- <el-button link type="danger" size="small">删除</el-button> -->
         </template>
       </el-table-column>
     </el-table>
     <div class="bottomWrap">
       <div class="buttonGroup">
-        <el-button @click="toDataAnalysis()" type="primary"> 批量删除 </el-button>
+        <el-button @click="toDataAnalysis()" type="primary" disabled> 批量删除 </el-button>
         <el-button @click="clearSelection()">重新选择</el-button>
       </div>
       <el-pagination v-model:currentPage="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 30, 40]"
@@ -46,30 +46,17 @@
         @size-change="handleSizeChange" @current-change="handleCurrentChange" />
     </div>
   </el-card>
-  <!-- <DataTemplateDialog :dialogData="dialogData" :isShowDialog="isShowDialog" @closeDialog="closeDialog" /> -->
   <MarkDialog :markData="markData" :isShowDialog="isShowMarkDialog" v-on:closeMarkDialog="closeMarkDialog(res)" />
 </template>
 
 <script lang="ts" setup>
 import { onMounted, ref, reactive, toRef, toRefs } from "vue";
-import { datas } from "@/api/POC/index.js";
 import { getReportApi } from "@/api/APV/testReport.js"
-import { filterData } from "@/utils/util.js";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { getDataApi } from "@/utils/getApi.js"
-import DataTemplateDialog from './components/dataTemplateDialog.vue';
 import MarkDialog from './components/MarkDialog.vue';
-import { Document } from "@element-plus/icons-vue";
-const state = reactive({
-  upload: {
-    url: ``,
-    header: {
-      token: ""
-    },
-    resData: {}
-  },
-})
+
 const router = useRouter();
 const multipleTableRef = ref();
 const multipleSelection = ref([]);
@@ -100,7 +87,6 @@ const getReport = async () => {
   }
 }
 
-
 const onQuery = () => {
   // getDatas(filterData(formInline));
 };
@@ -110,47 +96,14 @@ const onReset = () => {
   });
 };
 const clearSelection = () => {
-  // if (rows) {
-  //   rows.forEach((row) => {
-  //     // TODO: improvement typing when refactor table
-  //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //     multipleTableRef.value!.toggleRowSelection(row);
-  //     router.push("/POCTest/dataAnalysis");
-  //   });
-  // } else {
-  //   multipleTableRef.value!.clearSelection();
-  // }
   multipleTableRef.value!.clearSelection();
 };
 const handleSelectionChange = (val) => {
   multipleSelection.value = val;
-  console.log("选中的...", multipleSelection.value);
 };
-// 数据分析
 const toDataAnalysis = () => {
-  if (multipleSelection.value.length < 2) {
-    ElMessage({
-      message: "请至少选择两组数据进入数据对比....",
-      type: "warning",
-    });
-    return;
-  }
-  sessionStorage.setItem(
-    "dataList",
-    JSON.stringify(multipleSelection.value)
-  );
-  router.push("/POCTest/dataAnalysis");
+
 };
-// 生成报告
-const openReportDialog = (id) => {
-  isShowDialog.value = true
-  getDataApi(id).then(res => {
-    dialogData.value = res[0];
-  })
-}
-const closeDialog = () => {
-  isShowDialog.value = false
-}
 
 // 跳转详情
 const toDetail = (id, type) => {
@@ -182,35 +135,6 @@ const toDetail = (id, type) => {
     default:
       break;
   }
-}
-
-const onSuccess = () => {
-
-}
-
-const onError = () => {
-  ElMessage({
-    message: "上传失败!",
-    type: "error",
-  });
-}
-const beforeUpload = (file) => {
-  const sizeLimit = file.size / 1024 / 1024 > 10
-  if (sizeLimit) {
-    ElMessage({
-      message: "上传文件大小不能超过 10MB!",
-      type: "warning",
-    });
-  }
-  const fileFamart = file.name.split('.')[file.name.split('.').length - 1];
-  console.log("上传...", fileFamart);
-  if (fileFamart !== 'zip' || fileFamart !== 'rar') {
-    ElMessage({
-      message: "必须上传zip/rar格式的文件!",
-      type: "warning",
-    });
-  }
-  return !sizeLimit && (fileFamart === 'zip' || fileFamart === 'rar')
 }
 
 const handleSizeChange = (val: number) => {

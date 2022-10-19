@@ -17,7 +17,6 @@ service.interceptors.request.use(
   function (config) {
     // 在发送请求之前做些什么
     // 往header头中自动添加token
-
     const hastoken = getToken();
     if (
       hastoken &&
@@ -49,6 +48,8 @@ service.interceptors.request.use(
         break;
       case "APV":
         config.url = baseUrl.Base_APV_URL + config.url;
+      case "Log":
+        config.url = config.url
     }
     // 请求拦截进来 显示loading效果
     return config;

@@ -20,13 +20,13 @@
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="scope">
           <el-button link type="primary" size="small" @click="toMark(scope.row.id)">打标记</el-button>
-          <el-button link type="danger" size="small">删除</el-button>
+          <!-- <el-button link type="danger" size="small">删除</el-button> -->
         </template>
       </el-table-column>
     </el-table>
     <div class="bottomWrap">
       <div class="buttonGroup">
-        <el-button @click="toDataAnalysis()" type="primary"> 批量删除 </el-button>
+        <el-button @click="toDataAnalysis()" type="primary" disabled> 批量删除 </el-button>
         <el-button @click="clearSelection()">重新选择</el-button>
       </div>
       <el-pagination v-model:currentPage="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 30, 40]"

@@ -20,3 +20,12 @@ export function getReportDetailApi(params) {
     params,
   });
 }
+
+// 日志详情 - 获取
+export function getLogApi(url) {
+  return request({
+    url: url,
+    method: "get",
+    urlType: "Log",
+  });
+}
