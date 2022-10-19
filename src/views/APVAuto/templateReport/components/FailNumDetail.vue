@@ -1,5 +1,5 @@
 <template>
-  <el-table :data="detailTableData" border style="width: 100%" v-loading="loading">
+  <el-table :data="detailTableData" border style="width: 100%" height="80vh" v-loading="loading">
     <el-table-column type="expand">
       <template #default="props">
         <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">

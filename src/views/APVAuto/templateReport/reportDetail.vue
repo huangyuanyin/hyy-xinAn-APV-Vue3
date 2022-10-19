@@ -37,7 +37,7 @@
             </el-select>
           </el-form-item>
         </el-form>
-        <el-table :data="detailTableData" border style="width: 100%">
+        <el-table :data="detailTableData" border style="width: 100%" height="45vh">
           <el-table-column type="expand">
             <template #default="props">
               <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
