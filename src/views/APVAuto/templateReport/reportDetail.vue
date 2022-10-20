@@ -60,7 +60,8 @@
             </template>
           </el-table-column>
           <el-table-column label="case_ID" prop="case_id" />
-          <el-table-column label="用例脚本" prop="case_script">
+          <el-table-column label="模块" prop="module" />
+          <!-- <el-table-column label="用例脚本" prop="case_script">
             <template #default="scope">
               <el-button link type="primary" size="small" @click="toDetailCase(scope.row.case_script)">详情</el-button>
             </template>
@@ -74,7 +75,7 @@
             <template #default="scope">
               <el-button link type="primary" size="small" @click="toDetailCase(scope.row.shell_log)">详情</el-button>
             </template>
-          </el-table-column>
+          </el-table-column> -->
           <el-table-column label="响应时间" prop="use_time" />
           <el-table-column label="Comment" prop="comment" />
           <el-table-column label="结果" prop="result" />

@@ -8,7 +8,6 @@ const service = axios.create({
   // baseURL:"http://10.20.84.55:8000/",
   // baseURL: "http://10.20.70.89:8082", // 登录
   // baseDatasURL:"http://10.20.86.27:8015", // POC测试
-  // baseURL: '/api',
   timeout: 120000,
 });
 
@@ -18,24 +17,24 @@ service.interceptors.request.use(
     // 在发送请求之前做些什么
     // 往header头中自动添加token
     const hastoken = getToken();
-    if (
-      hastoken &&
-      config.url !== "/forum/login/" &&
-      config.url !== "/datas/datas/" &&
-      config.url !== "/WEBt/terminals/" &&
-      config.url !== "/autoapv/device/" &&
-      config.url !== "/autoapv/d_type/" &&
-      config.url !== "/autoapv/d_group/" &&
-      config.url !== "/autoapv/task/" &&
-      config.url !== "/base/build/" &&
-      config.url !== "/base/files/" &&
-      config.url !== "/autoapv/taskrun/" &&
-      config.url !== "/autoapv/case/" &&
-      config.url !== "/autoapv/task_config/" &&
-      config.url !== "/autoapv/report/"
-    ) {
-      config.headers["token"] = hastoken;
-    }
+    // if (
+    //   hastoken &&
+    //   config.url !== "/forum/login/" &&
+    //   config.url !== "/datas/datas/" &&
+    //   config.url !== "/WEBt/terminals/" &&
+    //   config.url !== "/autoapv/device/" &&
+    //   config.url !== "/autoapv/d_type/" &&
+    //   config.url !== "/autoapv/d_group/" &&
+    //   config.url !== "/autoapv/task/" &&
+    //   config.url !== "/base/build/" &&
+    //   config.url !== "/base/files/" &&
+    //   config.url !== "/autoapv/taskrun/" &&
+    //   config.url !== "/autoapv/case/" &&
+    //   config.url !== "/autoapv/task_config/" &&
+    //   config.url !== "/autoapv/report/" && config.url !== config.url
+    // ) {
+    //   config.headers["token"] = hastoken;
+    // }
     switch (config.urlType) {
       case "POC":
         config.url = baseUrl.Base_POC_URL + config.url;
@@ -48,8 +47,10 @@ service.interceptors.request.use(
         break;
       case "APV":
         config.url = baseUrl.Base_APV_URL + config.url;
+        break;
       case "Log":
-        config.url = config.url
+        config.url = config.url;
+        break;
     }
     // 请求拦截进来 显示loading效果
     return config;

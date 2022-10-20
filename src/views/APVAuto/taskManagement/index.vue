@@ -53,7 +53,7 @@
         <el-table :data="state.tableData" stripe style="width: 100%" v-loading="tableLoading">
           <el-table-column prop="name" label="任务名称" align="center" width="150" />
           <el-table-column prop="build" label="build版本" align="center" width="250" />
-          <el-table-column prop="groupAfter" label="测试平台" class-name="testStyle" width="350" header-align="center">
+          <el-table-column prop="groupAfter" label="测试平台" class-name="testStyle" width="320" header-align="center">
             <template #default="scope">
               <el-tag v-if="scope.row.groupAfter == 0 &&  scope.row.failGroupAfter == 0" type="info">
                 暂无测试平台
@@ -93,17 +93,17 @@
               </el-popover>
             </template>
           </el-table-column>
-          <el-table-column prop="number" label="总用例数 / 失败用例数" align="center" width="170">
+          <el-table-column prop="number" label="总用例数 / 失败用例数" align="center" width="200">
             <template #default="scope">
-              <span>{{scope.row.number[0]}}</span>
-              <span style="margin:0 2px">/</span>
-              <span class="failNumStyle" style="color:rgb(64, 158, 255)"
-                @click="toDetail(scope.row.id)">{{scope.row.number[0]}}</span>
+              <span v-if="scope.row.number">{{scope.row.number[0]}}</span>
+              <span style="margin:0 3px">/</span>
+              <span class="failNumStyle" @click="toDetail(scope.row.id)"
+                v-if="scope.row.number">{{scope.row.number[1]}}</span>
             </template>
           </el-table-column>
           <!-- <el-table-column prop="counts" label="总用例数" align="center" width="120" />
           <el-table-column prop="fail_cases" label="失败用例数" align="center" width="120" /> -->
-          <el-table-column prop="state" label="任务状态" align="center" width="150">
+          <el-table-column prop="state" label="任务状态" align="center" width="170">
             <template #default="scope">
               <div class="stateStyle" v-if="scope.row.state === 'stop'">
                 <div class="status-point" style=" background-color:#909399"></div>
@@ -166,7 +166,7 @@
                 </template>
                 <div class="moreButton">
                   <el-tooltip content="可查看当前任务的进度详情" placement="top" effect="dark">
-                    <el-button link type="primary" size="small" @click="taskProgress(scope.row.id)"> 任务进度
+                    <el-button link type="primary" size="small" @click="taskProgress(scope.row)"> 任务进度
                     </el-button>
                   </el-tooltip>
                   <el-tooltip content="可修改当前任务下所有的测试平台" placement="top" effect="dark">
@@ -253,7 +253,7 @@
         <el-timeline-item timestamp="2018/4/3" placement="top" color='#0bbd87'>
           <!-- <el-card shadow="never"> -->
           <h4>运行阶段</h4>
-          <reportDetailVue></reportDetailVue>
+          <reportDetailVue :reportDetailData="reportDetailData" />
           <!-- </el-card> -->
         </el-timeline-item>
         <el-timeline-item timestamp="2018/4/2" placement="top" color="#f56c6c">
@@ -872,17 +872,13 @@ const deleteTestPlat = async (params) => {
   }
 }
 
+const reportDetailData = ref([])
 // 任务进度
-const taskProgress = (id) => {
+const taskProgress = (data) => {
   taskProgressDialog.value = true
   textarea.value = ''
-  setInterval(() => {
-    percentage2.value = (percentage2.value % 100) + 10
-  }, 500)
-  getTaskRun(id)
-  // timer.value = setInterval(() => {
-  //   getTaskRun(id)
-  // }, 5000)
+  reportDetailData.value = data
+  getTaskRun(data.id)
 }
 
 // 任务启动/终止
@@ -1047,6 +1043,10 @@ const handleTaskCurrentChange = (val: number) => {
     top: 50%;
     transform: translate(-50%, -50%);
   }
+}
+
+.wrapper:hover {
+  cursor: pointer;
 }
 
 .searchForm {
@@ -1224,6 +1224,10 @@ const handleTaskCurrentChange = (val: number) => {
   .el-input {
     width: 220px;
   }
+}
+
+.failNumStyle {
+  color: rgb(64, 158, 255);
 }
 
 .failNumStyle:hover {

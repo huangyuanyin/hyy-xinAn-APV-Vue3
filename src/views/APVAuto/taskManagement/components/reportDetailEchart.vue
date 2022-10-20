@@ -4,8 +4,15 @@
 </template>
 
 <script lang='ts' setup>
-import { onMounted, inject } from 'vue'
+import { onMounted, inject, defineProps } from 'vue'
 let echarts: any = inject("echarts");
+
+const props = defineProps({
+  reportDetailData: {
+    type: Object,
+    default: () => { }
+  }
+})
 
 onMounted(() => {
   init()
@@ -13,13 +20,13 @@ onMounted(() => {
 
 const init = () => {
   const chartBox = echarts.init(document.getElementById('reportDetailEchart'));
-  var seriesdata1 = [{ name: '完成数', value: 50 }, { name: '成功数', value: 60 }, { name: '失败数', value: 80 }];
+  var seriesdata1 = [{ name: '完成数', value: 50 }, { name: '成功数', value: 60 }, { name: '失败数', value: props.reportDetailData.fail_cases }];
   var colorList = ['#407AFB', '#1791FF', '#36B0FE', '#6635EF', '#73ACFF', '#41CBAB', '#7BDD43', '#FFC653', '#FF6519', '#EE3939', '#FFAFDA', '#00FFFF']
 
   var objData = array2obj(seriesdata1, 'name')
 
   //将合计值转换为数组
-  var h = '6725';
+  var h = String(props.reportDetailData.counts);
   let arr = h.split('');
   let m = '';
 
