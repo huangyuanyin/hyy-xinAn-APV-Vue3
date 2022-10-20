@@ -9,14 +9,14 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column property="status" label="用例总数" align="center" />
-      <el-table-column property="apv_model" label="成功数" align="center" />
-      <el-table-column property="errorNumber" label="失败数" show-overflow-tooltip align="center">
+      <el-table-column property="counts" label="用例总数" align="center" />
+      <el-table-column property="pass" label="成功数" align="center" />
+      <el-table-column property="fail" label="失败数" show-overflow-tooltip align="center">
         <template #default="scope">
           <el-button link type="primary" size="small" @click="toDetail(scope.row.id,'FailNumDetail')">22</el-button>
         </template>
       </el-table-column>
-      <el-table-column property="ipversion" label="创建时间" align="center" />
+      <el-table-column property="uptime" label="创建时间" align="center" />
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="scope">
           <el-button link type="primary" size="small" @click="toMark(scope.row.id)">打标记</el-button>
@@ -37,228 +37,129 @@
   <MarkDialog :markData="markData" :isShowDialog="isShowMarkDialog" v-on:closeMarkDialog="closeMarkDialog(res)" />
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, ref, reactive, toRef, toRefs } from "vue";
+<script lang="ts" setup>
+import { onMounted, ref, reactive, toRef, toRefs } from "vue";
 import { datas } from "@/api/POC/index.js";
+import { getHistoryReportApi } from "@/api/APV/testReport.js"
 import { filterData } from "@/utils/util.js";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { getDataApi } from "@/utils/getApi.js"
 import DataTemplateDialog from './dataTemplateDialog.vue';
 import MarkDialog from './MarkDialog.vue';
 import { Document } from "@element-plus/icons-vue";
-export default defineComponent({
-  components: {
-    DataTemplateDialog, MarkDialog, Document
+const state = reactive({
+  upload: {
+    url: ``,
+    header: {
+      token: ""
+    },
+    resData: {}
   },
-  setup() {
-    const state = reactive({
-      upload: {
-        url: ``,
-        header: {
-          token: ""
-        },
-        resData: {}
-      },
-    })
-    const router = useRouter();
-    const multipleTableRef = ref();
-    const multipleSelection = ref([]);
-    const tableData = ref([
-      { id: "3", name: "平台测试", status: "120", apv_model: "22", errorNumber: "33", ipversion: "2022-9-22", user: "hyy" },
-      { id: "3", name: "平台测试", status: "120", apv_model: "22", errorNumber: "33", ipversion: "2022-9-22", user: "hyy" },
-      { id: "3", name: "平台测试", status: "120", apv_model: "22", errorNumber: "33", ipversion: "2022-9-22", user: "hyy" },
-      { id: "3", name: "平台测试", status: "120", apv_model: "22", errorNumber: "33", ipversion: "2022-9-22", user: "hyy" },
-      { id: "3", name: "平台测试", status: "120", apv_model: "22", errorNumber: "33", ipversion: "2022-9-22", user: "hyy" },
-      { id: "3", name: "平台测试", status: "120", apv_model: "22", errorNumber: "33", ipversion: "2022-9-22", user: "hyy" },
-      { id: "3", name: "平台测试", status: "120", apv_model: "22", errorNumber: "33", ipversion: "2022-9-22", user: "hyy" },
-    ]);
-    const dialogData = ref([])
-    const isShowDialog = ref(false)
-    const isShowMarkDialog = ref(false)
-    const markData = ref({})
-    const loading = ref(false)
-    const currentPage = ref(1)
-    const pageSize = ref(10)
-    const total = ref(0)
-    const formInline: any = reactive({
-      id: "",
-      user: "",
-      date1: "",
-      date2: "",
-      status: "",
-      apv_model: "",
-      ipversion: "",
-      build: "",
-    });
-    const onQuery = () => {
-      getDatas(filterData(formInline));
-    };
-    const onReset = () => {
-      Object.keys(formInline).map((key) => {
-        formInline[key] = "";
-      });
-    };
-    const clearSelection = () => {
-      // if (rows) {
-      //   rows.forEach((row) => {
-      //     // TODO: improvement typing when refactor table
-      //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //     multipleTableRef.value!.toggleRowSelection(row);
-      //     router.push("/POCTest/dataAnalysis");
-      //   });
-      // } else {
-      //   multipleTableRef.value!.clearSelection();
-      // }
-      multipleTableRef.value!.clearSelection();
-    };
-    const handleSelectionChange = (val) => {
-      multipleSelection.value = val;
-      console.log("选中的...", multipleSelection.value);
-    };
-    // 数据分析
-    const toDataAnalysis = () => {
-      if (multipleSelection.value.length < 2) {
-        ElMessage({
-          message: "请至少选择两组数据进入数据对比....",
-          type: "warning",
-        });
-        return;
-      }
-      sessionStorage.setItem(
-        "dataList",
-        JSON.stringify(multipleSelection.value)
-      );
-      router.push("/POCTest/dataAnalysis");
-    };
-    // 生成报告
-    const openReportDialog = (id) => {
-      isShowDialog.value = true
-      getDataApi(id).then(res => {
-        dialogData.value = res[0];
-      })
-    }
-    const closeDialog = () => {
-      isShowDialog.value = false
-    }
-    // 跳转详情
-    const toDetail = (id, type) => {
-      switch (type) {
-        case 'history':
-          router.push({
-            path: "/APVAuto/reportDetail",
-            query: {
-              resultid: id,
-            }
-          })
-          break;
-        case 'FailNumDetail':
-          router.push({
-            path: "/APVAuto/failNumDetail",
-            query: {
-              resultid: id,
-            }
-          })
-        default:
-          break;
-      }
-    }
-
-    const onSuccess = () => {
-
-    }
-
-    const onError = () => {
-      ElMessage({
-        message: "上传失败!",
-        type: "error",
-      });
-    }
-    const beforeUpload = (file) => {
-      const sizeLimit = file.size / 1024 / 1024 > 10
-      if (sizeLimit) {
-        ElMessage({
-          message: "上传文件大小不能超过 10MB!",
-          type: "warning",
-        });
-      }
-      const fileFamart = file.name.split('.')[file.name.split('.').length - 1];
-      console.log("上传...", fileFamart);
-      if (fileFamart !== 'zip' || fileFamart !== 'rar') {
-        ElMessage({
-          message: "必须上传zip/rar格式的文件!",
-          type: "warning",
-        });
-      }
-      return !sizeLimit && (fileFamart === 'zip' || fileFamart === 'rar')
-    }
-
-    const handleSizeChange = (val: number) => {
-      console.log(`${val} items per page`)
-    }
-
-    const handleCurrentChange = (val: number) => {
-      console.log(`current page: ${val}`)
-    }
-
-    // 列表数据
-    const getDatas = async (params) => {
-      loading.value = true
-      const res = await datas(params);
-      if (res.code == 1000) {
-        setTimeout(() => {
-          loading.value = false
-        }, 500);
-        tableData.value = res.data;
-        total.value = res.total
-      } else {
-        setTimeout(() => {
-          loading.value = false
-        }, 500);
-      }
-    };
-
-    const toMark = (id) => {
-      isShowMarkDialog.value = true
-    }
-    const closeMarkDialog = (res) => {
-      isShowMarkDialog.value = res
-    }
-
-    onMounted(() => {
-      // getDatas(filterData(formInline));
-    });
-    return {
-      ...toRefs(state),
-      total,
-      currentPage,
-      pageSize,
-      dialogData,
-      isShowDialog,
-      router,
-      formInline,
-      onQuery,
-      onReset,
-      multipleTableRef,
-      multipleSelection,
-      tableData,
-      clearSelection,
-      handleSelectionChange,
-      toDataAnalysis,
-      getDatas,
-      openReportDialog,
-      closeDialog,
-      toDetail,
-      onSuccess,
-      onError,
-      beforeUpload,
-      loading,
-      handleSizeChange,
-      handleCurrentChange,
-      toMark, closeMarkDialog, isShowMarkDialog, markData
-    };
-  },
+})
+const route = useRoute()
+const router = useRouter();
+const taskid = route.query.resultid || ''
+const multipleTableRef = ref();
+const multipleSelection = ref([]);
+const tableData = ref([]);
+const dialogData = ref([])
+const isShowDialog = ref(false)
+const isShowMarkDialog = ref(false)
+const markData = ref({})
+const loading = ref(false)
+const currentPage = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
+const formInline: any = reactive({
+  id: "",
+  user: "",
+  date1: "",
+  date2: "",
+  status: "",
+  apv_model: "",
+  ipversion: "",
+  build: "",
 });
+
+const onReset = () => {
+  Object.keys(formInline).map((key) => {
+    formInline[key] = "";
+  });
+};
+const clearSelection = () => {
+  multipleTableRef.value!.clearSelection();
+};
+const handleSelectionChange = (val) => {
+  multipleSelection.value = val;
+  console.log("选中的...", multipleSelection.value);
+};
+
+// 批量删除
+const toDataAnalysis = () => {
+
+}
+
+// 跳转详情
+const toDetail = (id, type) => {
+  switch (type) {
+    case 'history':
+      router.push({
+        path: "/APVAuto/historyReportDetail",
+        query: {
+          historyResultid: id,
+        }
+      })
+      break;
+    case 'FailNumDetail':
+      router.push({
+        path: "/APVAuto/failNumDetail",
+        query: {
+          historyResultid: id,
+        }
+      })
+    default:
+      break;
+  }
+}
+
+const handleSizeChange = (val: number) => {
+  console.log(`${val} items per page`)
+}
+
+const handleCurrentChange = (val: number) => {
+  console.log(`current page: ${val}`)
+}
+
+const toMark = (id) => {
+  isShowMarkDialog.value = true
+}
+const closeMarkDialog = (res) => {
+  isShowMarkDialog.value = res
+}
+
+const getHistoryReport = async (params) => {
+  let res = await getHistoryReportApi(params)
+  if (res.code === 1000) {
+    tableData.value = res.data || [];
+    await handleData(tableData.value)
+  }
+}
+
+// 处理接口数据
+const handleData = (data) => {
+  console.log("data", data);
+  data.map((item) => {
+    item.pass = item.pass ? item.pass : 0
+    item.counts = item.pass ? item.pass + item.issue + item.fail : item.issue + item.fail
+  })
+}
+
+onMounted(() => {
+  // getDatas(filterData(formInline));
+  getHistoryReport({ taskid })
+})
+
 </script>
 
 <style lang="scss" scoped>

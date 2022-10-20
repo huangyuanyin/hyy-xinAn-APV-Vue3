@@ -29,3 +29,23 @@ export function getLogApi(url) {
     urlType: "Log",
   });
 }
+
+// 历史报告 - 获取
+export function getHistoryReportApi(params) {
+  return request({
+    url: "/autoapv/report_history/",
+    method: "get",
+    urlType: "APV",
+    params,
+  });
+}
+
+// 历史报告详情 - 获取
+export function getHistoryReportDetailApi(params) {
+  return request({
+    url: "/autoapv/report_history/",
+    method: "get",
+    urlType: "APV",
+    params,
+  });
+}

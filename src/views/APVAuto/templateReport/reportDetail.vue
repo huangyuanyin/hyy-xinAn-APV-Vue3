@@ -96,7 +96,7 @@
 
 <script lang="ts" setup>
 import { onMounted, ref, reactive, inject, nextTick } from 'vue'
-import { getReportDetailApi, getLogApi } from "@/api/APV/testReport.js"
+import { getReportDetailApi, getLogApi, getHistoryReportDetailApi } from "@/api/APV/testReport.js"
 import { useRoute, useRouter } from 'vue-router';
 import DataTemplateDialog from './components/dataTemplateDialog.vue';
 import { getDataApi } from "@/utils/getApi.js"
@@ -106,7 +106,8 @@ import type { TabsPaneContext } from 'element-plus'
 
 const route = useRoute()
 const router = useRouter()
-const reportId = route.query.resultid || ''
+const reportId = route.query.resultid ? route.query.resultid || '' : route.query.historyResultid || ''
+const isHistory = route.query.resultid ? false : true
 const isShowDialog = ref(false)
 const tableData = ref([]) // 详情数据
 const detailTableData = ref([])
@@ -154,8 +155,35 @@ const getReportDetail = async (id) => {
   }
 }
 
+// 调用 历史测试报告详情接口
+const getHistoryReportDetail = async (id) => {
+  let res = await getHistoryReportDetailApi({ id, detail: 'True' })
+  if (res.code === 1000) {
+    contentItemList.value.map(item => {
+      item.value = res.data[item.label]
+      if (item.label === 'total') {
+        item.value = res.data['fail'] + res.data['issue']
+      }
+    })
+    res.data && res.data['pass'] ? (contentItemList.value[1].value = res.data['pass']) : (contentItemList.value[1].value = '0')
+    res.data.modules && res.data.modules.map(item => {
+      caseOptions.value.push({
+        value: item,
+        label: item
+      })
+    })
+  }
+}
+
 const getReportModuleDetail = async (params) => {
   let res = await getReportDetailApi(params)
+  if (res.code == 1000) {
+    detailTableData.value = res.data || []
+  }
+}
+
+const getHistoryReportModuleDetail = async (params) => {
+  let res = await getHistoryReportDetailApi(params)
   if (res.code == 1000) {
     detailTableData.value = res.data || []
   }
@@ -175,12 +203,12 @@ const status = ref("")
 // 选择状态/模块
 const selectSearch = async () => {
   const params = {
-    id: route.query.resultid,
+    id: reportId,
     details: 'True',
     result: status.value ? status.value : undefined,
     module: casValue.value ? casValue.value : undefined
   }
-  getReportModuleDetail(params)
+  isHistory ? getHistoryReportModuleDetail(params) : getReportModuleDetail(params)
 }
 
 let echarts: any = inject("echarts");
@@ -491,8 +519,8 @@ const toDetailCase = (log) => {
 }
 
 onMounted(async () => {
-  await getReportDetail(reportId)
-  await getReportModuleDetail({ id: reportId, details: 'True', })
+  isHistory ? await getHistoryReportDetail(reportId) : await getReportDetail(reportId)
+  isHistory ? await getHistoryReportModuleDetail({ id: reportId, details: 'True', }) : await getReportModuleDetail({ id: reportId, details: 'True', })
   await showOverview()
 })
 

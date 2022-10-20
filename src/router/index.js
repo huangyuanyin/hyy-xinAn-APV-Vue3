@@ -93,19 +93,10 @@ const routes = [
             component: () => import("@/views/APVAuto/templateReport/index.vue"),
           },
           {
-            path: "/APVAuto/dataAnalysis",
-            name: "DataAnalysis",
-            meta: {
-              title: "数据分析",
-            },
-            component: () =>
-              import("@/views/APVAuto/templateReport/dataAnalysis.vue"),
-          },
-          {
             path: "/APVAuto/reportDetail",
             name: "reportDetail",
             meta: {
-              title: "报告详情",
+              title: "测试报告详情",
             },
             component: () =>
               import("@/views/APVAuto/templateReport/reportDetail.vue"),
@@ -120,6 +111,15 @@ const routes = [
               import("@/views/APVAuto/templateReport/components/historyReport.vue"),
           },
           {
+            path: "/APVAuto/historyReportDetail",
+            name: "historyReportDetail",
+            meta: {
+              title: "历史报告详情",
+            },
+            component: () =>
+              import("@/views/APVAuto/templateReport/reportDetail.vue"),
+          },
+          {
             path: "/APVAuto/failNumDetail",
             name: "FailNumDetail",
             meta: {
@@ -127,7 +127,16 @@ const routes = [
             },
             component: () =>
               import("@/views/APVAuto/templateReport/components/FailNumDetail.vue"),
-          }
+          },
+          {
+            path: "/APVAuto/dataAnalysis",
+            name: "DataAnalysis",
+            meta: {
+              title: "数据分析",
+            },
+            component: () =>
+              import("@/views/APVAuto/templateReport/dataAnalysis.vue"),
+          },
         ],
       },
       {
