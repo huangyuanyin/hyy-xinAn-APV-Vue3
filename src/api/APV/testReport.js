@@ -22,11 +22,12 @@ export function getReportDetailApi(params) {
 }
 
 // 日志详情 - 获取
-export function getLogApi(url) {
+export function getLogApi(params) {
   return request({
-    url: url,
+    url: '/autoapv/report_log/',
     method: "get",
-    urlType: "Log",
+    urlType: "APV",
+    params
   });
 }
 

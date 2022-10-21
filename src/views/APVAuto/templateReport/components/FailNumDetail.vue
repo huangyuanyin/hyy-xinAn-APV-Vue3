@@ -1,4 +1,5 @@
 <template>
+  <el-button type="primary" class="backButton" @click="router.go(-1)">返回</el-button>
   <el-table :data="detailTableData" border style="width: 100%" height="80vh" v-loading="loading">
     <el-table-column type="expand">
       <template #default="props">
@@ -42,9 +43,10 @@ import { onMounted, ref } from 'vue'
 import type { TabsPaneContext } from 'element-plus'
 import * as monaco from 'monaco-editor'
 import { getReportDetailApi, getLogApi, getHistoryReportApi } from "@/api/APV/testReport.js"
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute()
+const router = useRouter()
 const failId = route.query.resultid ? route.query.resultid || '' : route.query.historyResultid || ''
 const isHistoty = route.query.resultid ? false : true
 const detailTableData = ref([])
@@ -96,6 +98,10 @@ onMounted(() => {
 
 </script>
 
-<style scoped>
-
+<style lang="scss" scoped>
+.backButton {
+  position: fixed;
+  top: 70px;
+  right: 25px;
+}
 </style>

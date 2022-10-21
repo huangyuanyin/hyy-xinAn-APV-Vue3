@@ -48,9 +48,6 @@ service.interceptors.request.use(
       case "APV":
         config.url = baseUrl.Base_APV_URL + config.url;
         break;
-      case "Log":
-        config.url = config.url;
-        break;
     }
     // 请求拦截进来 显示loading效果
     return config;

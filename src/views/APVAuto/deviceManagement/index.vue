@@ -3,9 +3,19 @@
     <el-tabs v-model="activeName" class="tabs" @tab-click="handleClick">
       <el-tab-pane label="测试平台管理" name="testbedManagement">
         <el-card class="group-card" shadow="never">
-          <el-button type="primary" @click="openAddDialog('group', 'add', null)" style="margin-bottom: 20px">
-            添加测试平台
-          </el-button>
+          <div class="search-wrap">
+            <div>
+              <el-button type="primary" @click="openAddDialog('group', 'add', null)" style="margin-bottom: 20px">
+                添加测试平台
+              </el-button>
+            </div>
+            <div>
+              <el-select size="large" clearable v-model="searchForm.status" placeholder="请选择设备状态...">
+                <el-option v-for="(item, index) in statusOptions" :key="'buildData' + index" :label="item.label"
+                  :value="item.value" />
+              </el-select>
+            </div>
+          </div>
           <el-table :data="state.d_groupData" stripe>
             <el-table-column prop="name" label="测试平台名称" align="center" />
             <el-table-column prop="build" label="测试版本" align="center">
@@ -17,8 +27,14 @@
             </el-table-column>
             <el-table-column label="状态" align="center">
               <template #default="scope">
-                <span v-if="scope.row.status === false">空闲</span>
-                <span v-else>使用中</span>
+                <div class="stateStyle " v-if="scope.row.status === false">
+                  <div class="status-point" style=" background-color:#409EFF"></div>
+                  <span style="color:#409EFF">空闲中</span>
+                </div>
+                <div class="stateStyle hhh" v-else>
+                  <div class="status-point hhh" style=" background-color:#67C23A"></div>
+                  <span style="color:#67C23A">使用中</span>
+                </div>
               </template>
             </el-table-column>
             <el-table-column prop="user" label="使用人" align="center" />
@@ -206,6 +222,19 @@ const state: any = reactive({
   buildData: [], // build管理数据
 })
 const titleDialog = ref("")
+const statusOptions = [
+  {
+    value: 'fail',
+    label: '使用中',
+  },
+  {
+    value: 'stop',
+    label: '空闲中',
+  }
+]
+const searchForm = ref({
+  status: "",
+})
 let addDeviceForm = reactive({
   id: null,
   ip: "",
@@ -707,6 +736,21 @@ const handleBuildCurrentChange = (val: number) => {
 </script>
 
 <style lang="scss" scoped>
+.search-wrap {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+
+  .el-select {
+    margin: 0 10px;
+    width: 220px;
+  }
+
+  .el-input {
+    width: 220px;
+  }
+}
+
 .addDevice-form {
 
   .el-select,
@@ -751,6 +795,94 @@ const handleBuildCurrentChange = (val: number) => {
   display: flex;
   justify-content: end;
   margin-top: 25px;
+}
+
+.hhh {
+  // border-radius: 100%;
+  webkit-animation: breathe 1500ms ease infinite;
+  -moz-animation: breathe 1500ms ease infinite;
+  -o-animation: breathe 1500ms ease infinite;
+  animation: breathe 1500ms ease infinite;
+}
+
+@-webkit-keyframes breathe {
+  0% {
+    opacity: .2;
+    box-shadow: 0 1px 10px rgba(255, 255, 255, 0.1)
+  }
+
+  100% {
+    opacity: 1;
+    box-shadow: 0 1px 40px rgba(255, 107, 132, 0.5)
+  }
+
+  50% {
+    opacity: 1;
+    box-shadow: 0 1px 80px #ff6b84
+  }
+}
+
+@-moz-keyframes breathe {
+  0% {
+    opacity: .2;
+    box-shadow: 0 1px 10px rgba(255, 255, 255, 0.1)
+  }
+
+  100% {
+    opacity: 1;
+    box-shadow: 0 1px 40px rgba(255, 107, 132, 0.5)
+  }
+
+  50% {
+    opacity: 1;
+    box-shadow: 0 1px 80px #ff6b84
+  }
+}
+
+@-o-keyframes breathe {
+  0% {
+    opacity: .2;
+    box-shadow: 0 1px 10px rgba(255, 255, 255, 0.1)
+  }
+
+  100% {
+    opacity: 1;
+    box-shadow: 0 1px 40px rgba(255, 107, 132, 0.5)
+  }
+
+  50% {
+    opacity: 1;
+    box-shadow: 0 1px 80px #ff6b84
+  }
+}
+
+@keyframes breathe {
+  0% {
+    opacity: .2;
+    box-shadow: 0 1px 10px rgba(255, 255, 255, 0.1)
+  }
+
+  100% {
+    opacity: 1;
+    box-shadow: 0 1px 40px rgba(255, 107, 132, 0.5)
+  }
+
+  50% {
+    opacity: 1;
+    box-shadow: 0 1px 80px #ff6b84
+  }
+}
+
+.status-point {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 3px;
+}
+
+:deep(.el-table .cell) {
+  padding: 0px;
 }
 </style>
 

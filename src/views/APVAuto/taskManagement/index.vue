@@ -125,6 +125,10 @@
                 <div class="status-point" style=" background-color:#409EFF"></div>
                 <span style="color:#409EFF">已完成</span>
               </div>
+              <div class="stateStyle" v-if="scope.row.state === 'ready'">
+                <div class="status-point" style=" background-color:Black"></div>
+                <span style="color:Black">准备中</span>
+              </div>
             </template>
           </el-table-column>
           <el-table-column prop="user" label="负责人" align="center" width="120" />
