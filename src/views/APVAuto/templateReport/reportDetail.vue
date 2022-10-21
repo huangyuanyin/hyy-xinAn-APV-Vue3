@@ -37,7 +37,7 @@
             </el-select>
           </el-form-item>
         </el-form>
-        <el-table :data="detailTableData" border style="width: 100%" height="45vh" @expand-change="hhh"
+        <el-table :data="detailTableData" border style="width: 100%" height="45vh" @expand-change="getLog"
           :expand-row-keys="expands" :row-key="getRowKeys">
           <el-table-column type="expand">
             <template #default="props">
@@ -515,14 +515,24 @@ const closeDialog = (value) => {
   isShowDialog.value = value
 }
 
-const hhh = (row, expandedRows) => {
-  expands.value = []
-  if (expandedRows.length > 0) {
-    row ? expands.value.push(row) : ''
+const getLog = (row, expandedRows) => {
+  if (expands.value.includes(row.case_id)) {
+    expands.value = expands.value.filter(val => val !== row.case_id);
+    return false
+  } else {
+    if (expands.value.length != 0) {
+      //如果存在展开行,清空expands数组,使它关闭
+      expands.value.splice(0, expands.value.length);
+      //打开点击的行
+      expands.value.push(row.case_id);
+    } else {
+      //如果不存在展开行,直接push打开点击的行
+      expands.value.push(row.case_id);
+    }
   }
+  activeName.value = 'first'
   let LogList = []
   LogList.push(row.case_script, row.case_log, row.shell_log)
-  console.log("data", LogList);
   LogList.map(async (item, index) => {
     await getLogApi({ url: String(item) }).then(res => {
       switch (index) {
@@ -538,22 +548,16 @@ const hhh = (row, expandedRows) => {
         default:
           break;
       }
-
     })
   })
 }
 
 const getRowKeys = (row) => { // 行数据的Key
-  return row
-}
-
-const getLog = async (log) => {
-  let res = await getLogApi({ url: String(log) })
-
+  return row.case_id
 }
 
 const toDetailCase = (log) => {
-  getLog(log)
+  // getLog(log)
   isShowCaseScriptDialog.value = true
 }
 
