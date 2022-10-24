@@ -107,7 +107,7 @@ import type { TabsPaneContext } from 'element-plus'
 
 const route = useRoute()
 const router = useRouter()
-const reportId = route.query.resultid ? route.query.resultid || '' : route.query.historyResultid || ''
+const reportId = route.query.resultid || route.params.detailId || route.query.historyResultid || ''
 const isHistory = route.query.resultid ? false : true
 const isShowDialog = ref(false)
 const tableData = ref([]) // 详情数据

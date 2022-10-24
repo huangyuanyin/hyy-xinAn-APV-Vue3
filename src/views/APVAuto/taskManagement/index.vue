@@ -964,9 +964,9 @@ const runAgain = async (value, data) => {
 
 const toDetail = (id) => {
   router.push({
-    path: "/APVAuto/failNumDetail",
+    path: `/APVAuto/templateReport/failNumDetail`,
     query: {
-      resultid: id,
+      reportId: id
     }
   })
 }

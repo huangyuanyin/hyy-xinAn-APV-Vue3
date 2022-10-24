@@ -90,43 +90,65 @@ const routes = [
             meta: {
               title: "测试报告",
             },
-            component: () => import("@/views/APVAuto/templateReport/index.vue"),
+            component: () => import("@/views/APVAuto/templateReport/components/historyLayout.vue"),
+            children: [
+              {
+                path: "",
+                component: () => import("@/views/APVAuto/templateReport/index.vue"),
+              },
+              {
+                path: "/APVAuto/reportDetail",
+                name: "reportDetail",
+                meta: {
+                  title: "测试报告详情",
+                },
+                component: () =>
+                  import("@/views/APVAuto/templateReport/reportDetail.vue"),
+              },
+              {
+                path: "/APVAuto/templateReport/failNumDetail",
+                name: "reportFailNumDetail",
+                meta: {
+                  title: "失败数详情",
+                },
+                component: () =>
+                  import("@/views/APVAuto/templateReport/components/FailNumDetail.vue"),
+              },
+            ]
           },
           {
-            path: "/APVAuto/reportDetail",
-            name: "reportDetail",
-            meta: {
-              title: "测试报告详情",
-            },
-            component: () =>
-              import("@/views/APVAuto/templateReport/reportDetail.vue"),
-          },
-          {
-            path: "/APVAuto/historyReport",
+            path: "/APVAuto/historyReport/:reportId",
             name: "historyReport",
             meta: {
               title: "历史报告",
             },
             component: () =>
-              import("@/views/APVAuto/templateReport/components/historyReport.vue"),
-          },
-          {
-            path: "/APVAuto/historyReportDetail",
-            name: "historyReportDetail",
-            meta: {
-              title: "历史报告详情",
-            },
-            component: () =>
-              import("@/views/APVAuto/templateReport/reportDetail.vue"),
-          },
-          {
-            path: "/APVAuto/failNumDetail",
-            name: "FailNumDetail",
-            meta: {
-              title: "失败数详情",
-            },
-            component: () =>
-              import("@/views/APVAuto/templateReport/components/FailNumDetail.vue"),
+              import("@/views/APVAuto/templateReport/components/historyLayout.vue"),
+            children: [
+              {
+                path: "",
+                component: () =>
+                  import("@/views/APVAuto/templateReport/components/historyReport.vue"),
+              },
+              {
+                path: "detail/:detailId",
+                name: "historyReportDetail",
+                meta: {
+                  title: "历史报告详情",
+                },
+                component: () =>
+                  import("@/views/APVAuto/templateReport/reportDetail.vue"),
+              },
+              {
+                path: "failNumDetail",
+                name: "FailNumDetail",
+                meta: {
+                  title: "失败数详情",
+                },
+                component: () =>
+                  import("@/views/APVAuto/templateReport/components/FailNumDetail.vue"),
+              },
+            ]
           },
           {
             path: "/APVAuto/dataAnalysis",

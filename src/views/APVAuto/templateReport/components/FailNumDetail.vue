@@ -1,5 +1,5 @@
 <template>
-  <el-button type="primary" class="backButton" @click="router.go(-1)">返回</el-button>
+  <!-- <el-button type="primary" class="backButton" @click="router.go(-1)">返回</el-button> -->
   <el-table :data="detailTableData" border style="width: 100%" height="80vh" v-loading="loading">
     <el-table-column type="expand">
       <template #default="props">
@@ -47,8 +47,8 @@ import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute()
 const router = useRouter()
-const failId = route.query.resultid ? route.query.resultid || '' : route.query.historyResultid || ''
-const isHistoty = route.query.resultid ? false : true
+const failId = route.query.historyResultid || route.params.reportId || route.query.reportId || ''
+const isHistoty = route.query.historyResultid ? true : (route.params.reportId || route.query.reportId ? false : true)
 const detailTableData = ref([])
 const activeName = ref('first');
 const logData = ref("20 | 400 | slb_rr_100.pl | Thursday, September 08, 2022 AM02:30:04 CST \n20 | 200 |  TIP all 10015100161000710008 \n20 | 200 |  TIP  10015:10016 \n20 | 200 |  2:30:4-172.16.26.215-ttyS0 :  user sunyb pass click1 \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : script dir /home/sunyb/sunyb.ws/src_apv/result/log//2022-09-08-02:29:22--Beta_APV_10_5_0_42.array/smoke_test//result/mnet_env//T_0001/shell-ttyS0.txt \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : Test Machine ip 172.16.26.215 \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : login user root \n20 | 200 |   \n20 | 200 |  the last prompt \n20 | 200 |  command timed-out at ../../util/cli/ca.pm line 159 \n20 | 200 |   \n 50 | 255 | Unkonw | FAIL | Unkonw Exit Code 255 \n20 | 500 | slb_rr_100.pl | Thursday, September 08, 2022 AM02:30:54 CST \nunable to update smoke test result")

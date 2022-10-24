@@ -59,7 +59,7 @@ const state = reactive({
 })
 const route = useRoute()
 const router = useRouter();
-const taskid = route.query.resultid || ''
+const taskid = route.params.reportId || ''
 const multipleTableRef = ref();
 const multipleSelection = ref([]);
 const tableData = ref([]);
@@ -104,18 +104,13 @@ const toDataAnalysis = () => {
 const toDetail = (id, type) => {
   switch (type) {
     case 'history':
-      router.push({
-        path: "/APVAuto/historyReportDetail",
-        query: {
-          historyResultid: id,
-        }
-      })
+      router.push(`/APVAuto/historyReport/${route.params.reportId}/detail/${id}`)
       break;
     case 'FailNumDetail':
       router.push({
-        path: "/APVAuto/failNumDetail",
+        path: `/APVAuto/historyReport/${route.params.reportId}/failNumDetail/`,
         query: {
-          historyResultid: id,
+          historyResultid: id
         }
       })
     default:

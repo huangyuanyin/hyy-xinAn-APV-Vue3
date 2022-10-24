@@ -52,11 +52,12 @@
 <script lang="ts" setup>
 import { onMounted, ref, reactive, toRef, toRefs } from "vue";
 import { getReportApi } from "@/api/APV/testReport.js"
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { getDataApi } from "@/utils/getApi.js"
 import MarkDialog from './components/MarkDialog.vue';
 
+const route = useRoute();
 const router = useRouter();
 const multipleTableRef = ref();
 const multipleSelection = ref([]);
@@ -118,18 +119,13 @@ const toDetail = (id, type) => {
       break;
     }
     case 'history':
-      router.push({
-        path: "/APVAuto/historyReport",
-        query: {
-          resultid: id,
-        }
-      })
+      router.push(`/APVAuto/historyReport/${id}`)
       break;
     case 'FailNumDetail':
       router.push({
-        path: "/APVAuto/failNumDetail",
+        path: `/APVAuto/templateReport/failNumDetail`,
         query: {
-          resultid: id,
+          reportId: id
         }
       })
     default:
