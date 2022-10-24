@@ -1,22 +1,23 @@
 <template>
   <!-- <el-button type="primary" class="backButton" @click="router.go(-1)">返回</el-button> -->
-  <el-table :data="detailTableData" border style="width: 100%" height="80vh" v-loading="loading">
+  <el-table :data="detailTableData" border style="width: 100%" height="80vh" v-loading="loading" @expand-change="getLog"
+    :expand-row-keys="expands" :row-key="getRowKeys">
     <el-table-column type="expand">
       <template #default="props">
         <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
           <el-tab-pane label="用例脚本" name="first">
             <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
-            <el-input v-model="logData" :autosize="{ minRows: 2, maxRows: 12}" type="textarea"
+            <el-input v-model="case_script" :autosize="{ minRows: 2, maxRows: 12}" type="textarea"
               placeholder="Please input" />
           </el-tab-pane>
           <el-tab-pane label="脚本执行日志" name="second">
             <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
-            <el-input v-model="logData" :autosize="{ minRows: 2, maxRows: 12}" type="textarea"
+            <el-input v-model="case_log" :autosize="{ minRows: 2, maxRows: 12}" type="textarea"
               placeholder="Please input" />
           </el-tab-pane>
           <el-tab-pane label="APV交互日志" name="three">
             <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
-            <el-input v-model="logData" :autosize="{ minRows: 2, maxRows: 12 }" type="textarea"
+            <el-input v-model="shell_log" :autosize="{ minRows: 2, maxRows: 12 }" type="textarea"
               placeholder="Please input" />
           </el-tab-pane>
         </el-tabs>
@@ -51,7 +52,10 @@ const failId = route.query.historyResultid || route.params.reportId || route.que
 const isHistoty = route.query.historyResultid ? true : (route.params.reportId || route.query.reportId ? false : true)
 const detailTableData = ref([])
 const activeName = ref('first');
-const logData = ref("20 | 400 | slb_rr_100.pl | Thursday, September 08, 2022 AM02:30:04 CST \n20 | 200 |  TIP all 10015100161000710008 \n20 | 200 |  TIP  10015:10016 \n20 | 200 |  2:30:4-172.16.26.215-ttyS0 :  user sunyb pass click1 \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : script dir /home/sunyb/sunyb.ws/src_apv/result/log//2022-09-08-02:29:22--Beta_APV_10_5_0_42.array/smoke_test//result/mnet_env//T_0001/shell-ttyS0.txt \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : Test Machine ip 172.16.26.215 \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : login user root \n20 | 200 |   \n20 | 200 |  the last prompt \n20 | 200 |  command timed-out at ../../util/cli/ca.pm line 159 \n20 | 200 |   \n 50 | 255 | Unkonw | FAIL | Unkonw Exit Code 255 \n20 | 500 | slb_rr_100.pl | Thursday, September 08, 2022 AM02:30:54 CST \nunable to update smoke test result")
+const case_script = ref("")
+const case_log = ref("")
+const shell_log = ref("")
+const expands = ref([]) // 通过该属性设置Table目前的展开行，需要设置row-key属性才能使用，该属性为展开行的keys数组
 const caseScriptValue = ref("20 | 400 | slb_rr_100.pl | Thursday, September 08, 2022 AM02:30:04 CST \n20 | 200 |  TIP all 10015100161000710008 \n20 | 200 |  TIP  10015:10016 \n20 | 200 |  2:30:4-172.16.26.215-ttyS0 :  user sunyb pass click1 \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : script dir /home/sunyb/sunyb.ws/src_apv/result/log//2022-09-08-02:29:22--Beta_APV_10_5_0_42.array/smoke_test//result/mnet_env//T_0001/shell-ttyS0.txt \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : Test Machine ip 172.16.26.215 \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : login user root \n20 | 200 |   \n20 | 200 |  the last prompt \n20 | 200 |  command timed-out at ../../util/cli/ca.pm line 159 \n20 | 200 |   \n 50 | 255 | Unkonw | FAIL | Unkonw Exit Code 255 \n20 | 500 | slb_rr_100.pl | Thursday, September 08, 2022 AM02:30:54 CST \nunable to update smoke test result")
 const language = ref('perl')
 const editorMounted = (editor: monaco.editor.IStandaloneCodeEditor) => {
@@ -90,6 +94,47 @@ const getHistoryReportModuleDetail = async (params) => {
   if (res.code == 1000) {
     detailTableData.value = res.data || []
   }
+}
+
+const getLog = (row, expandedRows) => {
+  if (expands.value.includes(row.case_id)) {
+    expands.value = expands.value.filter(val => val !== row.case_id);
+    return false
+  } else {
+    if (expands.value.length != 0) {
+      //如果存在展开行,清空expands数组,使它关闭
+      expands.value.splice(0, expands.value.length);
+      //打开点击的行
+      expands.value.push(row.case_id);
+    } else {
+      //如果不存在展开行,直接push打开点击的行
+      expands.value.push(row.case_id);
+    }
+  }
+  activeName.value = 'first'
+  let LogList = []
+  LogList.push(row.case_script, row.case_log, row.shell_log)
+  LogList.map(async (item, index) => {
+    await getLogApi({ url: String(item) }).then(res => {
+      switch (index) {
+        case 0:
+          case_script.value = res.data || '请求错误'
+          break;
+        case 1:
+          case_log.value = res.data || '请求错误'
+          break;
+        case 2:
+          shell_log.value = res.data || '请求错误'
+          break;
+        default:
+          break;
+      }
+    })
+  })
+}
+
+const getRowKeys = (row) => { // 行数据的Key
+  return row.case_id
 }
 
 onMounted(() => {
