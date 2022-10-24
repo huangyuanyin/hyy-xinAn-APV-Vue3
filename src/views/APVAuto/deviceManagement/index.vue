@@ -736,6 +736,10 @@ const handleBuildCurrentChange = (val: number) => {
 </script>
 
 <style lang="scss" scoped>
+.tagType {
+  margin: 0px 5px;
+}
+
 .search-wrap {
   margin-bottom: 20px;
   display: flex;
