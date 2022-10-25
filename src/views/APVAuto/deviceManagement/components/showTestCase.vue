@@ -33,6 +33,13 @@
                 <el-table-column prop="value" label="数量"></el-table-column>
               </el-table>
             </el-card>
+            <el-card v-if="props.row.children.length >= 48">
+              <el-table style="margin: 10px;" :data="props.row.children.slice(48,60)" :border="childBorder"
+                :show-header="true">
+                <el-table-column prop="name" label="模块名"></el-table-column>
+                <el-table-column prop="value" label="数量"></el-table-column>
+              </el-table>
+            </el-card>
           </div>
         </div>
       </template>

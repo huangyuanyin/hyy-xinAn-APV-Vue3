@@ -8,7 +8,7 @@ const service = axios.create({
   // baseURL:"http://10.20.84.55:8000/",
   // baseURL: "http://10.20.70.89:8082", // 登录
   // baseDatasURL:"http://10.20.86.27:8015", // POC测试
-  timeout: 120000,
+  timeout: 12000,
 });
 
 // 添加请求拦截器
