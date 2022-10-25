@@ -20,7 +20,7 @@ onMounted(() => {
 
 const init = () => {
   const chartBox = echarts.init(document.getElementById('reportDetailEchart'));
-  var seriesdata1 = [{ name: '完成数', value: 50 }, { name: '成功数', value: 60 }, { name: '失败数', value: props.reportDetailData.fail_cases }];
+  var seriesdata1 = [{ name: '完成数', value: 0 }, { name: '成功数', value: 0 }, { name: '失败数', value: props.reportDetailData.fail_cases }];
   var colorList = ['#407AFB', '#1791FF', '#36B0FE', '#6635EF', '#73ACFF', '#41CBAB', '#7BDD43', '#FFC653', '#FF6519', '#EE3939', '#FFAFDA', '#00FFFF']
 
   var objData = array2obj(seriesdata1, 'name')
