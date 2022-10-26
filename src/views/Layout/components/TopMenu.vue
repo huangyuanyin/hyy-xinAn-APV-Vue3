@@ -69,6 +69,7 @@ import {
 } from "@element-plus/icons-vue";
 import Drawer from "@/components/Drawer.vue";
 import { useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
 export default defineComponent({
   components: {
     ArrowDown,
@@ -95,7 +96,7 @@ export default defineComponent({
     const toLink = (index) => {
       switch (index) {
         case 0:
-          console.log("index", index);
+          ElMessage.warning("暂不支持")
           break;
         case 1:
           store.LoginOut();
@@ -216,6 +217,10 @@ export default defineComponent({
         width: 30px;
         height: 30px;
         border-radius: 50%;
+      }
+
+      .el-dropdown-link:hover {
+        cursor: pointer;
       }
 
       .el-dropdown {

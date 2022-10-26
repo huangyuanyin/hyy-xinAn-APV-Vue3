@@ -380,6 +380,7 @@ const getOneData = (type, id) => {
       state.d_groupData.map(item => {
         if (item.id === id) {
           addGroupForm.id = item.id
+          addGroupForm.ip = item.ip
           addGroupForm.name = item.name
           addGroupForm.build = item.build
           addGroupForm.buildip = item.buildip
@@ -486,6 +487,7 @@ const getD_group = async () => {
   state.d_groupData.map((item) => {
     item.uptime = utc2beijing(item.uptime)
   })
+  groupTotal.value = group.data.total
 }
 
 // 分组管理 添加接口
@@ -546,7 +548,6 @@ const deleteD_group = async (id) => {
 const getDevice = async () => {
   let res = await deviceApi()
   state.deviceData = res.data
-  groupTotal.value = res.total
   console.log("设备管理...", state.deviceData);
 }
 

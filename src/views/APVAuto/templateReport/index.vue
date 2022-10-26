@@ -17,7 +17,7 @@
 
     <el-table ref="multipleTableRef" :data="tableData" style="width: 100%; margin-top: 10px"
       @selection-change="handleSelectionChange" v-loading="loading">
-      <el-table-column type="selection" width="55" align="center" />
+      <!-- <el-table-column type="selection" width="55" align="center" /> -->
       <el-table-column property="id" label="报告ID" align="center" />
       <el-table-column property="name" label="任务名称" align="center">
         <template #default="scope">
@@ -28,12 +28,14 @@
       <el-table-column property="counts" label="用例总数" align="center" />
       <el-table-column property="fail_cases" label="失败数" show-overflow-tooltip align="center">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click="toDetail(scope.row.id,'FailNumDetail')">
+          <el-button link type="primary" size="small" @click="toDetail(scope.row.id,'FailNumDetail')"
+            v-if="scope.row.fail_cases != 0">
             {{scope.row.fail_cases}}
           </el-button>
+          <span v-else>{{scope.row.fail_cases}}</span>
         </template>
       </el-table-column>
-      <el-table-column property="uptime" label="更新时间" width="220" align="center" />
+      <el-table-column property="uptime" label="更新时间" :formatter="dateFormatter" width="220" align="center" />
       <el-table-column property="user" label="负责人" align="center" />
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="scope">
@@ -44,10 +46,10 @@
       </el-table-column>
     </el-table>
     <div class="bottomWrap">
-      <div class="buttonGroup">
+      <!-- <div class="buttonGroup">
         <el-button @click="toDataAnalysis()" type="primary" disabled> 批量删除 </el-button>
         <el-button @click="clearSelection()">重新选择</el-button>
-      </div>
+      </div> -->
       <el-pagination v-model:currentPage="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 30, 40]"
         :small="false" :background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
         @size-change="handleSizeChange" @current-change="handleCurrentChange" />
@@ -62,6 +64,7 @@ import { getReportApi } from "@/api/APV/testReport.js"
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { getDataApi } from "@/utils/getApi.js"
+import { utc2beijing } from "@/utils/util.js"
 import MarkDialog from './components/MarkDialog.vue';
 import { buildApi } from '@/api/APV/buildManagement.js'
 import { Calendar, Search } from '@element-plus/icons-vue'
@@ -169,6 +172,11 @@ const toDetail = (id, type) => {
   }
 }
 
+const dateFormatter = (row, column) => {
+  let date = row[column.property]
+  return utc2beijing(date)
+}
+
 const handleSizeChange = (val: number) => {
   console.log(`${val} items per page`)
 }
@@ -213,7 +221,7 @@ onMounted(async () => {
 .bottomWrap {
   display: flex;
   margin-top: 20px;
-  justify-content: space-between;
+  justify-content: flex-end;
 }
 
 :deep(.cell) {
