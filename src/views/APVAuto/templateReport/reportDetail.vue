@@ -564,7 +564,9 @@ const toDetailCase = (log) => {
 onMounted(async () => {
   isHistory ? await getHistoryReportDetail(reportId) : await getReportDetail(reportId)
   isHistory ? await getHistoryReportModuleDetail({ id: reportId, details: 'True', }) : await getReportModuleDetail({ id: reportId, details: 'True', })
-  await showOverview()
+  nextTick(() => {
+    showOverview()
+  })
 })
 
 </script>

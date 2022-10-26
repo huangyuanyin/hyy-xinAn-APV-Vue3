@@ -16,23 +16,45 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(__dirname, "src")
       }
     },
+    base: "/netapv/",
+    build: {
+      chunkSizeWarningLimit: 1500000,
+      outDir: "dist",
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              return id.toString().split('node_modules/')[1].split('/')[0].toString();
+            }
+          }
+        }
+      },
+      sourcemap: true, //是否构建source map 文件
+      terserOptions: {
+        // 生产环境移除console
+        compress: {
+          drop_console: true,
+          drop_debugger: true,
+        },
+      },
+    },
     // base: env.VITE_API_BASE_URL,
     // define:{
     //   'process.env.VITE_API_BASE_URL':JSON.stringify(env.VITE_API_BASE_URL)
     // },
 
-    server: {
-      proxy: {
-        '/api': {
-          // target:"http://ceshi13.dishait.cn",
-          target: "http://10.20.70.89:8082",
-          changeOrigin: true,
-          pathRewrite: {
-            '^/api': ''
-          }
-        }
-      }
-    },
+    // server: {
+    //   proxy: {
+    //     '/api': {
+    //       // target:"http://ceshi13.dishait.cn",
+    //       target: "http://10.20.70.89:8082",
+    //       changeOrigin: true,
+    //       pathRewrite: {
+    //         '^/api': ''
+    //       }
+    //     }
+    //   }
+    // },
 
     plugins: [
       vue(),

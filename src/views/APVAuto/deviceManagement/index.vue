@@ -1,5 +1,6 @@
 <template>
-  <div class="performanceManagement">
+  <div class="performanceManagement" v-loading="loadingInstance" element-loading-text="上传文件较大，请耐心等待..."
+    :element-loading-spinner="svg" element-loading-svg-view-box="-10, -10, 50, 50">
     <el-tabs v-model="activeName" class="tabs" @tab-click="handleClick">
       <el-tab-pane label="测试平台管理" name="testbedManagement">
         <el-card class="group-card" shadow="never">
@@ -211,6 +212,17 @@ const groupDialogVisible = ref(false)
 const isShowMore = ref(false)
 const deviceDrawer = ref(false)
 const fileDisabled = ref(false)
+const loadingInstance = ref(false)
+const svg = `
+  <path class="path" d="
+    M 30 15
+    L 28 17
+    M 25.61 25.61
+    A 15 15, 0, 0, 1, 15 30
+    A 15 15, 0, 1, 1, 27.99 7.5
+    L 15 15
+  " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)"/>
+`
 const direction = ref('rtl')
 const testName = ref('') // 绑定设备时传入的 测试平台名称name
 const state: any = reactive({
@@ -220,6 +232,7 @@ const state: any = reactive({
   d_groupData: [], // 测试平台管理数据
   groupIdList: [], // 分组ID集合
   buildData: [], // build管理数据
+  buildName: []
 })
 const titleDialog = ref("")
 const statusOptions = [
@@ -655,6 +668,7 @@ const deleteD_type = async (id) => {
 // build管理 获取接口
 const getBuild = async () => {
   let res = await buildApi({ filetype: "apvbuild" })
+  state.buildName = res.data
   state.buildData = res.data.map(item => ({ name: item }))
   buildTotal.value = res.dada?.total || 0
 }
@@ -687,25 +701,37 @@ const changeStatus = (data) => {
 
 // 文件上传
 const handleUpload = async (files) => {
+  if (state.buildName.includes(files.file.name)) {
+    ElMessage.error("请勿重复上传该文件！")
+    return false
+  }
   fileDisabled.value = true
   console.log("onChange...", files)
   let formData = new FormData()
   formData.append('file', files.file)
   formData.append('filetype', "apvbuild")
-  let res = await buildUploadApi(formData)
+  buildUpload(formData)
+}
+
+const buildUpload = async (data) => {
+  loadingInstance.value = true
+  let res = await buildUploadApi(data)
   if (res.code === 1000) {
     fileDisabled.value = false
+    loadingInstance.value = false
+    getBuild()
     ElMessage({
       message: "上传成功",
       type: "success",
       duration: 2000,
     });
   } else {
+    loadingInstance.value = false
     fileDisabled.value = false
     ElMessage({
       message: res.msg || "上传失败",
       type: "error",
-      duration: 2000,
+      duration: 3500,
     });
   }
 }

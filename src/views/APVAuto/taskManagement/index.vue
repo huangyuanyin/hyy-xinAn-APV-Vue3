@@ -125,9 +125,9 @@
                 <div class="status-point" style=" background-color:#409EFF"></div>
                 <span style="color:#409EFF">已完成</span>
               </div>
-              <div class="stateStyle" v-if="scope.row.state === 'ready'">
-                <div class="status-point" style=" background-color:Black"></div>
-                <span style="color:Black">准备中</span>
+              <div class="stateStyle hhh" v-if="scope.row.state === 'ready'">
+                <div class="status-point hhh" style=" background-color:#666666"></div>
+                <span style="color:#666666">准备中</span>
               </div>
             </template>
           </el-table-column>
@@ -202,10 +202,10 @@
         <el-form :inline="false" :model="addTaskForm" ref="addTaskRuleFormRef" :rules="addTaskFormRules"
           class="addDevice-form" label-width="110px">
           <el-form-item label="任务名称" prop="name">
-            <el-input v-model="addTaskForm.name" placeholder="请输入..." />
+            <el-input v-model="addTaskForm.name" placeholder="请输入..." :disabled="editDisabled" />
           </el-form-item>
           <el-form-item label="build版本" prop="build">
-            <el-select v-model="addTaskForm.build" placeholder="请选择...">
+            <el-select v-model="addTaskForm.build" placeholder="请选择..." :disabled="editDisabled">
               <el-option v-for="(item, index) in state.buildData" :key="'buildData' + index" :label="item.name"
                 :value="item.name" />
             </el-select>
@@ -320,6 +320,7 @@ const groupDialogVisible = ref(false)
 const taskProgressDialog = ref(false)
 const platformDialog = ref(false)
 const tableLoading = ref(false)
+const editDisabled = ref(false)
 const percentage2 = ref(0)
 const textarea = ref('')
 const testPlatList = ref([]) // 已有测试平台集合List
@@ -379,7 +380,6 @@ const getCasesOptions = (data) => {
 
   // 只单选
   addTaskForm.cases = arr[0]
-
   // console.log("dada", cases_name, modules_name, arr);
 }
 
@@ -497,7 +497,7 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
 const openAddDialog = async (type, operation, data) => {
   switch (type) {
     case 'task':
-      operation == 'add' ? (titleDialog.value = '添加任务') && (buttonText.value = '添加') : (titleDialog.value = '编辑任务') && (buttonText.value = '确定')
+      operation == 'add' ? (titleDialog.value = '添加任务') && (buttonText.value = '添加') && (editDisabled.value = false) : (titleDialog.value = '编辑任务') && (buttonText.value = '确定') && (editDisabled.value = true)
       casValue.value = []
       if (operation == 'add') {
         isPhysicalMachine.value = '0'
@@ -698,6 +698,7 @@ const addTask = async (params) => {
       message: res?.msg || "添加失败",
       type: "error",
       duration: 3000,
+      showClose: true,
     });
   }
 }
@@ -718,6 +719,7 @@ const editTask = async (params) => {
       message: res?.msg || "编辑失败",
       type: "error",
       duration: 3000,
+      showClose: true,
     });
   }
 }
@@ -827,7 +829,8 @@ const putTestPlat = async (params) => {
     ElMessage({
       message: res?.msg || "添加失败",
       type: "error",
-      duration: 2500,
+      duration: 3500,
+      showClose: true,
     });
   }
 }

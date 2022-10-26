@@ -13,7 +13,9 @@
       <el-table-column property="pass" label="成功数" align="center" />
       <el-table-column property="fail" label="失败数" show-overflow-tooltip align="center">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click="toDetail(scope.row.id,'FailNumDetail')">22</el-button>
+          <el-button link type="primary" size="small" @click="toDetail(scope.row.id,'FailNumDetail')">
+            {{scope.row.fail}}
+          </el-button>
         </template>
       </el-table-column>
       <el-table-column property="uptime" label="创建时间" align="center" />

@@ -1,6 +1,7 @@
 import {
   createRouter,
   createWebHistory,
+  createWebHashHistory
 } from "vue-router";
 
 import Layout from "@/views/Layout/index.vue"; // 布局组件 不需要懒加载
@@ -192,7 +193,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory('/netapv/'),
   routes,
 });
 

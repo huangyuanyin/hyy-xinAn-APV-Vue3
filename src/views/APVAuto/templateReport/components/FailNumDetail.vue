@@ -55,7 +55,7 @@ const activeName = ref('first');
 const case_script = ref("")
 const case_log = ref("")
 const shell_log = ref("")
-const expands = ref([]) // 通过该属性设置Table目前的展开行，需要设置row-key属性才能使用，该属性为展开行的keys数组
+const expands = ref([])
 const caseScriptValue = ref("20 | 400 | slb_rr_100.pl | Thursday, September 08, 2022 AM02:30:04 CST \n20 | 200 |  TIP all 10015100161000710008 \n20 | 200 |  TIP  10015:10016 \n20 | 200 |  2:30:4-172.16.26.215-ttyS0 :  user sunyb pass click1 \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : script dir /home/sunyb/sunyb.ws/src_apv/result/log//2022-09-08-02:29:22--Beta_APV_10_5_0_42.array/smoke_test//result/mnet_env//T_0001/shell-ttyS0.txt \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : Test Machine ip 172.16.26.215 \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : login user root \n20 | 200 |   \n20 | 200 |  the last prompt \n20 | 200 |  command timed-out at ../../util/cli/ca.pm line 159 \n20 | 200 |   \n 50 | 255 | Unkonw | FAIL | Unkonw Exit Code 255 \n20 | 500 | slb_rr_100.pl | Thursday, September 08, 2022 AM02:30:54 CST \nunable to update smoke test result")
 const language = ref('perl')
 const editorMounted = (editor: monaco.editor.IStandaloneCodeEditor) => {
@@ -76,7 +76,6 @@ const closeCaseScriptDialog = () => {
   isShowCaseScriptDialog.value = false
 }
 
-// 测试报告失败数详情
 const getReportModuleDetail = async (params) => {
   loading.value = true
   let res = await getReportDetailApi(params)
@@ -86,7 +85,6 @@ const getReportModuleDetail = async (params) => {
   }
 }
 
-// 历史报告失败数详情 
 const getHistoryReportModuleDetail = async (params) => {
   loading.value = true
   let res = await getHistoryReportApi(params)
@@ -102,12 +100,9 @@ const getLog = (row, expandedRows) => {
     return false
   } else {
     if (expands.value.length != 0) {
-      //如果存在展开行,清空expands数组,使它关闭
       expands.value.splice(0, expands.value.length);
-      //打开点击的行
       expands.value.push(row.case_id);
     } else {
-      //如果不存在展开行,直接push打开点击的行
       expands.value.push(row.case_id);
     }
   }
@@ -133,7 +128,7 @@ const getLog = (row, expandedRows) => {
   })
 }
 
-const getRowKeys = (row) => { // 行数据的Key
+const getRowKeys = (row) => {
   return row.case_id
 }
 

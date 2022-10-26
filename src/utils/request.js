@@ -8,7 +8,7 @@ const service = axios.create({
   // baseURL:"http://10.20.84.55:8000/",
   // baseURL: "http://10.20.70.89:8082", // 登录
   // baseDatasURL:"http://10.20.86.27:8015", // POC测试
-  timeout: 12000,
+  timeout: 120000,
 });
 
 // 添加请求拦截器
@@ -62,23 +62,23 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   function (response) {
     // 对响应数据做点什么
-    if (response.data.code != "1000") {
-      ElMessage({
-        message: response.data?.msg || "请求失败",
-        type: "error",
-        duration: 1000,
-      });
-      return Promise.reject(response);
-    }
+    // if (response.data.code != "1000") {
+    //   ElMessage({
+    //     message: response.data?.msg || "请求失败",
+    //     type: "error",
+    //     duration: 3000,
+    //   });
+    //   return Promise.reject(response);
+    // }
     return response.data;
   },
   function (error) {
     // 对响应错误做点什么
-    ElMessage({
-      message: error.data?.msg || "请求失败",
-      type: "error",
-      duration: 1000,
-    });
+    // ElMessage({
+    //   message: error.data?.msg || "请求失败",
+    //   type: "error",
+    //   duration: 3000,
+    // });
     return Promise.reject(error);
   }
 );

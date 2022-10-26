@@ -1,14 +1,19 @@
 <template>
   <el-card shadow="never">
-    <el-form :inline="true" :model="formInline" class="exportForm">
-      <el-form-item label="">
-        <el-input v-model="formInline.id" placeholder="搜索build版本、测试平台、负责人..." />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="onQuery">搜索</el-button>
-        <el-button @click="onReset">重置</el-button>
-      </el-form-item>
-    </el-form>
+    <div class="search-wrap">
+      <div>
+        <el-select size="large" clearable v-model="formInline.build" placeholder="请选择要搜索的build版本...">
+          <el-option v-for="(item, index) in state.buildData" :key="'buildData' + index" :label="item.name"
+            :value="item.name" />
+        </el-select>
+        <el-select size="large" clearable v-model="formInline.group" placeholder="请选择要搜索的任务状态..."
+          @change="getGroupDataId">
+          <el-option v-for="(item, index) in state.selectStatusList" :key="'selectStatusList' + index"
+            :label="item.label" :value="item.value" />
+        </el-select>
+        <el-input size="large" clearable v-model="formInline.user" placeholder="请输入要搜索的负责人..." :suffix-icon="Search" />
+      </div>
+    </div>
 
     <el-table ref="multipleTableRef" :data="tableData" style="width: 100%; margin-top: 10px"
       @selection-change="handleSelectionChange" v-loading="loading">
@@ -23,7 +28,9 @@
       <el-table-column property="counts" label="用例总数" align="center" />
       <el-table-column property="fail_cases" label="失败数" show-overflow-tooltip align="center">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click="toDetail(scope.row.id,'FailNumDetail')">22</el-button>
+          <el-button link type="primary" size="small" @click="toDetail(scope.row.id,'FailNumDetail')">
+            {{scope.row.fail_cases}}
+          </el-button>
         </template>
       </el-table-column>
       <el-table-column property="uptime" label="更新时间" width="220" align="center" />
@@ -56,6 +63,8 @@ import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { getDataApi } from "@/utils/getApi.js"
 import MarkDialog from './components/MarkDialog.vue';
+import { buildApi } from '@/api/APV/buildManagement.js'
+import { Calendar, Search } from '@element-plus/icons-vue'
 
 const route = useRoute();
 const router = useRouter();
@@ -80,6 +89,33 @@ const formInline: any = reactive({
   ipversion: "",
   build: "",
 });
+
+const state = reactive({
+  buildData: [],
+  selectStatusList: [
+    {
+      value: 'running',
+      label: '运行中',
+    },
+    {
+      value: 'fail',
+      label: '已失败',
+    },
+    {
+      value: 'stop',
+      label: '已停止',
+    }
+  ]
+})
+
+const getBuild = async () => {
+  let res = await buildApi({ filetype: "apvbuild" })
+  state.buildData = res.data.map(item => ({ name: item }))
+}
+
+const getGroupDataId = (value) => {
+  // addTaskForm.group = value
+}
 
 const getReport = async () => {
   let res = await getReportApi()
@@ -148,8 +184,9 @@ const closeMarkDialog = (res) => {
   isShowMarkDialog.value = res
 }
 
-onMounted(() => {
-  getReport()
+onMounted(async () => {
+  await getReport()
+  await getBuild()
 });
 
 </script>
@@ -188,6 +225,21 @@ onMounted(() => {
     height: 24px;
     line-height: 24px;
     margin-left: 10px;
+  }
+}
+
+.search-wrap {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: flex-end;
+
+  .el-select {
+    margin: 0 10px;
+    width: 220px;
+  }
+
+  .el-input {
+    width: 220px;
   }
 }
 </style>

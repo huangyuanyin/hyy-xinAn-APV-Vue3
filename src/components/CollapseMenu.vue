@@ -1,7 +1,7 @@
 <template>
   <el-aside>
     <el-menu :default-active="defaultActiveIndex" class="el-menu" :collapse="store.isCollapse"
-      active-text-color="rgb(85, 85, 85)" background-color="rgb(245, 245, 245)" text-color="rgb(51, 51, 51)" router>
+      active-text-color="rgb(85, 85, 85)" text-color="rgb(51, 51, 51)" router>
       <template v-for="(item, index) in menuList" :key="index + 'menu'">
         <!-- 一级菜单(无子级) -->
         <el-menu-item v-if="!item.children.length" :index="item.path" :disabled="item.isDisabled">
@@ -50,7 +50,7 @@ export default defineComponent({
     const store = useAppStore();
     const defaultActiveIndex = ref("")
     onMounted(() => {
-      defaultActiveIndex.value = window.location.pathname
+      defaultActiveIndex.value = window.location.hash.replace("#", "")
     });
     return {
       store, defaultActiveIndex
