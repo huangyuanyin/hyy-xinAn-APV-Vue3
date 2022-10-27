@@ -98,7 +98,9 @@
               <span v-if="scope.row.number">{{scope.row.number[0]}}</span>
               <span style="margin:0 3px">/</span>
               <span class="failNumStyle" @click="toDetail(scope.row.id)"
-                v-if="scope.row.number">{{scope.row.number[1]}}</span>
+                v-if="scope.row.number && scope.row.number[1]!=0">{{scope.row.number[1]}}</span>
+              <span class="failNumStyle"
+                v-if="scope.row.number && scope.row.number[1]==0">{{scope.row.number[1]}}</span>
             </template>
           </el-table-column>
           <!-- <el-table-column prop="counts" label="总用例数" align="center" width="120" />
@@ -135,7 +137,7 @@
           <el-table-column prop="uptimeAfter" label="更新时间" align="center" width="200" />
           <el-table-column fixed="right" label="操作" align="center">
             <template #default="scope">
-              <el-popover placement="bottom" :width="10" trigger="click" popper-class="morePopover">
+              <el-popover placement="bottom" :width="10" trigger="hover" popper-class="morePopover">
                 <template #reference>
                   <el-button link type="primary" size="small">启停</el-button>
                 </template>
@@ -191,7 +193,7 @@
           </el-table-column>
         </el-table>
         <el-pagination v-model:currentPage="taskCurrentPage" v-model:page-size="taskPageSize"
-          :page-sizes="[10, 20, 30, 40]" layout="total, sizes, prev, pager, next, jumper" :total="taskTotal"
+          :page-sizes="[10, 20, 30, 40]" layout="total, prev, pager, next, jumper" :total="taskTotal"
           @size-change="handleTaskSizeChange" @current-change="handleTaskCurrentChange" />
       </el-card>
       <!-- </el-tab-pane> -->
@@ -321,11 +323,13 @@ const taskProgressDialog = ref(false)
 const platformDialog = ref(false)
 const tableLoading = ref(false)
 const editDisabled = ref(false)
-const percentage2 = ref(0)
 const textarea = ref('')
 const testPlatList = ref([]) // 已有测试平台集合List
 const buttonText = ref("添加")
 const timer = ref(null) // 定时器
+const taskCurrentPage = ref(1)
+const taskPageSize = ref(10)
+const taskTotal = ref(0)
 const casesProps = {
   multiple: true,
   label: 'name',
@@ -626,9 +630,9 @@ const handleDelete = (type, data) => {
 
 onMounted(async () => {
   await getD_group()
-  await getTask()
+  await getTask(1)
   await getBuild()
-  await handle()
+  // await handle()
   await getTaskConfig()
   await getCase()
 })
@@ -662,18 +666,20 @@ const handle = () => {
       })
     })
   })
-
   tableLoading.value = false
 }
 
 // 任务管理 获取接口
-const getTask = async () => {
+const getTask = async (page) => {
   tableLoading.value = true
-  let res = await taskApi()
+  let res = await taskApi({ page })
   if (res.code == 1000) {
+    tableLoading.value = false
     state.tableData = res.data
     taskTotal.value = res.total || 0
+    handle()
   } else {
+    tableLoading.value = false
     ElMessage({
       message: res.msg || "请求失败",
       type: "error",
@@ -686,7 +692,7 @@ const getTask = async () => {
 const addTask = async (params) => {
   let res = await addTaskApi(params)
   if (res.code === 1000) {
-    await getTask()
+    await getTask(1)
     await handle()
     ElMessage({
       message: "添加成功",
@@ -707,7 +713,7 @@ const addTask = async (params) => {
 const editTask = async (params) => {
   let res = await editTaskApi(params)
   if (res.code === 1000) {
-    await getTask()
+    await getTask(1)
     await handle()
     ElMessage({
       message: "编辑成功",
@@ -731,7 +737,7 @@ const deleteTask = async (id) => {
   }
   let res = await deleteTaskApi(params)
   if (res.code === 1000) {
-    await getTask()
+    await getTask(1)
     await handle()
     ElMessage({
       message: res?.msg || "删除成功",
@@ -816,7 +822,7 @@ const onAddTestPlatForm = async (formEl: FormInstance | undefined) => {
 const putTestPlat = async (params) => {
   let res = await putTestPlatApi(params)
   if (res.code === 1000) {
-    await getTask()
+    await getTask(taskCurrentPage.value)
     await handle()
     platformDialog.value = false
     ElMessage({
@@ -901,7 +907,7 @@ const changeTaskStatus = (val, id) => {
 const getTaskStatus = async (params) => {
   let res = await taskStatusApi(params)
   if (res.code === 1000) {
-    await getTask()
+    await getTask(taskCurrentPage.value)
     await handle()
     ElMessage({
       message: res?.msg || "任务已启动",
@@ -947,7 +953,7 @@ const runAgain = async (value, data) => {
   }
   let res = await putTestPlatApi(params)
   if (res.code === 1000) {
-    await getTask()
+    await getTask(taskCurrentPage.value)
     await handle()
     platformDialog.value = false
     ElMessage({
@@ -1012,14 +1018,13 @@ const onQuery = () => { }
 
 const onResert = () => { }
 
-const taskCurrentPage = ref(1)
-const taskPageSize = ref(10)
-const taskTotal = ref(0)
+
 const handleTaskSizeChange = (val: number) => {
   console.log(`${val} items per page`)
 }
 const handleTaskCurrentChange = (val: number) => {
-  console.log(`current page: ${val}`)
+  taskCurrentPage.value = val
+  getTask(taskCurrentPage.value)
 }
 
 </script>

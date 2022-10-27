@@ -62,23 +62,24 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   function (response) {
     // 对响应数据做点什么
-    // if (response.data.code != "1000") {
-    //   ElMessage({
-    //     message: response.data?.msg || "请求失败",
-    //     type: "error",
-    //     duration: 3000,
-    //   });
-    //   return Promise.reject(response);
-    // }
-    return response.data;
+    if (response.data.code != "1000") {
+      ElMessage({
+        message: response.data?.msg || "请求失败",
+        type: "error",
+        duration: 3000,
+      });
+      // return Promise.reject(response.data);
+    } else {
+      return response.data;
+    }
   },
   function (error) {
     // 对响应错误做点什么
-    // ElMessage({
-    //   message: error.data?.msg || "请求失败",
-    //   type: "error",
-    //   duration: 3000,
-    // });
+    ElMessage({
+      message: error.data?.msg || "请求失败",
+      type: "error",
+      duration: 3000,
+    });
     return Promise.reject(error);
   }
 );

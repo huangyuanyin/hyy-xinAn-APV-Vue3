@@ -2,7 +2,7 @@
   <el-card shadow="never">
     <el-table ref="multipleTableRef" :data="tableData" style="width: 100%; margin-top: 10px"
       @selection-change="handleSelectionChange" v-loading="loading">
-      <el-table-column type="selection" width="55" align="center" />
+      <!-- <el-table-column type="selection" width="55" align="center" /> -->
       <el-table-column property="id" label="历史报告ID" width="200" align="center">
         <template #default="scope">
           <el-button link type="primary" size="small" @click="toDetail(scope.row.id,'history')">{{scope.row.id}}
@@ -29,12 +29,12 @@
       </el-table-column>
     </el-table>
     <div class="bottomWrap">
-      <div class="buttonGroup">
+      <!-- <div class="buttonGroup">
         <el-button @click="toDataAnalysis()" type="primary" disabled> 批量删除 </el-button>
         <el-button @click="clearSelection()">重新选择</el-button>
-      </div>
+      </div> -->
       <el-pagination v-model:currentPage="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 30, 40]"
-        :small="false" :background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
+        :small="false" :background="false" layout="total, prev, pager, next, jumper" :total="total"
         @size-change="handleSizeChange" @current-change="handleCurrentChange" />
     </div>
   </el-card>
@@ -127,6 +127,8 @@ const handleSizeChange = (val: number) => {
 }
 
 const handleCurrentChange = (val: number) => {
+  currentPage.value = val
+  getHistoryReport(taskid, currentPage.value)
   console.log(`current page: ${val}`)
 }
 
@@ -137,10 +139,11 @@ const closeMarkDialog = (res) => {
   isShowMarkDialog.value = res
 }
 
-const getHistoryReport = async (params) => {
-  let res = await getHistoryReportApi(params)
+const getHistoryReport = async (taskid, page) => {
+  let res = await getHistoryReportApi({ taskid, page })
   if (res.code === 1000) {
     tableData.value = res.data || [];
+    total.value = res.total || 0
     await handleData(tableData.value)
   }
 }
@@ -156,7 +159,7 @@ const handleData = (data) => {
 
 onMounted(() => {
   // getDatas(filterData(formInline));
-  getHistoryReport({ taskid })
+  getHistoryReport(taskid, 1)
 })
 
 </script>
@@ -183,7 +186,7 @@ onMounted(() => {
 .bottomWrap {
   display: flex;
   margin-top: 20px;
-  justify-content: space-between;
+  justify-content: flex-end;
 }
 
 :deep(.cell) {

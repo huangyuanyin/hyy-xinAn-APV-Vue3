@@ -51,7 +51,7 @@
         <el-button @click="clearSelection()">重新选择</el-button>
       </div> -->
       <el-pagination v-model:currentPage="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 30, 40]"
-        :small="false" :background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
+        :small="false" :background="false" layout="total, prev, pager, next, jumper" :total="total"
         @size-change="handleSizeChange" @current-change="handleCurrentChange" />
     </div>
   </el-card>
@@ -63,19 +63,16 @@ import { onMounted, ref, reactive, toRef, toRefs } from "vue";
 import { getReportApi } from "@/api/APV/testReport.js"
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
-import { getDataApi } from "@/utils/getApi.js"
 import { utc2beijing } from "@/utils/util.js"
 import MarkDialog from './components/MarkDialog.vue';
 import { buildApi } from '@/api/APV/buildManagement.js'
-import { Calendar, Search } from '@element-plus/icons-vue'
+import { Search } from '@element-plus/icons-vue'
 
 const route = useRoute();
 const router = useRouter();
 const multipleTableRef = ref();
 const multipleSelection = ref([]);
 const tableData = ref([]);
-const dialogData = ref([])
-const isShowDialog = ref(false)
 const isShowMarkDialog = ref(false)
 const markData = ref({})
 const loading = ref(false)
@@ -120,10 +117,11 @@ const getGroupDataId = (value) => {
   // addTaskForm.group = value
 }
 
-const getReport = async () => {
-  let res = await getReportApi()
+const getReport = async (page) => {
+  let res = await getReportApi({ page })
   if (res.code === 1000) {
     tableData.value = res.data
+    total.value = res.total
   }
 }
 
@@ -177,14 +175,6 @@ const dateFormatter = (row, column) => {
   return utc2beijing(date)
 }
 
-const handleSizeChange = (val: number) => {
-  console.log(`${val} items per page`)
-}
-
-const handleCurrentChange = (val: number) => {
-  console.log(`current page: ${val}`)
-}
-
 const toMark = (id) => {
   isShowMarkDialog.value = true
 }
@@ -192,8 +182,16 @@ const closeMarkDialog = (res) => {
   isShowMarkDialog.value = res
 }
 
+const handleSizeChange = (val: number) => {
+  console.log(`${val} items per page`)
+}
+const handleCurrentChange = (val: number) => {
+  currentPage.value = val
+  getReport(currentPage.value)
+}
+
 onMounted(async () => {
-  await getReport()
+  await getReport(1)
   await getBuild()
 });
 

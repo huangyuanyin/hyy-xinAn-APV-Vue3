@@ -29,6 +29,9 @@
     <el-table-column label="Comment" prop="comment" />
     <el-table-column label="结果" prop="result" />
   </el-table>
+  <el-pagination v-model:currentPage="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 30, 40]"
+    :small="false" :background="false" layout="total, prev, pager, next, jumper" :total="total"
+    @size-change="handleSizeChange" @current-change="handleCurrentChange" />
   <!--case脚本详情-->
   <el-dialog :model-value="isShowCaseScriptDialog" custom-class="caseScriptDialog" title="case脚本详情"
     @close="closeCaseScriptDialog">
@@ -63,6 +66,9 @@ const editorMounted = (editor: monaco.editor.IStandaloneCodeEditor) => {
 }
 const isShowCaseScriptDialog = ref(false)
 const loading = ref(false)
+const currentPage = ref(1)
+const pageSize = ref(20)
+const total = ref(0)
 
 const toDetailCase = () => {
   isShowCaseScriptDialog.value = true
@@ -76,21 +82,23 @@ const closeCaseScriptDialog = () => {
   isShowCaseScriptDialog.value = false
 }
 
-const getReportModuleDetail = async (params) => {
+const getReportModuleDetail = async (id, details, result, page) => {
   loading.value = true
-  let res = await getReportDetailApi(params)
+  let res = await getReportDetailApi({ id, details, result, page })
   loading.value = false
   if (res.code == 1000) {
     detailTableData.value = res.data || []
+    total.value = res.total || 0
   }
 }
 
-const getHistoryReportModuleDetail = async (params) => {
+const getHistoryReportModuleDetail = async (id, details, result, page) => {
   loading.value = true
-  let res = await getHistoryReportApi(params)
+  let res = await getHistoryReportApi({ id, details, result, page })
   loading.value = false
   if (res.code == 1000) {
     detailTableData.value = res.data || []
+    total.value = res.total || 0
   }
 }
 
@@ -132,9 +140,19 @@ const getRowKeys = (row) => {
   return row.case_id
 }
 
+const handleSizeChange = (val: number) => {
+  console.log(`${val} items per page`)
+}
+const handleCurrentChange = (val: number) => {
+  currentPage.value = val
+  isHistoty ? getHistoryReportModuleDetail(failId, 'True', "fail", currentPage.value) : getReportModuleDetail(failId, 'True', "fail", currentPage.value)
+}
+
 onMounted(() => {
-  isHistoty ? getHistoryReportModuleDetail({ id: failId, details: 'True', result: "fail" }) : getReportModuleDetail({ id: failId, details: 'True', result: "fail" })
+  isHistoty ? getHistoryReportModuleDetail(failId, 'True', "fail", 1) : getReportModuleDetail(failId, 'True', "fail", 1)
 })
+
+
 
 </script>
 
@@ -143,5 +161,10 @@ onMounted(() => {
   position: fixed;
   top: 70px;
   right: 25px;
+}
+
+.el-pagination {
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 </style>

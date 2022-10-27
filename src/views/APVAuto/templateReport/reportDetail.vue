@@ -26,13 +26,13 @@
         <el-form :inline="true" :model="formInline" class="detailForm">
           <el-form-item label="">
             <el-select clearable v-model="status" class="m-2" placeholder="选择状态类型" size="default"
-              @change="selectSearch()">
+              @change="selectSearch(1)">
               <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
           <el-form-item label="">
             <el-select clearable v-model="casValue" collapse-tags collapse-tags-tooltip placeholder="选择模块"
-              style="width: 240px" @change="selectSearch()">
+              style="width: 240px" @change="selectSearch(1)">
               <el-option v-for="item in caseOptions" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
@@ -81,6 +81,9 @@
           <el-table-column label="Comment" prop="comment" />
           <el-table-column label="结果" prop="result" />
         </el-table>
+        <el-pagination v-model:currentPage="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 30, 40]"
+          :small="false" :background="false" layout="total, prev, pager, next, jumper" :total="total"
+          @size-change="handleSizeChange" @current-change="handleCurrentChange" />
       </el-tab-pane>
     </el-tabs>
   </el-card>
@@ -139,6 +142,9 @@ const activeName = ref('first');
 const expands = ref([]) // 通过该属性设置Table目前的展开行，需要设置row-key属性才能使用，该属性为展开行的keys数组
 const casValue: any = ref([]);
 const caseOptions = ref([])
+const currentPage = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
 
 // 调用 测试报告详情接口 
 const getReportDetail = async (id) => {
@@ -184,6 +190,7 @@ const getReportModuleDetail = async (params) => {
   let res = await getReportDetailApi(params)
   if (res.code == 1000) {
     detailTableData.value = res.data || []
+    total.value = res.total || 0
   }
 }
 
@@ -191,6 +198,7 @@ const getHistoryReportModuleDetail = async (params) => {
   let res = await getHistoryReportDetailApi(params)
   if (res.code == 1000) {
     detailTableData.value = res.data || []
+    total.value = res.total || 0
   }
 }
 
@@ -207,12 +215,14 @@ const statusOptions = ref(options)
 const status = ref("")
 
 // 选择状态/模块
-const selectSearch = async () => {
+const selectSearch = async (page) => {
+  currentPage.value = page
   const params = {
     id: reportId,
     details: 'True',
     result: status.value ? status.value : undefined,
-    module: casValue.value ? casValue.value : undefined
+    module: casValue.value ? casValue.value : undefined,
+    page: currentPage.value
   }
   isHistory ? getHistoryReportModuleDetail(params) : getReportModuleDetail(params)
 }
@@ -561,9 +571,17 @@ const toDetailCase = (log) => {
   isShowCaseScriptDialog.value = true
 }
 
+const handleSizeChange = (val: number) => {
+  console.log(`${val} items per page`)
+}
+const handleCurrentChange = (val: number) => {
+  currentPage.value = val
+  selectSearch(currentPage.value)
+}
+
 onMounted(async () => {
   isHistory ? await getHistoryReportDetail(reportId) : await getReportDetail(reportId)
-  isHistory ? await getHistoryReportModuleDetail({ id: reportId, details: 'True', }) : await getReportModuleDetail({ id: reportId, details: 'True', })
+  isHistory ? await getHistoryReportModuleDetail({ id: reportId, details: 'True', page: 1 }) : await getReportModuleDetail({ id: reportId, details: 'True', page: 1 })
   nextTick(() => {
     showOverview()
   })
@@ -711,6 +729,11 @@ onMounted(async () => {
       margin-left: 5px;
     }
   }
+}
+
+.el-pagination {
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 </style>
 

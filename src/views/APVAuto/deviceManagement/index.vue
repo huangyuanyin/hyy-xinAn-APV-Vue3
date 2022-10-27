@@ -58,7 +58,7 @@
             </el-table-column>
           </el-table>
           <el-pagination v-model:currentPage="groupCurrentPage" v-model:page-size="groupPageSize"
-            :page-sizes="[10, 20, 30, 40]" layout="total, sizes, prev, pager, next, jumper" :total="groupTotal"
+            :page-sizes="[10, 20, 30, 40]" layout="total, prev, pager, next, jumper" :total="groupTotal"
             @size-change="handleGroupSizeChange" @current-change="handleGroupCurrentChange" />
         </el-card>
       </el-tab-pane>
@@ -66,7 +66,7 @@
         <el-card class="build-card" shadow="never">
           <el-upload class="upload-demo" :show-file-list="false" action="action" :http-request="handleUpload"
             :on-success="handleSuccess">
-            <el-button type="primary" style="margin-bottom: 20px" :auto-upload="false" :disabled="fileDisabled">
+            <el-button type="primary" style="margin-bottom: 20px" :auto-upload="false">
               上传文件
             </el-button>
           </el-upload>
@@ -84,7 +84,7 @@
             </el-table-column>
           </el-table>
           <el-pagination v-model:currentPage="buildCurrentPage" v-model:page-size="buildPageSize"
-            :page-sizes="[10, 20, 30, 40]" layout="total, sizes, prev, pager, next, jumper" :total="buildTotal"
+            :page-sizes="[10, 20, 30, 40]" layout="total, prev, pager, next, jumper" :total="buildTotal"
             @size-change="handleBuildSizeChange" @current-change="handleBuildCurrentChange" />
         </el-card>
       </el-tab-pane>
@@ -211,7 +211,6 @@ const dialogVisible = ref(false);
 const groupDialogVisible = ref(false)
 const isShowMore = ref(false)
 const deviceDrawer = ref(false)
-const fileDisabled = ref(false)
 const loadingInstance = ref(false)
 const svg = `
   <path class="path" d="
@@ -223,6 +222,12 @@ const svg = `
     L 15 15
   " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)"/>
 `
+const groupCurrentPage = ref(1)
+const groupPageSize = ref(10)
+const groupTotal = ref(0)
+const buildCurrentPage = ref(1)
+const buildPageSize = ref(10)
+const buildTotal = ref(0)
 const direction = ref('rtl')
 const testName = ref('') // 绑定设备时传入的 测试平台名称name
 const state: any = reactive({
@@ -476,13 +481,13 @@ const handleDelete = (type, id) => {
 onMounted(() => {
   getDevice()
   getD_typeApi()
-  getD_group()
+  getD_group(1)
   getBuild()
 })
 
 // 分组管理 接口
-const getD_group = async () => {
-  let group = await d_groupApi()
+const getD_group = async (page) => {
+  let group = await d_groupApi({ page })
   state.d_groupData = group.data.data
   state.d_groupData.map((item) => {
     item.uptime = utc2beijing(item.uptime)
@@ -494,7 +499,7 @@ const getD_group = async () => {
 const addD_group = async (params) => {
   let res = await addD_groupApi(params)
   if (res.code === 1000) {
-    getD_group()
+    getD_group(1)
     ElMessage({
       message: "添加成功",
       type: "success",
@@ -513,7 +518,7 @@ const addD_group = async (params) => {
 const editD_group = async (params) => {
   let res = await editD_groupApi(params)
   if (res.code === 1000) {
-    getD_group()
+    getD_group(1)
     ElMessage({
       message: res?.msg || "编辑成功",
       type: "success",
@@ -535,7 +540,7 @@ const deleteD_group = async (id) => {
   }
   let res = await deleteD_groupApi(params)
   if (res.code === 1000) {
-    getD_group()
+    getD_group(1)
     ElMessage({
       message: res?.msg || "删除成功",
       type: "success",
@@ -706,7 +711,6 @@ const handleUpload = async (files) => {
     ElMessage.error("请勿重复上传该文件！")
     return false
   }
-  fileDisabled.value = true
   console.log("onChange...", files)
   let formData = new FormData()
   formData.append('file', files.file)
@@ -717,8 +721,8 @@ const handleUpload = async (files) => {
 const buildUpload = async (data) => {
   loadingInstance.value = true
   let res = await buildUploadApi(data)
+  loadingInstance.value = false
   if (res.code === 1000) {
-    fileDisabled.value = false
     loadingInstance.value = false
     getBuild()
     ElMessage({
@@ -728,7 +732,6 @@ const buildUpload = async (data) => {
     });
   } else {
     loadingInstance.value = false
-    fileDisabled.value = false
     ElMessage({
       message: res.msg || "上传失败",
       type: "error",
@@ -741,24 +744,20 @@ const handleSuccess: UploadProps['onSuccess'] = () => {
   getBuild()
 }
 
-const groupCurrentPage = ref(1)
-const groupPageSize = ref(10)
-const groupTotal = ref(0)
 const handleGroupSizeChange = (val: number) => {
   console.log(`${val} items per page`)
 }
 const handleGroupCurrentChange = (val: number) => {
-  console.log(`current page: ${val}`)
+  groupCurrentPage.value = val
+  getD_group(groupCurrentPage.value)
 }
 
-const buildCurrentPage = ref(1)
-const buildPageSize = ref(10)
-const buildTotal = ref(0)
 const handleBuildSizeChange = (val: number) => {
   console.log(`${val} items per page`)
 }
 const handleBuildCurrentChange = (val: number) => {
-  console.log(`current page: ${val}`)
+  // groupCurrentPage.value = val
+  // getD_group(groupCurrentPage.value)
 }
 </script>
 
