@@ -20,7 +20,7 @@
   <el-card class="detail-card">
     <el-tabs type="border-card">
       <el-tab-pane label="概览">
-        <div id="overview" style="width: 90vw;height:500px;"></div>
+        <div v-if="isShow" id="overview" style="width: 90vw;height:500px;"></div>
       </el-tab-pane>
       <el-tab-pane label="详情" class="detailsPane">
         <el-form :inline="true" :model="formInline" class="detailForm">
@@ -145,11 +145,13 @@ const caseOptions = ref([])
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
+const isShow = ref(false)
 
 // 调用 测试报告详情接口 
 const getReportDetail = async (id) => {
   let res = await getReportDetailApi({ id, detail: 'True' })
   if (res.code === 1000) {
+    isShow.value = true
     contentItemList.value.map(item => {
       item.value = res.data[item.label]
       if (item.label === 'total') {
@@ -168,6 +170,7 @@ const getReportDetail = async (id) => {
 
 // 调用 历史测试报告详情接口
 const getHistoryReportDetail = async (id) => {
+  isShow.value = true
   let res = await getHistoryReportDetailApi({ id, detail: 'True' })
   if (res.code === 1000) {
     contentItemList.value.map(item => {
@@ -385,6 +388,7 @@ const showOverview = () => {
     },
     series: seriesOption
   }
+  document.getElementById('overview').removeAttribute('_echarts_instance_');
   chartBox.setOption(option);
   // 根据页面大小自动响应图表大小
   window.addEventListener("resize", function () {
