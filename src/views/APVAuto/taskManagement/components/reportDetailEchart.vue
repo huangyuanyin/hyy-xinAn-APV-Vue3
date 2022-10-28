@@ -20,13 +20,13 @@ onMounted(() => {
 
 const init = () => {
   const chartBox = echarts.init(document.getElementById('reportDetailEchart'));
-  var seriesdata1 = [{ name: '完成数', value: 0 }, { name: '成功数', value: 0 }, { name: '失败数', value: props.reportDetailData.fail_cases }];
+  var seriesdata1 = [{ name: '完成数', value: props.reportDetailData.counts }, { name: '成功数', value: props.reportDetailData.success || 0 }, { name: '失败数', value: props.reportDetailData.fail_cases }];
   var colorList = ['#407AFB', '#1791FF', '#36B0FE', '#6635EF', '#73ACFF', '#41CBAB', '#7BDD43', '#FFC653', '#FF6519', '#EE3939', '#FFAFDA', '#00FFFF']
 
   var objData = array2obj(seriesdata1, 'name')
 
   //将合计值转换为数组
-  var h = String(props.reportDetailData.counts);
+  var h = String(props.reportDetailData.counts || 0);
   let arr = h.split('');
   let m = '';
 
@@ -47,8 +47,8 @@ const init = () => {
     },
     title: [{
       "show": true,
-      // text: '{a|类别}{b|数量}{c|占比}',
-      text: '{a|}{b|数量}{c|占比}',
+      // text: '{a|}{b|数量}{c|占比}',
+      text: '{a|}{b|数量}',
       "top": "40%",
       "left": "60%",
       textStyle: {
@@ -65,7 +65,7 @@ const init = () => {
             fontSize: 16,
             color: 'rgba(255,255,255,1)',
             width: 5,
-            padding: [0, 0, 0, 50]
+            padding: [0, 0, 0, 70]
           },
           c: {
             align: 'center',
@@ -119,7 +119,8 @@ const init = () => {
       itemHeight: 12,
       data: seriesdata1,
       formatter: function (name) {
-        return '{a|' + name + '}{b|' + objData[name].value.toFixed(0) + '}{c|' + Number(10).toLocaleString() + '%}'
+        // return '{a|' + name + '}{b|' + objData[name].value.toFixed(0) + '}{c|' + (objData[name].value / props.reportDetailData.counts) + '%}'
+        return '{a|' + name + '}{b|' + objData[name].value.toFixed(0) + '}'
       },
       textStyle: {
         rich: {
@@ -137,7 +138,7 @@ const init = () => {
             color: 'rgba(255,255,255,1)',
             width: 5,
             //fontWeight: 600,
-            padding: [0, 0, 0, 40]
+            padding: [0, 0, 0, 60]
           },
           c: {
             align: 'center',
@@ -169,9 +170,8 @@ const init = () => {
         show: true,
         position: 'outside',
         formatter: function (data) {
-          //console.log('data',data)
           // return '\n{icon|}\n' + '{name|' + data.name + "}" + " {value|" + data.value.toFixed(0) + " ," + data.percent.toFixed(0) + "%}";
-          return '\n{icon|}\n' + '{name|' + data.name + "}" + " {value|" + data.value.toFixed(0) + " ," + data.percent.toFixed(0) + "%}";
+          return '\n{icon|}\n' + '{name|' + data.name + "}" + " {value|" + data.value.toFixed(0) + "}";
         },
         //padding: [-40, -90, -20, -80],
         rich: {
@@ -218,7 +218,8 @@ const init = () => {
     }
     return resObj
   };
-  chartBox.setOption(option);
+  document.getElementById('reportDetailEchart').removeAttribute('_echarts_instance_');
+  chartBox.setOption(option, true);
   // 根据页面大小自动响应图表大小
   window.addEventListener("resize", function () {
     chartBox.resize();

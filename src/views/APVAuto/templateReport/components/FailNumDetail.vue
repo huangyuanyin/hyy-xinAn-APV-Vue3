@@ -7,17 +7,17 @@
         <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
           <el-tab-pane label="用例脚本" name="first">
             <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
-            <el-input v-model="case_script" :autosize="{ minRows: 2, maxRows: 12}" type="textarea"
+            <el-input v-model="case_script" :autosize="{ minRows: 12, maxRows: 22}" type="textarea"
               placeholder="Please input" />
           </el-tab-pane>
           <el-tab-pane label="脚本执行日志" name="second">
             <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
-            <el-input v-model="case_log" :autosize="{ minRows: 2, maxRows: 12}" type="textarea"
+            <el-input v-model="case_log" :autosize="{ minRows: 12, maxRows: 22}" type="textarea"
               placeholder="Please input" />
           </el-tab-pane>
           <el-tab-pane label="APV交互日志" name="three">
             <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
-            <el-input v-model="shell_log" :autosize="{ minRows: 2, maxRows: 12 }" type="textarea"
+            <el-input v-model="shell_log" :autosize="{ minRows: 12, maxRows: 22 }" type="textarea"
               placeholder="Please input" />
           </el-tab-pane>
         </el-tabs>
@@ -166,5 +166,9 @@ onMounted(() => {
 .el-pagination {
   justify-content: flex-end;
   margin-top: 10px;
+}
+
+.demo-tabs {
+  padding-left: 10px;
 }
 </style>

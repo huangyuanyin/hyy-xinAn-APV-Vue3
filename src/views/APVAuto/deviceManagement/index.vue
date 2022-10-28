@@ -18,7 +18,7 @@
             </div>
           </div>
           <el-table :data="state.d_groupData" stripe>
-            <el-table-column prop="name" label="测试平台名称" align="center" />
+            <el-table-column prop="name" label="测试平台名称" align="center" width="200" />
             <el-table-column prop="build" label="测试版本" align="center">
               <template #default="scope">
                 <el-tag class="tagType" v-for="item,index in scope.row.build" :key="'build'+index">
@@ -26,7 +26,7 @@
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="状态" align="center">
+            <el-table-column label="状态" align="center" width="180">
               <template #default="scope">
                 <div class="stateStyle " v-if="scope.row.status === false">
                   <div class="status-point" style=" background-color:#409EFF"></div>
@@ -38,8 +38,8 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column prop="user" label="使用人" align="center" />
-            <el-table-column prop="uptime" label="更新时间" align="center" />
+            <el-table-column prop="user" label="使用人" align="center" width="150" />
+            <el-table-column prop="uptime" label="更新时间" align="center" width="180" />
             <el-table-column fixed="right" label="操作" align="center">
               <template #default="scope">
                 <el-button link type="primary" size="small" @click="openAddDeviceDrawer(scope.row)">绑定设备
@@ -70,7 +70,7 @@
               上传文件
             </el-button>
           </el-upload>
-          <el-table :data="state.buildData" border stripe>
+          <el-table :data="state.buildData" border stripe height="62vh">
             <el-table-column prop="name" label="版本名称" align="center" />
             <el-table-column fixed="right" label="Operations" align="center">
               <template #default="scope">

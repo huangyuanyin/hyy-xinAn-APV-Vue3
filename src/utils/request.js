@@ -54,7 +54,7 @@ service.interceptors.request.use(
   },
   function (error) {
     // 对请求错误做些什么
-    return Promise.reject(error);
+    // return Promise.reject(error);
   }
 );
 
@@ -66,7 +66,7 @@ service.interceptors.response.use(
       ElMessage({
         message: response.data?.msg || "请求失败",
         type: "error",
-        duration: 3000,
+        duration: 3500,
       });
       // return Promise.reject(response.data);
     } else {
@@ -78,9 +78,9 @@ service.interceptors.response.use(
     ElMessage({
       message: error.data?.msg || "请求失败",
       type: "error",
-      duration: 3000,
+      duration: 3500,
     });
-    return Promise.reject(error);
+    // return Promise.reject(error);
   }
 );
 

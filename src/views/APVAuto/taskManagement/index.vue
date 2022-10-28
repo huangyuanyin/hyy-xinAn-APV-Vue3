@@ -50,7 +50,7 @@
           </div>
         </div>
 
-        <el-table :data="state.tableData" stripe style="width: 100%" v-loading="tableLoading">
+        <el-table :data="state.tableData" stripe style="width: 100%" v-loading="tableLoading" height="65vh">
           <el-table-column prop="name" label="任务名称" align="center" width="150" />
           <el-table-column prop="build" label="build版本" align="center" width="250" />
           <el-table-column prop="groupAfter" label="测试平台" class-name="testStyle" width="320" header-align="center">
@@ -93,10 +93,12 @@
               </el-popover>
             </template>
           </el-table-column>
-          <el-table-column prop="number" label="总用例数 / 失败用例数" align="center" width="200">
+          <el-table-column prop="number" label="总用例数 / 执行数 / 失败用例数" align="center" width="200">
             <template #default="scope">
               <span v-if="scope.row.number">{{scope.row.number[0]}}</span>
-              <span style="margin:0 3px">/</span>
+              <span style="margin:0 5px">/</span>
+              <span>{{scope.row.run_cases}}</span>
+              <span style="margin:0 5px">/</span>
               <span class="failNumStyle" @click="toDetail(scope.row.id)"
                 v-if="scope.row.number && scope.row.number[1]!=0">{{scope.row.number[1]}}</span>
               <span class="failNumStyle"
@@ -163,24 +165,26 @@
                   </el-tooltip>
                 </div>
               </el-popover>
-              <el-button link type="primary" size="small" @click="openAddDialog('task', 'edit', scope.row)">
-                编辑
-              </el-button>
+              <el-tooltip content="可查看当前任务的进度详情" placement="top" effect="dark">
+                <el-button link type="primary" size="small" @click="taskProgress(scope.row)">
+                  任务进度
+                </el-button>
+              </el-tooltip>
               <el-popover placement="bottom" :width="10" trigger="click" popper-class="morePopover">
                 <template #reference>
                   <el-button link type="info" size="small">更多</el-button>
                 </template>
                 <div class="moreButton">
-                  <el-tooltip content="可查看当前任务的进度详情" placement="top" effect="dark">
-                    <el-button link type="primary" size="small" @click="taskProgress(scope.row)"> 任务进度
-                    </el-button>
-                  </el-tooltip>
                   <el-tooltip content="可修改当前任务下所有的测试平台" placement="top" effect="dark">
                     <el-button link type="primary" size="small" @click="openTestPlatformDialog(scope.row)"
                       style="margin-left: 0px;">
                       测试平台
                     </el-button>
                   </el-tooltip>
+                  <el-button style="margin-left:0px" link type="primary" size="small"
+                    @click="openAddDialog('task', 'edit', scope.row)">
+                    编辑
+                  </el-button>
                   <el-popconfirm title="确定删除此项任务?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消"
                     @confirm="handleDelete('task', scope.row)">
                     <template #reference>
@@ -259,7 +263,7 @@
         <el-timeline-item timestamp="2018/4/3" placement="top" color='#0bbd87'>
           <!-- <el-card shadow="never"> -->
           <h4>运行阶段</h4>
-          <reportDetailVue :reportDetailData="reportDetailData" />
+          <reportDetailVue v-if="showDetail" :reportDetailData="reportDetailData" />
           <!-- </el-card> -->
         </el-timeline-item>
         <el-timeline-item timestamp="2018/4/2" placement="top" color="#f56c6c">
@@ -309,6 +313,7 @@ import { Calendar, Search } from '@element-plus/icons-vue'
 import { ElInput } from 'element-plus'
 import { deviceApi, addDeviceApi, editDeviceApi, deleteDeviceApi, d_typeApi, addD_typeApi, editD_typeApi, deleteD_typeApi, d_groupApi, addD_groupApi, editD_groupApi, deleteD_groupApi } from '@/api/APV/index.js'
 import { taskApi, addTaskApi, editTaskApi, deleteTaskApi, taskRunApi, taskStatusApi, deleteTestPlatApi, putTestPlatApi, getCaseApi, getTaskConfigApi } from '@/api/APV/taskManagement.js'
+import { getReportApi } from "@/api/APV/testReport.js"
 import { buildApi } from '@/api/APV/buildManagement.js'
 import { utc2beijing } from '@/utils/util.js'
 import reportDetailVue from "./components/reportDetailEchart.vue";
@@ -323,6 +328,7 @@ const taskProgressDialog = ref(false)
 const platformDialog = ref(false)
 const tableLoading = ref(false)
 const editDisabled = ref(false)
+const showDetail = ref(false)
 const textarea = ref('')
 const testPlatList = ref([]) // 已有测试平台集合List
 const buttonText = ref("添加")
@@ -885,13 +891,14 @@ const deleteTestPlat = async (params) => {
   }
 }
 
-const reportDetailData = ref([])
+const reportDetailData = ref({})
 // 任务进度
-const taskProgress = (data) => {
-  taskProgressDialog.value = true
+const taskProgress = async (data) => {
+  showDetail.value = false
   textarea.value = ''
-  reportDetailData.value = data
-  getTaskRun(data.id)
+  console.log("dada", data);
+  // 获取对应的测试报告失败数/成功数/用例数
+  await getReport(data)
 }
 
 // 任务启动/终止
@@ -926,14 +933,28 @@ const getTaskStatus = async (params) => {
 // 任务进度 接口
 const getTaskRun = async (id) => {
   let res = await taskRunApi({ id })
-  if (res.code === 1000) {
+  if (res?.code == 1000) {
     textarea.value += res.data.log || ''
-  } else {
-    ElMessage({
-      message: res?.msg || "请求失败",
-      type: "error",
-      duration: 2500,
-    });
+  }
+}
+
+// 测试报告
+const getReport = async (data) => {
+  let res = await getReportApi({ id: data.id })
+  getTaskRun(data.id)
+  showDetail.value = true
+  taskProgressDialog.value = true
+  reportDetailData.value = {
+    counts: data.counts,
+    success: 0,
+    fail_cases: 0
+  }
+  if (res.code === 1000) {
+    reportDetailData.value = {
+      counts: data.counts,
+      success: res.data.pass,
+      fail_cases: res.data.fail
+    }
   }
 }
 
