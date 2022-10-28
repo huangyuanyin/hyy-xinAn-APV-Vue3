@@ -153,7 +153,7 @@ const getReportDetail = async (id) => {
     contentItemList.value.map(item => {
       item.value = res.data[item.label]
       if (item.label === 'total') {
-        item.value = res.data['fail'] + res.data['issue']
+        item.value = res.data['fail'] + res.data['issue'] + res.data['pass']
       }
     })
     res.data && res.data['pass'] ? (contentItemList.value[1].value = res.data['pass']) : (contentItemList.value[1].value = '0')
@@ -173,7 +173,7 @@ const getHistoryReportDetail = async (id) => {
     contentItemList.value.map(item => {
       item.value = res.data[item.label]
       if (item.label === 'total') {
-        item.value = res.data['fail'] + res.data['issue']
+        item.value = res.data['fail'] + res.data['issue'] + res.data['pass']
       }
     })
     res.data && res.data['pass'] ? (contentItemList.value[1].value = res.data['pass']) : (contentItemList.value[1].value = '0')

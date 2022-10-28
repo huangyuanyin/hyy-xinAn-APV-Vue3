@@ -39,7 +39,7 @@
       <el-table-column property="user" label="负责人" align="center" />
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click="toMark(scope.row.id)">标记</el-button>
+          <el-button link type="primary" disabled size="small" @click="toMark(scope.row.id)">标记</el-button>
           <el-button link type="primary" size="small" @click="toDetail(scope.row.id,'history')">历史报告</el-button>
           <!-- <el-button link type="danger" size="small">删除</el-button> -->
         </template>

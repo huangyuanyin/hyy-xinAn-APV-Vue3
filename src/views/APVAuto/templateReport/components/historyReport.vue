@@ -23,7 +23,7 @@
       <el-table-column property="uptime" label="创建时间" align="center" />
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click="toMark(scope.row.id)">打标记</el-button>
+          <el-button link type="primary" size="small" @click="toMark(scope.row.id)" disabled>标记</el-button>
           <!-- <el-button link type="danger" size="small">删除</el-button> -->
         </template>
       </el-table-column>
