@@ -257,10 +257,7 @@ const showOverview = () => {
   }, {
     name: 'known_Issue',
     value: Number(contentItemList.value[3].value)
-  }, {
-    name: '总数',
-    value: Number(contentItemList.value[4].value)
-  }];
+  },];
 
   var data = [];
   var color = ['#00ffff', '#00cfff', '#006ced', '#ffe000', '#ffa800', '#ff5b00', '#ff3000']

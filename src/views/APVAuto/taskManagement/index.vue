@@ -941,7 +941,7 @@ const getTaskRun = async (id) => {
 // 测试报告
 const getReport = async (data) => {
   let res = await getReportApi({ id: data.id })
-  getTaskRun(data.id)
+  await getTaskRun(data.id)
   showDetail.value = true
   taskProgressDialog.value = true
   reportDetailData.value = {
@@ -949,7 +949,7 @@ const getReport = async (data) => {
     success: 0,
     fail_cases: 0
   }
-  if (res.code === 1000) {
+  if (res?.code === 1000) {
     reportDetailData.value = {
       counts: data.counts,
       success: res.data.pass,

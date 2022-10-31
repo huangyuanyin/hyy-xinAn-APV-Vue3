@@ -20,7 +20,7 @@ onMounted(() => {
 
 const init = () => {
   const chartBox = echarts.init(document.getElementById('reportDetailEchart'));
-  var seriesdata1 = [{ name: '完成数', value: props.reportDetailData.counts }, { name: '成功数', value: props.reportDetailData.success || 0 }, { name: '失败数', value: props.reportDetailData.fail_cases }];
+  var seriesdata1 = [{ name: '成功数', value: props.reportDetailData.success || 0 }, { name: '失败数', value: props.reportDetailData.fail_cases }, { name: '完成数', value: props.reportDetailData.counts }];
   var colorList = ['#407AFB', '#1791FF', '#36B0FE', '#6635EF', '#73ACFF', '#41CBAB', '#7BDD43', '#FFC653', '#FF6519', '#EE3939', '#FFAFDA', '#00FFFF']
 
   var objData = array2obj(seriesdata1, 'name')
@@ -37,6 +37,7 @@ const init = () => {
 
   const option = {
     backgroundColor: "#051F54",
+    animation: false, // 取消动画
     grid: {
       "x": "30%",
       "y": "3%",
@@ -122,6 +123,9 @@ const init = () => {
         // return '{a|' + name + '}{b|' + objData[name].value.toFixed(0) + '}{c|' + (objData[name].value / props.reportDetailData.counts) + '%}'
         return '{a|' + name + '}{b|' + objData[name].value.toFixed(0) + '}'
       },
+      selected: {
+        '完成数': false,
+      },
       textStyle: {
         rich: {
           a: {
@@ -186,7 +190,7 @@ const init = () => {
           },
           name: {
             fontSize: 14,
-            padding: [-10, 100, -20, -90],
+            padding: [-10, 100, -20, -70],
             color: '#ffffff'
           },
           value: {
@@ -220,6 +224,12 @@ const init = () => {
   };
   document.getElementById('reportDetailEchart').removeAttribute('_echarts_instance_');
   chartBox.setOption(option, true);
+  chartBox.on('legendselectchanged', function (params) {
+    chartBox.setOption({
+      legend: { selected: { "完成数": false } }
+    })
+    console.log('点击了', params.name);
+  })
   // 根据页面大小自动响应图表大小
   window.addEventListener("resize", function () {
     chartBox.resize();
