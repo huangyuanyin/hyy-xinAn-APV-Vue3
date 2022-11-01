@@ -2,16 +2,16 @@
   <el-card shadow="never">
     <div class="search-wrap">
       <div>
-        <el-select size="large" clearable v-model="formInline.build" placeholder="请选择要搜索的build版本...">
+        <el-select size="large" clearable v-model="searchBuild" placeholder="请选择要搜索的build版本..." @change="getReport(1)">
           <el-option v-for="(item, index) in state.buildData" :key="'buildData' + index" :label="item.name"
             :value="item.name" />
         </el-select>
-        <el-select size="large" clearable v-model="formInline.group" placeholder="请选择要搜索的任务状态..."
-          @change="getGroupDataId">
+        <el-select size="large" clearable v-model="searchGroup" placeholder="请选择要搜索的任务状态..." @change="getReport(1)">
           <el-option v-for="(item, index) in state.selectStatusList" :key="'selectStatusList' + index"
             :label="item.label" :value="item.value" />
         </el-select>
-        <el-input size="large" clearable v-model="formInline.user" placeholder="请输入要搜索的负责人..." :suffix-icon="Search" />
+        <el-input size="large" clearable v-model="searchUser" placeholder="请输入要搜索的负责人..." :suffix-icon="Search"
+          @change='getReport(1)' />
       </div>
     </div>
 
@@ -107,6 +107,9 @@ const state = reactive({
     }
   ]
 })
+const searchUser = ref("")
+const searchBuild = ref("")
+const searchGroup = ref("")
 
 const getBuild = async () => {
   let res = await buildApi({ filetype: "apvbuild" })
@@ -118,7 +121,9 @@ const getGroupDataId = (value) => {
 }
 
 const getReport = async (page) => {
-  let res = await getReportApi({ page })
+  let build = searchBuild.value
+  let user = searchUser.value
+  let res = await getReportApi({ page, build, 'state': searchGroup.value, user })
   if (res.code === 1000) {
     tableData.value = res.data
     total.value = res.total

@@ -36,17 +36,17 @@
             </el-button>
           </div>
           <div>
-            <el-select size="large" clearable v-model="searchForm.build" placeholder="请选择要搜索的build版本...">
+            <el-select size="large" clearable v-model="searchBuild" placeholder="请选择要搜索的build版本..."
+              @change="getTask(1)">
               <el-option v-for="(item, index) in state.buildData" :key="'buildData' + index" :label="item.name"
                 :value="item.name" />
             </el-select>
-            <el-select size="large" clearable v-model="searchForm.group" placeholder="请选择要搜索的任务状态..."
-              @change="getGroupDataId">
+            <el-select size="large" clearable v-model="searchGroup" placeholder="请选择要搜索的任务状态..." @change="getTask(1)">
               <el-option v-for="(item, index) in state.selectStatusList" :key="'selectStatusList' + index"
                 :label="item.label" :value="item.value" />
             </el-select>
-            <el-input size="large" clearable v-model="searchForm.user" placeholder="请输入要搜索的负责人..."
-              :suffix-icon="Search" />
+            <el-input size="large" clearable v-model="searchUser" placeholder="请输入要搜索的负责人..." :suffix-icon="Search"
+              @change='getTask(1)' />
           </div>
         </div>
 
@@ -427,6 +427,9 @@ const searchForm = ref({
   group: "",
   user: ""
 })
+const searchUser = ref("")
+const searchBuild = ref("")
+const searchGroup = ref("")
 
 // 添加测试平台数据
 const addTestPlatForm = reactive({
@@ -678,7 +681,9 @@ const handle = () => {
 // 任务管理 获取接口
 const getTask = async (page) => {
   tableLoading.value = true
-  let res = await taskApi({ page })
+  let build = searchBuild.value
+  let user = searchUser.value
+  let res = await taskApi({ page, build, 'state': searchGroup.value, user })
   if (res.code == 1000) {
     tableLoading.value = false
     state.tableData = res.data

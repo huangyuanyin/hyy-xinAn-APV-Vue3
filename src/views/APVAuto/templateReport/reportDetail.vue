@@ -150,7 +150,7 @@ const isShow = ref(false)
 // 调用 测试报告详情接口 
 const getReportDetail = async (id) => {
   let res = await getReportDetailApi({ id, detail: 'True' })
-  if (res.code === 1000) {
+  if (res?.code === 1000) {
     isShow.value = true
     contentItemList.value.map(item => {
       item.value = res.data[item.label]
@@ -172,7 +172,7 @@ const getReportDetail = async (id) => {
 const getHistoryReportDetail = async (id) => {
   isShow.value = true
   let res = await getHistoryReportDetailApi({ id, detail: 'True' })
-  if (res.code === 1000) {
+  if (res?.code === 1000) {
     contentItemList.value.map(item => {
       item.value = res.data[item.label]
       if (item.label === 'total') {
@@ -191,7 +191,7 @@ const getHistoryReportDetail = async (id) => {
 
 const getReportModuleDetail = async (params) => {
   let res = await getReportDetailApi(params)
-  if (res.code == 1000) {
+  if (res?.code == 1000) {
     detailTableData.value = res.data || []
     total.value = res.total || 0
   }
@@ -199,7 +199,7 @@ const getReportModuleDetail = async (params) => {
 
 const getHistoryReportModuleDetail = async (params) => {
   let res = await getHistoryReportDetailApi(params)
-  if (res.code == 1000) {
+  if (res?.code == 1000) {
     detailTableData.value = res.data || []
     total.value = res.total || 0
   }
