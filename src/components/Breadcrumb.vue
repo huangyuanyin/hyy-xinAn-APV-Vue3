@@ -74,6 +74,7 @@ export default defineComponent({
   .el-breadcrumb {
     display: inline-flex;
     height: 16px;
+    margin-left: 5px;
   }
 }
 </style>

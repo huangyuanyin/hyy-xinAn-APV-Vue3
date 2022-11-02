@@ -44,8 +44,11 @@
               <template #default="scope">
                 <el-button link type="primary" size="small" @click="openAddDeviceDrawer(scope.row)">绑定设备
                 </el-button>
-                <el-button link type="primary" size="small">在线终端
+                <el-button link type="primary" size="small" v-if="scope.row.isShowTermail == false"
+                  @click="openConsole(scope.row)">
+                  在线终端
                 </el-button>
+                <el-button link type="primary" size="small" v-else @click="cloeConsole(scope.row)">关闭终端</el-button>
                 <el-button link type="primary" size="small" @click="openAddDialog('group', 'edit', scope.row.id)">编辑
                 </el-button>
                 <el-popover placement="bottom" :width="10" trigger="click" popper-class="moreGroupPopover">
@@ -66,6 +69,8 @@
               </template>
             </el-table-column>
           </el-table>
+          <!-- 终端 -->
+          <Termmail v-if="isShowTermail" />
           <el-pagination v-model:currentPage="groupCurrentPage" v-model:page-size="groupPageSize"
             :page-sizes="[10, 20, 30, 40]" layout="total, prev, pager, next, jumper" :total="groupTotal"
             @size-change="handleGroupSizeChange" @current-change="handleGroupCurrentChange" />
@@ -220,6 +225,7 @@ import { buildApi, buildUploadApi, deleteBuildApi } from '@/api/APV/buildManagem
 import { utc2beijing } from '@/utils/util.js'
 import { buildOptions } from './data.js'
 import ShowTestCase from './components/showTestCase.vue'
+import Termmail from '@/components/Termail.vue'
 
 const activeName = ref("testbedManagement");
 const dialogVisible = ref(false);
@@ -254,6 +260,7 @@ const state: any = reactive({
   buildData: [], // build管理数据
   buildName: []
 })
+const isShowTermail = ref(false);
 const isNoServerIp = ref(false)
 const remark = ref("")
 const options = ref(
@@ -531,6 +538,9 @@ onMounted(() => {
 // 分组管理 接口
 const getD_group = async (page) => {
   let group = await d_groupApi({ page })
+  group.data.data.forEach((item, index) => {
+    item.isShowTermail = false
+  })
   state.d_groupData = group.data.data
   state.d_groupData.map((item) => {
     item.uptime = utc2beijing(item.uptime)
@@ -803,6 +813,22 @@ const optionsPushType = (arr) => {
     value: obj[val]
   }))
   return newObj
+}
+
+const openConsole = async (row) => {
+  if (isShowTermail.value) {
+    ElMessage({
+      message: "已有打开的终端,请先关闭!",
+      type: "warning",
+    });
+    return
+  }
+  row.isShowTermail = true
+  isShowTermail.value = true
+}
+const cloeConsole = (row) => {
+  row.isShowTermail = false
+  isShowTermail.value = false
 }
 
 const handleGroupSizeChange = (val: number) => {
