@@ -38,22 +38,31 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column prop="user" label="使用人" align="center" width="150" />
+            <el-table-column prop="user" label="使用人" align="center" width="200" />
             <el-table-column prop="uptime" label="更新时间" align="center" width="180" />
             <el-table-column fixed="right" label="操作" align="center">
               <template #default="scope">
                 <el-button link type="primary" size="small" @click="openAddDeviceDrawer(scope.row)">绑定设备
                 </el-button>
-                <el-button link type="primary" size="small" @click="changeStatus(scope.row)">状态变更
+                <el-button link type="primary" size="small">在线终端
                 </el-button>
                 <el-button link type="primary" size="small" @click="openAddDialog('group', 'edit', scope.row.id)">编辑
                 </el-button>
-                <el-popconfirm title="确定删除这个测试平台?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消"
-                  @confirm="handleDelete('group', scope.row.id)">
+                <el-popover placement="bottom" :width="10" trigger="click" popper-class="moreGroupPopover">
                   <template #reference>
-                    <el-button link type="danger" size="small">删除</el-button>
+                    <el-button link type="info" size="small">更多</el-button>
                   </template>
-                </el-popconfirm>
+                  <div class="moreButton">
+                    <el-button link type="primary" size="small" @click="changeStatus(scope.row)">状态变更
+                    </el-button>
+                    <el-popconfirm title="确定删除这个测试平台?" trigger="click" confirm-button-text="确认删除"
+                      cancel-button-text="取消" @confirm="handleDelete('group', scope.row.id)">
+                      <template #reference>
+                        <el-button link type="danger" size="small">删除</el-button>
+                      </template>
+                    </el-popconfirm>
+                  </div>
+                </el-popover>
               </template>
             </el-table-column>
           </el-table>
@@ -98,20 +107,26 @@
       <span>
         <el-form :inline="false" :model="addDeviceForm" ref="addDeviceRuleFormRef" :rules="addDeviceFormRules"
           class="addDevice-form" label-width="100px">
-          <el-form-item label="IP" prop="ip">
-            <el-input v-model="addDeviceForm.ip" placeholder="请输入..." />
-          </el-form-item>
-          <el-form-item label="用户名" prop="username">
-            <el-input v-model="addDeviceForm.username" placeholder="请输入..." />
-          </el-form-item>
-          <el-form-item label="密码" prop="password">
-            <el-input v-model="addDeviceForm.password" placeholder="请输入..." />
-          </el-form-item>
-          <el-form-item label="设备类型" prop="type">
+          <!-- <el-form-item label="类型" prop="type">
             <el-select v-model="addDeviceForm.type" placeholder="请选择...">
               <el-option v-for="(item, index) in state.d_typeData" :key="'d_typeData' + index" :label="item"
                 :value="item" />
             </el-select>
+          </el-form-item> -->
+          <el-form-item label="类型" prop="type">
+            <div style="display: flex;flex-direction: column;">
+              <el-cascader :emitPath="false" :options="options" :show-all-levels="false" @change="changeType" />
+              <span class="remark" v-if="isNoServerIp">注：{{remark}}</span>
+            </div>
+          </el-form-item>
+          <el-form-item label="IP" prop="ip">
+            <el-input v-model="addDeviceForm.ip" placeholder="请输入..." />
+          </el-form-item>
+          <el-form-item label="用户名" prop="username" v-if="isNoServerIp">
+            <el-input v-model="addDeviceForm.username" placeholder="请输入..." />
+          </el-form-item>
+          <el-form-item label="密码" prop="password" v-if="isNoServerIp">
+            <el-input v-model="addDeviceForm.password" placeholder="请输入..." />
           </el-form-item>
           <!-- <el-form-item label="测试平台" prop="gid__name">
             <el-select v-model="addDeviceForm.gid__name" placeholder="请选择..." disabled>
@@ -134,15 +149,15 @@
       <span>
         <el-form :inline="false" :model="addGroupForm" ref="addGroupRuleFormRef" :rules="addGroupFormRules"
           class="addDevice-form" label-width="100px">
-          <el-form-item label="平台IP" prop="ip">
+          <!-- <el-form-item label="平台IP" prop="ip">
             <el-input v-model="addGroupForm.ip" placeholder="请输入..." />
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item label="平台名称" prop="name">
             <el-input v-model="addGroupForm.name" placeholder="请输入..." />
           </el-form-item>
-          <el-form-item label="ServerIp" prop="buildip">
+          <!-- <el-form-item label="ServerIp" prop="buildip">
             <el-input v-model="addGroupForm.buildip" placeholder="请输入..." />
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item label="测试版本" prop="build">
             <el-select v-model="addGroupForm.build" multiple placeholder="请选择..." @change="getBuildName">
               <el-option v-for="item in buildOptions" :key="item" :label="item" :value="item" />
@@ -160,12 +175,12 @@
 
     <el-drawer custom-class="deviceDrawerStyle" v-model="deviceDrawer" :direction="direction">
       <template #header>
-        <h4>设备管理</h4>
+        <h4>平台管理</h4>
       </template>
       <template #default>
         <div class="deviceTitle">
-          <span>设备管理列表</span>
-          <el-button type="primary" link @click="openAddDialog('device', 'add', null)"> + 添加设备 </el-button>
+          <span>列表</span>
+          <el-button type="primary" link @click="openAddDialog('device', 'add', null)"> + 新增 </el-button>
         </div>
         <el-card class="deivce-card" shadow="never">
           <el-table :data="state.deviceDataShow" stripe>
@@ -239,6 +254,35 @@ const state: any = reactive({
   buildData: [], // build管理数据
   buildName: []
 })
+const isNoServerIp = ref(false)
+const remark = ref("")
+const options = ref(
+  [
+    {
+      value: '设备',
+      label: '设备',
+      children: [
+        {
+          value: 'disciplines',
+          label: 'Disciplines',
+        },
+        {
+          value: 'navigation',
+          label: 'Navigation',
+        },
+      ],
+    },
+    {
+      value: '服务',
+      label: '服务',
+      children: [
+        {
+          value: 'ServerIp',
+          label: 'ServerIp',
+        },
+      ],
+    },
+  ])
 const titleDialog = ref("")
 const statusOptions = [
   {
@@ -329,7 +373,6 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
 };
 
 const getBuildName = (value) => {
-  console.log("dada", value);
 }
 
 // 打开添加/编辑弹窗
@@ -337,7 +380,7 @@ const openAddDialog = (type, operation, id) => {
   switch (type) {
     case 'device':
       addDeviceForm.gid__name = testName.value
-      operation == 'add' ? titleDialog.value = '添加设备' : titleDialog.value = '编辑设备'
+      operation == 'add' ? titleDialog.value = '新增' : titleDialog.value = '编辑'
       nextTick(() => { // nextTick 解决表单重置无效的问题
         getOneData(type, id)
       })
@@ -402,7 +445,7 @@ const onAddDeviceForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
     if (valid) {
-      if (titleDialog.value == '添加设备') {
+      if (titleDialog.value == '新增') {
         delete addDeviceForm.id
         addDevice(addDeviceForm)
       } else {
@@ -614,6 +657,8 @@ const deleteDevice = async (id) => {
 const getD_typeApi = async () => {
   let res = await d_typeApi()
   state.d_typeData = res.data
+  remark.value = res?.migration || ''
+  options.value[0].children = optionsPushType(state.d_typeData)
   console.log("设备类型...", state.d_typeData);
 }
 
@@ -705,13 +750,16 @@ const changeStatus = (data) => {
   });
 }
 
+const changeType = (value) => {
+  value[1] === 'ServerIp' ? isNoServerIp.value = false : isNoServerIp.value = true
+}
+
 // 文件上传
 const handleUpload = async (files) => {
   if (state.buildName.includes(files.file.name)) {
     ElMessage.error("请勿重复上传该文件！")
     return false
   }
-  console.log("onChange...", files)
   let formData = new FormData()
   formData.append('file', files.file)
   formData.append('filetype', "apvbuild")
@@ -744,6 +792,19 @@ const handleSuccess: UploadProps['onSuccess'] = () => {
   getBuild()
 }
 
+const optionsPushType = (arr) => {
+  let obj = {};
+  // 将数组转化为对象
+  for (let key in arr) {
+    obj[key] = arr[key];
+  }
+  let newObj = Object.keys(obj).map(val => ({
+    label: obj[val],
+    value: obj[val]
+  }))
+  return newObj
+}
+
 const handleGroupSizeChange = (val: number) => {
   console.log(`${val} items per page`)
 }
@@ -762,6 +823,17 @@ const handleBuildCurrentChange = (val: number) => {
 </script>
 
 <style lang="scss" scoped>
+.remark {
+  display: flex;
+  width: 500px;
+  color: #999999;
+}
+
+.moreButton {
+  display: flex;
+  flex-direction: column;
+}
+
 .tagType {
   margin: 0px 5px;
 }
@@ -787,6 +859,11 @@ const handleBuildCurrentChange = (val: number) => {
   .el-input {
     width: 350px;
   }
+}
+
+:deep(.el-cascader) {
+  width: 350px !important;
+
 }
 
 :deep(.deviceDrawerStyle) {
@@ -913,6 +990,23 @@ const handleBuildCurrentChange = (val: number) => {
 
 :deep(.el-table .cell) {
   padding: 0px;
+}
+</style>
+
+<style lang="scss">
+.moreGroupPopover {
+
+  min-width: 0px !important;
+  width: 66px !important;
+
+  .el-button {
+    margin-bottom: 5px;
+
+    &:last-child {
+      margin-bottom: 0px;
+      margin-left: 0px;
+    }
+  }
 }
 </style>
 
