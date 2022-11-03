@@ -203,10 +203,10 @@
       <!-- </el-tab-pane> -->
     </el-tabs>
     <!--添加任务弹窗-->
-    <el-dialog v-model="dialogVisible" :title="titleDialog" width="30%" :before-close="handleClose">
+    <el-dialog v-model="dialogVisible" :title="titleDialog" width="40%" :before-close="handleClose">
       <span>
         <el-form :inline="false" :model="addTaskForm" ref="addTaskRuleFormRef" :rules="addTaskFormRules"
-          class="addDevice-form" label-width="110px">
+          class="addDevice-form" label-width="145px">
           <el-form-item label="任务名称" prop="name">
             <el-input v-model="addTaskForm.name" placeholder="请输入..." :disabled="editDisabled" />
           </el-form-item>
@@ -229,6 +229,9 @@
             <el-cascader v-model="casValue" :options="casesOptions" :props="casesProps" @change="getCasesOptions"
               popper-class="casesProps-tree" collapse-tags collapse-tags-tooltip clearable />
           </el-form-item>
+          <el-form-item label="备注" prop="remark">
+            <el-input v-model="addTaskForm.remark" placeholder="提示信息：可根据测试设备硬件等信息区分同一build的不同测试任务" />
+          </el-form-item>
           <el-form-item label="物理机" prop="config">
             <el-radio-group v-model="isPhysicalMachine">
               <el-radio label="1">是</el-radio>
@@ -241,6 +244,12 @@
           <el-form-item v-show="isPhysicalMachine == '1'" label="物理设备port" prop="TipPort">
             <el-input v-model="addTaskForm.config.TipPort" :placeholder="placeholderTipPort" />
           </el-form-item>
+          <el-form-item v-show="isPhysicalMachine == '1'" label="物理设备PassWord" prop="TestPass">
+            <el-input v-model="addTaskForm.config.TestPass" :placeholder="placeholderTestPass" />
+          </el-form-item>
+          <!-- <el-form-item v-show="isPhysicalMachine == '1'" label="物理设备硬件型号" prop="model">
+            <el-input v-model="addTaskForm.config.model" :placeholder="placeholderTipModel" />
+          </el-form-item> -->
         </el-form>
       </span>
       <template #footer>
@@ -254,21 +263,17 @@
     <el-dialog custom-class="taskProgressDialog" v-model="taskProgressDialog" title="任务进度" width="1050px"
       @close="closeTaskProgressDialog">
       <el-timeline>
-        <el-timeline-item timestamp="2018/4/12" placement="top" size='large' type='primary' hollow>
+        <el-timeline-item timestamp="准备阶段" placement="top" size='large' type='primary' hollow>
           <!-- <el-card shadow="never" :body-style='bodyStyle'> -->
-          <h4>准备阶段</h4>
           <el-input v-model="textarea" :rows="13" type="textarea" placeholder="暂无log日志..." />
           <!-- </el-card> -->
         </el-timeline-item>
-        <el-timeline-item timestamp="2018/4/3" placement="top" color='#0bbd87'>
+        <el-timeline-item timestamp="运行阶段" placement="top" color='#0bbd87'>
           <!-- <el-card shadow="never"> -->
-          <h4>运行阶段</h4>
           <reportDetailVue v-if="showDetail" :reportDetailData="reportDetailData" />
           <!-- </el-card> -->
         </el-timeline-item>
-        <el-timeline-item timestamp="2018/4/2" placement="top" color="#f56c6c">
-          任务完成
-        </el-timeline-item>
+        <el-timeline-item timestamp="任务完成" placement="top" color="#f56c6c" />
       </el-timeline>
     </el-dialog>
     <!--平台弹窗-->
@@ -447,9 +452,12 @@ const addTaskForm = reactive({
   build: "",
   group: [],
   cases: null,
+  remark: "",
   config: {
     TipServer: "",
-    TipPort: ""
+    TipPort: "",
+    TestPass: "",
+    // model: ""
   }
 });
 
@@ -476,6 +484,28 @@ const validateTipPort = (rule: any, value: any, callback: any) => {
     }
   }
 }
+const validateTestPass = (rule: any, value: any, callback: any) => {
+  if (isPhysicalMachine.value == '0') {
+    return callback()
+  } else {
+    if (addTaskForm.config.TestPass === '') {
+      callback(new Error('请输入物理机PassWord'))
+    } else {
+      callback()
+    }
+  }
+}
+const validateModel = (rule: any, value: any, callback: any) => {
+  // if (isPhysicalMachine.value == '0') {
+  //   return callback()
+  // } else {
+  //   if (addTaskForm.config.model === '') {
+  //     callback(new Error('请输入物理机硬件型号'))
+  //   } else {
+  //     callback()
+  //   }
+  // }
+}
 const addTaskFormRules = reactive<FormRules>({
   name: [
     { required: true, message: "任务名称不能为空", trigger: "blur" },
@@ -498,6 +528,12 @@ const addTaskFormRules = reactive<FormRules>({
   ],
   TipPort: [
     { required: true, validator: validateTipPort, trigger: "blur" },
+  ],
+  TestPass: [
+    { required: true, validator: validateTestPass, trigger: "blur" },
+  ],
+  model: [
+    { required: true, validator: validateModel, trigger: "blur" },
   ]
 });
 
@@ -521,6 +557,8 @@ const openAddDialog = async (type, operation, data) => {
           isPhysicalMachine.value = '1'
           addTaskForm.config.TipServer = data.config.TipServer
           addTaskForm.config.TipPort = data.config.TipPort
+          addTaskForm.config.TestPass = data.config.TestPass
+          // addTaskForm.config.model = data.config.model
         }
       }
       if (data && data.state === 'running') {
@@ -549,6 +587,7 @@ const getOneData = (type, id) => {
           addTaskForm.id = item.id
           addTaskForm.name = item.name
           addTaskForm.user = item.user
+          addTaskForm.remark = item.remark
           addTaskForm.build = item.build
           addTaskForm.group = item.group
           addTaskForm.cases = item.cases
@@ -901,7 +940,6 @@ const reportDetailData = ref({})
 const taskProgress = async (data) => {
   showDetail.value = false
   textarea.value = ''
-  console.log("dada", data);
   // 获取对应的测试报告失败数/成功数/用例数
   await getReport(data)
 }
@@ -965,11 +1003,15 @@ const getReport = async (data) => {
 
 const placeholderTipServer = ref("")
 const placeholderTipPort = ref("")
+const placeholderTestPass = ref("")
+const placeholderTipModel = ref("")
 // 获取物理机参数配置信息
 const getTaskConfig = async () => {
   let res = await getTaskConfigApi()
   placeholderTipServer.value = res.data.TipServer || ''
   placeholderTipPort.value = res.data.TipPort || ''
+  placeholderTestPass.value = res.data.TestPass || ''
+  // placeholderTipModel.value = res.data.model || ''
 }
 
 const runAgain = async (value, data) => {
@@ -1056,6 +1098,13 @@ const handleTaskCurrentChange = (val: number) => {
 </script>
 
 <style lang="scss" scoped>
+:deep(.el-timeline-item__timestamp.is-top) {
+  font-size: 15px;
+  font-weight: 600;
+  color: black;
+  margin-bottom: 12px;
+}
+
 .wrapper {
   width: 60px;
   height: 35px;
@@ -1111,7 +1160,7 @@ const handleTaskCurrentChange = (val: number) => {
 
   .el-input,
   .el-select {
-    width: 300px;
+    width: 450px;
   }
 }
 
@@ -1297,7 +1346,7 @@ const handleTaskCurrentChange = (val: number) => {
 
 .addDevice-form {
   .el-cascader {
-    width: 300px;
+    width: 450px;
 
     .el-input {
       height: 32px;

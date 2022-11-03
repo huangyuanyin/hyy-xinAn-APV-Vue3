@@ -120,7 +120,8 @@
           </el-form-item> -->
           <el-form-item label="类型" prop="type">
             <div style="display: flex;flex-direction: column;">
-              <el-cascader :emitPath="false" :options="options" :show-all-levels="false" @change="changeType" />
+              <el-cascader :emitPath="false" :options="options" :show-all-levels="false" @change="changeType"
+                v-model="addDeviceForm.type" />
               <span class="remark" v-if="isNoServerIp">注：{{remark}}</span>
             </div>
           </el-form-item>
@@ -189,7 +190,7 @@
         </div>
         <el-card class="deivce-card" shadow="never">
           <el-table :data="state.deviceDataShow" stripe>
-            <el-table-column prop="uname" label="设备名称" align="center" />
+            <!-- <el-table-column prop="uname" label="设备名称" align="center" /> -->
             <el-table-column prop="ip" label="ip" align="center" />
             <el-table-column prop="type" label="设备类型" align="center" />
             <el-table-column prop="gid__name" label="测试平台" align="center" />
@@ -331,9 +332,9 @@ const addDeviceFormRules = reactive<FormRules>({
 let addGroupForm = reactive({
   id: "",
   name: "",
-  ip: "",
+  // ip: "",
   build: null,
-  buildip: "",
+  // buildip: "",
   // status: null,
 })
 let validateIPAddress = (rule, value, callback) => {
@@ -435,10 +436,10 @@ const getOneData = (type, id) => {
       state.d_groupData.map(item => {
         if (item.id === id) {
           addGroupForm.id = item.id
-          addGroupForm.ip = item.ip
+          // addGroupForm.ip = item.ip
           addGroupForm.name = item.name
           addGroupForm.build = item.build
-          addGroupForm.buildip = item.buildip
+          // addGroupForm.buildip = item.buildip
         }
       })
       break;
@@ -452,6 +453,7 @@ const onAddDeviceForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
     if (valid) {
+      addDeviceForm.type === 'ServerIp' ? delete addDeviceForm.username && delete addDeviceForm.password : ''
       if (titleDialog.value == '新增') {
         delete addDeviceForm.id
         addDevice(addDeviceForm)
@@ -501,6 +503,7 @@ const onResetDeviceForm = (formEl: FormInstance | undefined) => {
 const handleClose = (type) => {
   if (type === 'deviceDialog') {
     dialogVisible.value = false;
+    isNoServerIp.value = false
     addDeviceRuleFormRef.value.resetFields()
   } else {
     groupDialogVisible.value = false
@@ -551,7 +554,7 @@ const getD_group = async (page) => {
 // 分组管理 添加接口
 const addD_group = async (params) => {
   let res = await addD_groupApi(params)
-  if (res.code === 1000) {
+  if (res?.code === 1000) {
     getD_group(1)
     ElMessage({
       message: "添加成功",
@@ -612,18 +615,12 @@ const getDevice = async () => {
 // 设备管理 添加接口
 const addDevice = async (params) => {
   let res = await addDeviceApi(params)
-  if (res.code === 1000) {
+  if (res?.code === 1000) {
     getDevice()
     ElMessage({
       message: "添加成功",
       type: "success",
       duration: 1000,
-    });
-  } else {
-    ElMessage({
-      message: res?.msg || "添加失败",
-      type: "error",
-      duration: 3000,
     });
   }
 }
@@ -637,12 +634,6 @@ const editDevice = async (params) => {
       message: res?.msg || "编辑成功",
       type: "success",
       duration: 1000,
-    });
-  } else {
-    ElMessage({
-      message: res?.msg || "编辑失败",
-      type: "error",
-      duration: 3000,
     });
   }
 }
@@ -675,7 +666,7 @@ const getD_typeApi = async () => {
 // 设备类型 添加接口
 const addD_type = async (params) => {
   let res = await addD_typeApi(params)
-  if (res.code === 1000) {
+  if (res?.code === 1000) {
     getD_typeApi()
     ElMessage({
       message: "添加成功",
@@ -761,6 +752,7 @@ const changeStatus = (data) => {
 }
 
 const changeType = (value) => {
+  addDeviceForm.type = value[1]
   value[1] === 'ServerIp' ? isNoServerIp.value = false : isNoServerIp.value = true
 }
 
