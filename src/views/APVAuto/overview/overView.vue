@@ -1,0 +1,214 @@
+<template>
+  <div class="screen-container" :style="containerStyle">
+    <header class="screen-header">
+      <div>
+        <img :src="headerSrc" alt="">
+      </div>
+      <span class="logo">
+        <img :src="logoSrc" alt="" />
+      </span>
+      <span class="title">APV自动化测试报告</span>
+      <div class="title-right">
+        <img :src="themeSrc" class="qiehuan" @click="handleChangeTheme">
+        <span class="datetime">2049-01-01 00:00:00</span>
+      </div>
+    </header>
+    <div class="screen-body">
+      <section class="screen-middle">
+        <div id="middle-top" :class="[fullScreenStatus.hot ? 'fullscreen' : '']">
+          <!-- Case图表 -->
+          <CasesEcharts />
+        </div>
+      </section>
+      <section class="screen-right">
+        <div id="right-top" :class="[fullScreenStatus.hot ? 'fullscreen' : '']">
+          <!-- 任务列表图表 -->
+          <TaskEcharts ref="hot" />
+        </div>
+      </section>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { computed } from 'vue'
+import { getThemeValue } from '@/utils/theme_utils'
+import { useAppStore } from '@/store/modules/app';
+import TaskEcharts from './component/TaskEcharts.vue'
+import CasesEcharts from './component/CasesEcharts.vue'
+
+const store = useAppStore()
+
+const containerStyle = computed(() => {
+  return {
+    backgroundColor: getThemeValue(store.theme).backgroundColor,
+    color: getThemeValue(store.theme).titleColor
+  }
+})
+const logoSrc = computed(() => {
+  return '/static/img/' + getThemeValue(store.theme).logoSrc
+})
+const headerSrc = computed(() => {
+  return '/static/img/' + getThemeValue(store.theme).headerBorderSrc
+})
+const themeSrc = computed(() => {
+  return '/static/img/' + getThemeValue(store.theme).themeSrc
+})
+
+const fullScreenStatus = { // 定义每一个图表的全屏状态
+  trend: false,
+  seller: false,
+  map: false,
+  rank: false,
+  hot: false,
+  stock: false
+}
+
+const handleChangeTheme = () => {
+
+}
+</script>
+
+<style lang="scss" scoped>
+// 全屏样式的定义
+.fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  z-index: 100;
+}
+
+.screen-container {
+  width: 100%;
+  height: calc(100% - 61px);
+  // padding: 0 20px;
+  background-color: rgba(7, 10, 88, 0.99) !important;
+  color: #fff;
+  box-sizing: border-box;
+}
+
+.screen-header {
+  width: 100%;
+  height: 64px;
+  font-size: 20px;
+  position: relative;
+  background-color: rgba(3, 14, 70, 0.5) !important;
+
+  >div {
+    img {
+      width: 100%;
+    }
+  }
+
+  .title {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    font-size: 20px;
+    transform: translate(-50%, -50%);
+  }
+
+  .title-right {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-80%);
+  }
+
+  .qiehuan {
+    width: 28px;
+    height: 21px;
+    cursor: pointer;
+  }
+
+  .datetime {
+    font-size: 15px;
+    margin-left: 10px;
+  }
+
+  .logo {
+    position: absolute;
+    left: 20px;
+    top: 60%;
+    transform: translateY(-80%);
+
+    img {
+      height: 35px;
+      width: 80px;
+    }
+  }
+}
+
+.screen-body {
+  width: 100%;
+  height: calc(100% - 80px);
+  display: flex;
+  margin-top: 10px;
+  justify-content: flex-end;
+
+  .screen-left {
+    height: 100%;
+    width: 27.6%;
+
+    #left-top {
+      height: 53%;
+      position: relative;
+    }
+
+    #left-bottom {
+      height: 31%;
+      margin-top: 25px;
+      position: relative;
+    }
+  }
+
+  .screen-middle {
+    height: 100%;
+    width: 41.5%;
+    margin-left: 1.6%;
+    margin-right: 1.6%;
+
+    #middle-top {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    #middle-bottom {
+      margin-top: 25px;
+      width: 100%;
+      height: 28%;
+      position: relative;
+    }
+  }
+
+  .screen-right {
+    height: 100%;
+    width: 27.6%;
+    background-color: rgba(3, 14, 70, 0.5) !important;
+
+    #right-top {
+      height: 46%;
+      position: relative;
+    }
+
+    #right-bottom {
+      height: 38%;
+      margin-top: 25px;
+      position: relative;
+    }
+  }
+}
+
+.resize {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  cursor: pointer;
+}
+</style>

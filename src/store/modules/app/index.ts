@@ -4,6 +4,7 @@ export const useAppStore = defineStore({
   id: 'app',
   state: () => ({
     isCollapse: false,
+    theme: 'chalk'
   }),
   getters: {
     getCollapse: (state) => {

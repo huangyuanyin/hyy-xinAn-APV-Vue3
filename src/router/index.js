@@ -47,7 +47,7 @@ const routes = [
             meta: {
               title: "概览",
             },
-            component: () => import("@/views/APVAuto/overview/index.vue"),
+            component: () => import("@/views/APVAuto/overview/overView.vue"),
           },
           {
             path: "/APVAuto/deviceManagement",
