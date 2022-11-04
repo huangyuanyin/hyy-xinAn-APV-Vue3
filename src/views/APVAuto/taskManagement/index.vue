@@ -206,7 +206,7 @@
     <el-dialog v-model="dialogVisible" :title="titleDialog" width="40%" :before-close="handleClose">
       <span>
         <el-form :inline="false" :model="addTaskForm" ref="addTaskRuleFormRef" :rules="addTaskFormRules"
-          class="addDevice-form" label-width="145px">
+          class="addDevice-form" label-width="160px">
           <el-form-item label="任务名称" prop="name">
             <el-input v-model="addTaskForm.name" placeholder="请输入..." :disabled="editDisabled" />
           </el-form-item>
@@ -238,13 +238,13 @@
               <el-radio label="0">否</el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-form-item v-show="isPhysicalMachine == '1'" label="物理设备ip" prop="TipServer">
+          <el-form-item v-show="isPhysicalMachine == '1'" label="TipServer IP " prop="TipServer">
             <el-input v-model="addTaskForm.config.TipServer" :placeholder="placeholderTipServer" />
           </el-form-item>
-          <el-form-item v-show="isPhysicalMachine == '1'" label="物理设备port" prop="TipPort">
+          <el-form-item v-show="isPhysicalMachine == '1'" label="TipServer Port" prop="TipPort">
             <el-input v-model="addTaskForm.config.TipPort" :placeholder="placeholderTipPort" />
           </el-form-item>
-          <el-form-item v-show="isPhysicalMachine == '1'" label="物理设备PassWord" prop="TestPass">
+          <el-form-item v-show="isPhysicalMachine == '1'" label="TipServer PassWord" prop="TestPass">
             <el-input v-model="addTaskForm.config.TestPass" :placeholder="placeholderTestPass" />
           </el-form-item>
           <!-- <el-form-item v-show="isPhysicalMachine == '1'" label="物理设备硬件型号" prop="model">

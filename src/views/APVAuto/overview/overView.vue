@@ -10,7 +10,7 @@
       <span class="title">APV自动化测试报告</span>
       <div class="title-right">
         <img :src="themeSrc" class="qiehuan" @click="handleChangeTheme">
-        <span class="datetime">2049-01-01 00:00:00</span>
+        <span class="datetime">{{getNowDate()}}</span>
       </div>
     </header>
     <div class="screen-body">
@@ -36,6 +36,7 @@ import { getThemeValue } from '@/utils/theme_utils'
 import { useAppStore } from '@/store/modules/app';
 import TaskEcharts from './component/TaskEcharts.vue'
 import CasesEcharts from './component/CasesEcharts.vue'
+import { getNowDate } from '@/utils/util.js'
 
 const store = useAppStore()
 

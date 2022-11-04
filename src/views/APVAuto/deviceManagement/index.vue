@@ -269,16 +269,7 @@ const options = ref(
     {
       value: '设备',
       label: '设备',
-      children: [
-        {
-          value: 'disciplines',
-          label: 'Disciplines',
-        },
-        {
-          value: 'navigation',
-          label: 'Navigation',
-        },
-      ],
+      children: [],
     },
     {
       value: '服务',

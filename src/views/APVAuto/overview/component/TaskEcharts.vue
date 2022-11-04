@@ -4,38 +4,31 @@
     <el-table :data="tableData" border style="width: 100%;" class="taskTable"
       :header-cell-style="{background:'rgba(7, 10, 88, 0.99) ',color: '#fff'}"
       :row-style="{background:'rgba(3, 14, 70, 0.5)',color: '#fff'}">
-      <el-table-column prop="date" label="Date" />
-      <el-table-column prop="name" label="Name" />
-      <el-table-column prop="address" label="Address" />
+      <el-table-column prop="name" label="任务名称" align="center" />
+      <el-table-column prop="counts" label="总用例数" align="center" />
+      <el-table-column prop="success" label="成功数" align="center" />
+      <el-table-column prop="date" label="通过率" align="center" />
     </el-table>
   </div>
 </template>
 
 <script lang='ts' setup>
-import { onMounted, inject } from 'vue'
-const tableData = [
-  {
-    date: '2016-05-03',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    date: '2016-05-02',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    date: '2016-05-04',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    date: '2016-05-01',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-]
+import { onMounted, inject, ref } from 'vue'
+import { taskApi } from '@/api/APV/taskManagement.js'
+
+
+const tableData = ref([])
+
+// 任务管理 获取接口
+const getTask = async (page) => {
+  let res = await taskApi({ page })
+  if (res.code == 1000) {
+    tableData.value = res.data
+  }
+}
+
 onMounted(async () => {
+  await getTask(1)
 })
 
 </script>
@@ -64,6 +57,10 @@ onMounted(async () => {
 
 ::v-deep .el-table--enable-row-hover .el-table__body tr:hover>td {
   background-color: rgba(3, 14, 70, 0.5);
+}
+
+::v-deep .el-table__body {
+  height: 65vh;
 }
 </style>
 
