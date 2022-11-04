@@ -47,7 +47,7 @@ onMounted(async () => {
   }
 }
 
-::v-deep(.el-table) {
+:deep(.el-table) {
   background-color: rgba(3, 14, 70, 0.5) !important;
 
   .el-table__header {
@@ -55,11 +55,11 @@ onMounted(async () => {
   }
 }
 
-::v-deep .el-table--enable-row-hover .el-table__body tr:hover>td {
+:deep(.el-table--enable-row-hover .el-table__body tr:hover>td) {
   background-color: rgba(3, 14, 70, 0.5);
 }
 
-::v-deep .el-table__body {
+:deep(.el-table__body) {
   height: 65vh;
 }
 </style>

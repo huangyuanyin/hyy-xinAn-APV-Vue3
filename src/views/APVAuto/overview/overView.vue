@@ -2,14 +2,14 @@
   <div class="screen-container" :style="containerStyle">
     <header class="screen-header">
       <div>
-        <img :src="headerSrc" alt="">
+        <img :src="line" alt="">
       </div>
       <span class="logo">
-        <img :src="logoSrc" alt="" />
+        <img :src="logo" alt="" />
       </span>
       <span class="title">APV自动化测试报告</span>
       <div class="title-right">
-        <img :src="themeSrc" class="qiehuan" @click="handleChangeTheme">
+        <img :src="refresh" class="qiehuan" @click="handleChangeTheme">
         <span class="datetime">{{getNowDate()}}</span>
       </div>
     </header>
@@ -37,6 +37,9 @@ import { useAppStore } from '@/store/modules/app';
 import TaskEcharts from './component/TaskEcharts.vue'
 import CasesEcharts from './component/CasesEcharts.vue'
 import { getNowDate } from '@/utils/util.js'
+import logo from "@/assets/logo.png";
+import line from "@/assets/header_border_dark.png";
+import refresh from '@/assets/qiehuan_dark.png'
 
 const store = useAppStore()
 
@@ -46,15 +49,15 @@ const containerStyle = computed(() => {
     color: getThemeValue(store.theme).titleColor
   }
 })
-const logoSrc = computed(() => {
-  return '/static/img/' + getThemeValue(store.theme).logoSrc
-})
-const headerSrc = computed(() => {
-  return '/static/img/' + getThemeValue(store.theme).headerBorderSrc
-})
-const themeSrc = computed(() => {
-  return '/static/img/' + getThemeValue(store.theme).themeSrc
-})
+// const logoSrc = computed(() => {
+//   return '@/assets/' + getThemeValue(store.theme).logoSrc
+// })
+// const headerSrc = computed(() => {
+//   return '@/assets/' + getThemeValue(store.theme).headerBorderSrc
+// })
+// const themeSrc = computed(() => {
+//   return '@/assets/' + getThemeValue(store.theme).themeSrc
+// })
 
 const fullScreenStatus = { // 定义每一个图表的全屏状态
   trend: false,
