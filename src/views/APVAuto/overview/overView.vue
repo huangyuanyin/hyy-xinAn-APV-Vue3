@@ -10,7 +10,7 @@
       <span class="title">APV自动化测试报告</span>
       <div class="title-right">
         <img :src="refresh" class="qiehuan" @click="handleChangeTheme">
-        <span class="datetime">{{getNowDate()}}</span>
+        <span class="datetime">{{ getNowDate() }}</span>
       </div>
     </header>
     <div class="screen-body">
@@ -100,10 +100,17 @@ const handleChangeTheme = () => {
   font-size: 20px;
   position: relative;
   background-color: rgba(3, 14, 70, 0.5) !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   >div {
+    width: 100%;
+    height: 100%;
+
     img {
       width: 100%;
+      height: 100%;
     }
   }
 
@@ -117,11 +124,13 @@ const handleChangeTheme = () => {
 
   .title-right {
     display: flex;
+    justify-content: flex-end;
     align-items: center;
     position: absolute;
     right: 20px;
     top: 50%;
-    transform: translateY(-80%);
+    transform: translateY(-60%);
+    height: 100%;
   }
 
   .qiehuan {
