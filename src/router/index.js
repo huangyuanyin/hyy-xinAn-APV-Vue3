@@ -90,6 +90,7 @@ const routes = [
             name: "TemplateReport",
             meta: {
               title: "测试报告",
+              keepAlive: true,
             },
             component: () => import("@/views/APVAuto/templateReport/components/historyLayout.vue"),
             children: [
