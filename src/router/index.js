@@ -63,6 +63,7 @@ const routes = [
             name: "TaskManagement",
             meta: {
               title: "任务管理",
+              keepAlive: true
             },
             component: () =>
               import("@/views/APVAuto/taskManagement/index.vue"),
@@ -90,13 +91,15 @@ const routes = [
             name: "TemplateReport",
             meta: {
               title: "测试报告",
-              keepAlive: true,
             },
             component: () => import("@/views/APVAuto/templateReport/components/historyLayout.vue"),
             children: [
               {
                 path: "",
                 component: () => import("@/views/APVAuto/templateReport/index.vue"),
+                meta: {
+                  keepAlive: true,
+                }
               },
               {
                 path: "/APVAuto/reportDetail",
@@ -123,6 +126,7 @@ const routes = [
             name: "historyReport",
             meta: {
               title: "历史报告",
+              keepAlive: true,
             },
             component: () =>
               import("@/views/APVAuto/templateReport/components/historyLayout.vue"),
@@ -137,6 +141,7 @@ const routes = [
                 name: "historyReportDetail",
                 meta: {
                   title: "历史报告详情",
+                  keepAlive: false,
                 },
                 component: () =>
                   import("@/views/APVAuto/templateReport/reportDetail.vue"),

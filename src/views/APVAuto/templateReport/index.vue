@@ -21,18 +21,18 @@
       <el-table-column property="id" label="报告ID" align="center" />
       <el-table-column property="name" label="任务名称" align="center">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click="toDetail(scope.row.id,'detail')">{{ scope.row.name }}
+          <el-button link type="primary" size="small" @click="toDetail(scope.row.id, 'detail')">{{ scope.row.name }}
           </el-button>
         </template>
       </el-table-column>
       <el-table-column property="counts" label="用例总数" align="center" />
       <el-table-column property="fail_cases" label="失败数" show-overflow-tooltip align="center">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click="toDetail(scope.row.id,'FailNumDetail')"
+          <el-button link type="primary" size="small" @click="toDetail(scope.row.id, 'FailNumDetail')"
             v-if="scope.row.fail_cases != 0">
-            {{scope.row.fail_cases}}
+            {{ scope.row.fail_cases }}
           </el-button>
-          <span v-else>{{scope.row.fail_cases}}</span>
+          <span v-else>{{ scope.row.fail_cases }}</span>
         </template>
       </el-table-column>
       <el-table-column property="uptime" label="更新时间" :formatter="dateFormatter" width="220" align="center" />
@@ -40,7 +40,7 @@
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="scope">
           <el-button link type="primary" disabled size="small" @click="toMark(scope.row.id)">标记</el-button>
-          <el-button link type="primary" size="small" @click="toDetail(scope.row.id,'history')">历史报告</el-button>
+          <el-button link type="primary" size="small" @click="toDetail(scope.row.id, 'history')">历史报告</el-button>
           <!-- <el-button link type="danger" size="small">删除</el-button> -->
         </template>
       </el-table-column>
@@ -59,7 +59,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, reactive, toRef, toRefs } from "vue";
+import { onMounted, ref, reactive, toRef, toRefs, defineProps } from "vue";
 import { getReportApi } from "@/api/APV/testReport.js"
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
@@ -67,6 +67,18 @@ import { utc2beijing } from "@/utils/util.js"
 import MarkDialog from './components/MarkDialog.vue';
 import { buildApi } from '@/api/APV/buildManagement.js'
 import { Search } from '@element-plus/icons-vue'
+
+
+const props = defineProps({
+  keepAlive: {
+    type: Boolean,
+    default: false,
+  },
+  rootKey: {
+    type: Boolean,
+    default: false,
+  }
+})
 
 const route = useRoute();
 const router = useRouter();

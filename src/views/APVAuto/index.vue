@@ -5,12 +5,14 @@
   <el-main>
     <!-- 面包屑 -->
     <Breadcrumb />
+    <!-- {{ $route.matched }} -->
     <!-- <router-view></router-view> -->
     <router-view v-slot="{ Component }">
       <keep-alive>
-        <component :is="Component" :key="$route.fullPath" v-if="$route.meta.keepAlive" />
+        <component :is="Component" :key="$route.matched[2].path" v-if="shouldCache && $route.meta.keepAlive" keepAlive
+          :rootKey="$route.matched[2].path" />
       </keep-alive>
-      <component :is="Component" :key="$route.fullPath" v-if="!$route.meta.keepAlive" />
+      <component :is="Component" :key="$route.matched[2].path" v-if="!keepAlive && !$route.meta.keepAlive" />
     </router-view>
   </el-main>
 </template>
@@ -27,6 +29,21 @@ export default defineComponent({
     // TestMenuVue,
     CollapseMenu,
     Breadcrumb,
+  },
+  props: {
+    keepAlive: {
+      type: Boolean,
+      default: false,
+    },
+    rootKey: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  computed: {
+    shouldCache() {
+      return this.$route.matched[1].path === this.rootKey
+    }
   },
   setup() {
     const router = useRouter();

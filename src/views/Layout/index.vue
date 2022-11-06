@@ -7,9 +7,10 @@
       <el-container>
         <router-view v-slot="{ Component }">
           <keep-alive>
-            <component :is="Component" :key="$route.fullPath" v-if="route.meta.keepAlive" />
+            <component :is="Component" :key="$route.matched[1].path" v-if="route.meta.keepAlive" keepAlive
+              :rootKey="$route.matched[1].path" />
           </keep-alive>
-          <component :is="Component" :key="$route.fullPath" v-if="!route.meta.keepAlive" />
+          <component :is="Component" :key="$route.matched[1].path" v-if="!route.meta.keepAlive" />
         </router-view>
       </el-container>
     </el-container>

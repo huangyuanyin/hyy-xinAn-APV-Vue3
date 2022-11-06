@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, defineProps } from 'vue'
 import { getThemeValue } from '@/utils/theme_utils'
 import { useAppStore } from '@/store/modules/app';
 import TaskEcharts from './component/TaskEcharts.vue'
@@ -40,6 +40,17 @@ import { getNowDate } from '@/utils/util.js'
 import logo from "@/assets/logo.png";
 import line from "@/assets/header_border_dark.png";
 import refresh from '@/assets/qiehuan_dark.png'
+
+const props = defineProps({
+  keepAlive: {
+    type: Boolean,
+    default: false,
+  },
+  rootKey: {
+    type: Boolean,
+    default: false,
+  }
+})
 
 const store = useAppStore()
 
