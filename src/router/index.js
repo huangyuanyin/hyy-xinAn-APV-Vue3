@@ -46,6 +46,7 @@ const routes = [
             name: "Overview",
             meta: {
               title: "概览",
+              keepAlive: true
             },
             component: () => import("@/views/APVAuto/overview/overView.vue"),
           },
@@ -54,6 +55,7 @@ const routes = [
             name: "DeviceManagement",
             meta: {
               title: "资源管理",
+              keepAlive: true
             },
             component: () =>
               import("@/views/APVAuto/deviceManagement/index.vue"),
