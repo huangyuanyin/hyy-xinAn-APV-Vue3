@@ -21,8 +21,8 @@
             <el-table-column prop="name" label="测试平台名称" align="center" width="200" />
             <el-table-column prop="build" label="测试版本" align="center">
               <template #default="scope">
-                <el-tag class="tagType" v-for="item,index in scope.row.build" :key="'build'+index">
-                  {{item}}
+                <el-tag class="tagType" v-for="item, index in scope.row.build" :key="'build' + index">
+                  {{ item }}
                 </el-tag>
               </template>
             </el-table-column>
@@ -108,7 +108,7 @@
     </el-tabs>
     <!--添加设备弹窗-->
     <el-dialog v-model="dialogVisible" :title="titleDialog" width="35%" @close="handleClose('deviceDialog')"
-      :close-on-click-modal=" false" :close-on-press-escape="false">
+      :close-on-click-modal="false" :close-on-press-escape="false">
       <span>
         <el-form :inline="false" :model="addDeviceForm" ref="addDeviceRuleFormRef" :rules="addDeviceFormRules"
           class="addDevice-form" label-width="100px">
@@ -122,7 +122,7 @@
             <div style="display: flex;flex-direction: column;">
               <el-cascader :emitPath="false" :options="options" :show-all-levels="false" @change="changeType"
                 v-model="addDeviceForm.type" />
-              <span class="remark" v-if="isNoServerIp">注：{{remark}}</span>
+              <span class="remark" v-if="isNoServerIp">注：{{ remark }}</span>
             </div>
           </el-form-item>
           <el-form-item label="IP" prop="ip">
@@ -261,6 +261,7 @@ const state: any = reactive({
   buildData: [], // build管理数据
   buildName: []
 })
+const gidID = ref("")
 const isShowTermail = ref(false);
 const isNoServerIp = ref(false)
 const remark = ref("")
@@ -276,8 +277,8 @@ const options = ref(
       label: '服务',
       children: [
         {
-          value: 'ServerIp',
-          label: 'ServerIp',
+          value: 'buildservice',
+          label: 'buildservice',
         },
       ],
     },
@@ -397,14 +398,11 @@ const openAddDialog = (type, operation, id) => {
   }
 }
 
-const openAddDeviceDrawer = (data) => {
+const openAddDeviceDrawer = async (data) => {
   state.deviceDataShow = []
   testName.value = data.name
-  state.deviceData.map((item) => {
-    if (item.gid__name == testName.value) {
-      state.deviceDataShow.push(item)
-    }
-  })
+  gidID.value = data.id
+  getDevice()
   deviceDrawer.value = true
 }
 
@@ -598,8 +596,9 @@ const deleteD_group = async (id) => {
 
 // 设备管理 获取接口
 const getDevice = async () => {
-  let res = await deviceApi()
+  let res = await deviceApi({ gid: gidID.value })
   state.deviceData = res.data
+  state.deviceDataShow = res.data
   console.log("设备管理...", state.deviceData);
 }
 
@@ -744,7 +743,7 @@ const changeStatus = (data) => {
 
 const changeType = (value) => {
   addDeviceForm.type = value[1]
-  value[1] === 'ServerIp' ? isNoServerIp.value = false : isNoServerIp.value = true
+  value[1] === 'buildservice' ? isNoServerIp.value = false : isNoServerIp.value = true
 }
 
 // 文件上传

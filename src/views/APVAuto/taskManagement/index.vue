@@ -55,10 +55,10 @@
           <el-table-column prop="build" label="build版本" align="center" width="250" />
           <el-table-column prop="groupAfter" label="测试平台" class-name="testStyle" width="320" header-align="center">
             <template #default="scope">
-              <el-tag v-if="scope.row.groupAfter == 0 &&  scope.row.failGroupAfter == 0" type="info">
+              <el-tag v-if="scope.row.groupAfter == 0 && scope.row.failGroupAfter == 0" type="info">
                 暂无测试平台
               </el-tag>
-              <el-popover placement="top" width="auto" trigger="hover" v-if="scope.row.groupAfter != 0 ">
+              <el-popover placement="top" width="auto" trigger="hover" v-if="scope.row.groupAfter != 0">
                 <template #reference>
                   <!-- <el-tag class="tagType">成功的测试平台集合</el-tag> -->
                   <div class="wrapper">
@@ -67,8 +67,8 @@
                     </div>
                   </div>
                 </template>
-                <el-tag class="tagType" v-for="(item,index) in scope.row.groupAfter" :key="'groupAfter'+index">
-                  {{item.label}}
+                <el-tag class="tagType" v-for="(item, index) in scope.row.groupAfter" :key="'groupAfter' + index">
+                  {{ item.label }}
                 </el-tag>
               </el-popover>
               <el-popover placement="top" width="auto" trigger="hover" v-if="scope.row.failGroupAfter != 0">
@@ -84,7 +84,7 @@
                   <el-table-column prop="label" label="测试平台名称" align="center" width="200" />
                   <el-table-column fixed="right" label="操作" align="center">
                     <template #default="item">
-                      <el-button link type="primary" size="small" @click="runAgain(item.row.value,scope.row)">
+                      <el-button link type="primary" size="small" @click="runAgain(item.row.value, scope.row)">
                         重新运行
                       </el-button>
                     </template>
@@ -95,14 +95,14 @@
           </el-table-column>
           <el-table-column prop="number" label="总用例数 / 执行数 / 失败用例数" align="center" width="200">
             <template #default="scope">
-              <span v-if="scope.row.number">{{scope.row.number[0]}}</span>
+              <span v-if="scope.row.number">{{ scope.row.number[0] }}</span>
               <span style="margin:0 5px">/</span>
-              <span>{{scope.row.run_cases}}</span>
+              <span>{{ scope.row.run_cases }}</span>
               <span style="margin:0 5px">/</span>
               <span class="failNumStyle" @click="toDetail(scope.row.id)"
-                v-if="scope.row.number && scope.row.number[1]!=0">{{scope.row.number[1]}}</span>
-              <span class="failNumStyle"
-                v-if="scope.row.number && scope.row.number[1]==0">{{scope.row.number[1]}}</span>
+                v-if="scope.row.number && scope.row.number[1] != 0">{{ scope.row.number[1] }}</span>
+              <span class="failNumStyle" v-if="scope.row.number && scope.row.number[1] == 0">{{ scope.row.number[1]
+              }}</span>
             </template>
           </el-table-column>
           <!-- <el-table-column prop="counts" label="总用例数" align="center" width="120" />
@@ -147,19 +147,19 @@
                   <el-tooltip content="该任务下所有测试平台均停止运行" v-if="scope.row.state === 'running'" placement="top"
                     effect="dark">
                     <span>
-                      <el-button link type="primary" size="small" @click="changeTaskStatus('stop',scope.row.id)">
+                      <el-button link type="primary" size="small" @click="changeTaskStatus('stop', scope.row.id)">
                         任务终止
                       </el-button>
                     </span>
                   </el-tooltip>
-                  <el-button link type="primary" size="small" v-else @click="changeTaskStatus('start',scope.row.id)">
+                  <el-button link type="primary" size="small" v-else @click="changeTaskStatus('start', scope.row.id)">
                     任务启动
                   </el-button>
-                  <el-tooltip content="重新启动该任务下失败用例" placement="top" effect="dark">
+                  <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
                     <span>
-                      <el-button link type="primary" size="small" v-if="scope.row.state === 'running'"
-                        @click="changeTaskStatus('restart',scope.row.id)">
-                        任务重启
+                      <el-button link type="primary" size="small" v-if="scope.row.state == 'fail'"
+                        @click="changeTaskStatus('restart', scope.row.id)">
+                        继续运行
                       </el-button>
                     </span>
                   </el-tooltip>
@@ -255,7 +255,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="onResetTaskForm(addTaskRuleFormRef)">取消</el-button>
-          <el-button type="primary" @click="onAddTaskForm(addTaskRuleFormRef)">{{buttonText}}</el-button>
+          <el-button type="primary" @click="onAddTaskForm(addTaskRuleFormRef)">{{ buttonText }}</el-button>
         </span>
       </template>
     </el-dialog>
@@ -283,9 +283,9 @@
         <span class="title">已有测试平台：</span>
         <el-tag v-if="testPlatList.length == 0" class="ml-2" type="info">暂无测试平台</el-tag>
         <div>
-          <el-tag class="tagType" v-for="item,index in testPlatList" :key="'testPlatList'+index" closable
-            @close="handleCloseTag(item,item.id)">
-            {{item.label}}
+          <el-tag class="tagType" v-for="item, index in testPlatList" :key="'testPlatList' + index" closable
+            @close="handleCloseTag(item, item.id)">
+            {{ item.label }}
           </el-tag>
         </div>
       </div>
@@ -956,19 +956,13 @@ const changeTaskStatus = (val, id) => {
 // 任务start or stop api
 const getTaskStatus = async (params) => {
   let res = await taskStatusApi(params)
-  if (res.code === 1000) {
+  if (res?.code === 1000) {
     await getTask(taskCurrentPage.value)
     await handle()
     ElMessage({
       message: res?.msg || "任务已启动",
       type: "success",
       duration: 1500,
-    });
-  } else {
-    ElMessage({
-      message: res?.msg || "请求失败",
-      type: "error",
-      duration: 2500,
     });
   }
 }
