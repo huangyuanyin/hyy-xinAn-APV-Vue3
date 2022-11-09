@@ -7,7 +7,7 @@
       <span class="logo">
         <img :src="logo" alt="" />
       </span>
-      <span class="title">APV自动化测试报告</span>
+      <span class="title">APV自动化平台概览</span>
       <div class="title-right">
         <img :src="refresh" class="qiehuan" @click="handleChangeTheme">
         <span class="datetime">{{ getNowDate() }}</span>

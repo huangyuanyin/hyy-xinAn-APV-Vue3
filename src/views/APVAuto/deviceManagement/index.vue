@@ -128,8 +128,8 @@
           <el-form-item label="IP" prop="ip">
             <el-input v-model="addDeviceForm.ip" placeholder="请输入..." />
           </el-form-item>
-          <el-form-item label="用户名" prop="username" v-if="isNoServerIp">
-            <el-input v-model="addDeviceForm.username" placeholder="请输入..." />
+          <el-form-item label="用户名" prop="uname" v-if="isNoServerIp">
+            <el-input v-model="addDeviceForm.uname" placeholder="请输入..." />
           </el-form-item>
           <el-form-item label="密码" prop="password" v-if="isNoServerIp">
             <el-input v-model="addDeviceForm.password" placeholder="请输入..." />
@@ -300,7 +300,7 @@ const searchForm = ref({
 let addDeviceForm = reactive({
   id: null,
   ip: "",
-  username: "",
+  uname: "",
   password: "",
   type: "",
   gid__name: "",
@@ -308,7 +308,7 @@ let addDeviceForm = reactive({
 const addDeviceRuleFormRef = ref<FormInstance>();
 const addDeviceFormRules = reactive<FormRules>({
   ip: [{ required: true, message: "ip不能为空", trigger: "blur" }],
-  username: [
+  uname: [
     { required: true, message: "用户名不能为空", trigger: "blur" },
   ],
   password: [
@@ -383,6 +383,11 @@ const openAddDialog = (type, operation, id) => {
       operation == 'add' ? titleDialog.value = '新增' : titleDialog.value = '编辑'
       nextTick(() => { // nextTick 解决表单重置无效的问题
         getOneData(type, id)
+        if ((titleDialog.value == '编辑') && addDeviceForm.type !== 'buildservice') {
+          isNoServerIp.value = true
+        } else {
+          isNoServerIp.value = false
+        }
       })
       dialogVisible.value = true;
       break;
@@ -414,7 +419,7 @@ const getOneData = (type, id) => {
         if (item.id === id) {
           addDeviceForm.id = item.id
           addDeviceForm.ip = item.ip
-          addDeviceForm.username = item.username
+          addDeviceForm.uname = item.uname
           addDeviceForm.password = item.password
           addDeviceForm.type = item.type
           addDeviceForm.gid__name = item.gid__name
@@ -442,11 +447,12 @@ const onAddDeviceForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
     if (valid) {
-      addDeviceForm.type === 'ServerIp' ? delete addDeviceForm.username && delete addDeviceForm.password : ''
+      addDeviceForm.type === 'buildservice' ? delete addDeviceForm.uname && delete addDeviceForm.password : ''
       if (titleDialog.value == '新增') {
         delete addDeviceForm.id
         addDevice(addDeviceForm)
       } else {
+        console.log("da", addDeviceForm);
         editDevice(addDeviceForm)
       }
       addDeviceRuleFormRef.value.resetFields()
