@@ -14,6 +14,45 @@
       </div>
     </header>
     <div class="screen-body">
+      <section class="screen-left">
+        <div id="left-top" :class="[fullScreenStatus.hot ? 'fullscreen' : '']">
+          <!-- 测试平台使用情况图表 -->
+          <div class="testingPlatform-container">
+            <h2>测试平台使用情况</h2>
+            <div class="details">
+              <div class="item">
+                <img src="../../../assets/icon_01.png" />
+                <span>测试平台总数</span>
+                <p>
+                  <span class="num">100780</span>
+                  <span class="white-font">(条)</span>
+                </p>
+              </div>
+              <div class="item">
+                <img src="../../../assets/icon_02.png" />
+                <span>任务运行总数</span>
+                <p>
+                  <span class="num">780</span>
+                  <span class="white-font">(条)</span>
+                </p>
+              </div>
+              <div class="item">
+                <img src="../../../assets/icon_03.png" />
+                <span>平台使用次数</span>
+                <p>
+                  <span class="num">670</span>
+                  <span class="white-font">(条)</span>
+                </p>
+              </div>
+            </div>
+            <TaskBar />
+          </div>
+          <div class="WeeklyVersion-container">
+            <h2>周版本使用情况</h2>
+            <WeeklyVersion />
+          </div>
+        </div>
+      </section>
       <section class="screen-middle">
         <div id="middle-top" :class="[fullScreenStatus.hot ? 'fullscreen' : '']">
           <!-- Case图表 -->
@@ -36,6 +75,8 @@ import { getThemeValue } from '@/utils/theme_utils'
 import { useAppStore } from '@/store/modules/app';
 import TaskEcharts from './component/TaskEcharts.vue'
 import CasesEcharts from './component/CasesEcharts.vue'
+import TaskBar from './component/TaskBar.vue'
+import WeeklyVersion from './component/WeeklyVersion.vue'
 import { getNowDate } from '@/utils/util.js'
 import logo from "@/assets/logo.png";
 import line from "@/assets/header_border_dark.png";
@@ -173,11 +214,77 @@ const handleChangeTheme = () => {
   height: calc(100% - 80px);
   display: flex;
   margin-top: 10px;
-  justify-content: flex-end;
+  justify-content: flex-start;
+  // justify-content: flex-end;
 
   .screen-left {
     height: 100%;
     width: 27.6%;
+
+    .testingPlatform-container {
+      background-color: rgba(3, 14, 70, 0.5) !important;
+      height: 100%;
+
+      .details {
+        display: flex;
+        justify-content: space-around;
+        padding-top: 10px;
+
+        .item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          width: 120px;
+
+          p {
+            display: block;
+          }
+
+          .white-font {
+            color: #fff;
+            line-height: 26px;
+            margin-left: 5px;
+            font-size: 16px;
+          }
+
+          .num {
+            color: #02cbff;
+            font-weight: 400;
+            font-size: 22px;
+          }
+
+          span {
+            color: #fff;
+            font-size: 15px;
+          }
+
+          img {
+            width: 40px;
+            margin-bottom: 10px;
+          }
+        }
+      }
+
+      h2 {
+        color: #007bff !important;
+        text-align: center;
+        margin: 0;
+        line-height: 40px;
+      }
+    }
+
+    .WeeklyVersion-container {
+      background-color: rgba(3, 14, 70, 0.5) !important;
+      height: 84%;
+      margin-top: 15px;
+
+      h2 {
+        color: #007bff !important;
+        text-align: center;
+        margin: 0;
+        line-height: 40px;
+      }
+    }
 
     #left-top {
       height: 53%;

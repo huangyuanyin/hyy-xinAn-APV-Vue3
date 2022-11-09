@@ -420,7 +420,7 @@ const getOneData = (type, id) => {
           addDeviceForm.id = item.id
           addDeviceForm.ip = item.ip
           addDeviceForm.uname = item.uname
-          addDeviceForm.password = item.password
+          addDeviceForm.password = item.passw
           addDeviceForm.type = item.type
           addDeviceForm.gid__name = item.gid__name
         }

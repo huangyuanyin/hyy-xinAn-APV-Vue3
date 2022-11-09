@@ -48,7 +48,7 @@ const change = () => {
   };
 
   const option = {
-    backgroundColor: 'rgba(3, 14, 70, 0.5)',
+    backgroundColor: '',
     title: {
       // text: 'cases数据',
       // textStyle: {
