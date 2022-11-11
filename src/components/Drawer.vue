@@ -1,24 +1,9 @@
 <template>
   <div class="drawer-wrapper">
-    <el-drawer
-      v-model="isDrawer"
-      :direction="direction"
-      :append-to-body="false"
-      :z-index="-1"
-      :with-header="false"
-    >
-      <el-menu
-        default-active="POCTest"
-        class="el-menu-vertical-demo"
-        @select="handleSelect"
-        router
-      >
-        <el-menu-item
-          v-for="(item, index) in menuList"
-          :key="'menuList' + index"
-          :index="item.path"
-          :disabled="item.title == '产品与服务' ? true : false"
-        >
+    <el-drawer v-model="isDrawer" :direction="direction" :append-to-body="false" :z-index="-1" :with-header="false">
+      <el-menu default-active="POCTest" class="el-menu-vertical-demo" @select="handleSelect" router>
+        <el-menu-item v-for="(item, index) in menuList" :key="'menuList' + index" :index="item.path"
+          :disabled="item.title == '产品与服务' ? true : false">
           <el-icon>
             <Setting v-if="item.title != '产品与服务'" />
           </el-icon>
@@ -108,6 +93,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .drawer-wrapper {
+
   :deep(.el-drawer__header) {
     margin-bottom: 0px;
     padding: 0px;
@@ -124,6 +110,7 @@ export default defineComponent({
   .el-menu-vertical-demo {
     height: 100vh;
     width: 240px;
+
     .el-menu-item.is-disabled {
       opacity: 1;
       background-color: #ebebeb !important;
@@ -150,6 +137,7 @@ export default defineComponent({
     font-size: 16px;
     cursor: pointer;
   }
+
   :deep(.el-menu-item-group__title) {
     padding: 0px;
   }
