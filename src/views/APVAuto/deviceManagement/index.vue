@@ -128,8 +128,8 @@
           <el-form-item label="IP" prop="ip">
             <el-input v-model="addDeviceForm.ip" placeholder="请输入..." />
           </el-form-item>
-          <el-form-item label="用户名" prop="uname" v-if="isNoServerIp">
-            <el-input v-model="addDeviceForm.uname" placeholder="请输入..." />
+          <el-form-item label="用户名" prop="username" v-if="isNoServerIp">
+            <el-input v-model="addDeviceForm.username" placeholder="请输入..." />
           </el-form-item>
           <el-form-item label="密码" prop="password" v-if="isNoServerIp">
             <el-input v-model="addDeviceForm.password" placeholder="请输入..." />
@@ -301,7 +301,7 @@ const searchForm = ref({
 let addDeviceForm = reactive({
   id: null,
   ip: "",
-  uname: "",
+  username: "",
   password: "",
   type: "",
   gid__name: "",
@@ -309,7 +309,7 @@ let addDeviceForm = reactive({
 const addDeviceRuleFormRef = ref<FormInstance>();
 const addDeviceFormRules = reactive<FormRules>({
   ip: [{ required: true, message: "ip不能为空", trigger: "blur" }],
-  uname: [
+  username: [
     { required: true, message: "用户名不能为空", trigger: "blur" },
   ],
   password: [
@@ -420,7 +420,7 @@ const getOneData = (type, id) => {
         if (item.id === id) {
           addDeviceForm.id = item.id
           addDeviceForm.ip = item.ip
-          addDeviceForm.uname = item.uname
+          addDeviceForm.username = item.uname
           addDeviceForm.password = item.passw
           addDeviceForm.type = item.type
           addDeviceForm.gid__name = item.gid__name
@@ -448,7 +448,7 @@ const onAddDeviceForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
     if (valid) {
-      addDeviceForm.type === 'buildservice' ? delete addDeviceForm.uname && delete addDeviceForm.password : ''
+      addDeviceForm.type === 'buildservice' ? delete addDeviceForm.username && delete addDeviceForm.password : ''
       if (titleDialog.value == '新增') {
         delete addDeviceForm.id
         addDevice(addDeviceForm)
