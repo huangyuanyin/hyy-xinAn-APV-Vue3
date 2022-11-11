@@ -70,7 +70,7 @@
             </el-table-column>
           </el-table>
           <!-- 终端 -->
-          <Termmail v-if="isShowTermail" />
+          <Termmail v-if="isShowTermail" :termmailInfo="termmailInfo" />
           <el-pagination v-model:currentPage="groupCurrentPage" v-model:page-size="groupPageSize"
             :page-sizes="[10, 20, 30, 40]" layout="total, prev, pager, next, jumper" :total="groupTotal"
             @size-change="handleGroupSizeChange" @current-change="handleGroupCurrentChange" />
@@ -265,6 +265,7 @@ const gidID = ref("")
 const isShowTermail = ref(false);
 const isNoServerIp = ref(false)
 const remark = ref("")
+const termmailInfo = ref({})
 const options = ref(
   [
     {
@@ -811,9 +812,9 @@ const openConsole = async (row) => {
     });
     return
   }
-  row.isShowTermail = true
-  isShowTermail.value = true
+  await getDeviceInfo(row)
 }
+
 const cloeConsole = (row) => {
   row.isShowTermail = false
   isShowTermail.value = false
@@ -833,6 +834,25 @@ const handleBuildSizeChange = (val: number) => {
 const handleBuildCurrentChange = (val: number) => {
   // groupCurrentPage.value = val
   // getD_group(groupCurrentPage.value)
+}
+
+// 设备管理 获取终端用户名密码
+const getDeviceInfo = async (data) => {
+  let res = await deviceApi({ gid: data.id, type: 'Console' })
+  if (res.code === 1000) {
+    if (res.data.length === 0) {
+      ElMessage({
+        message: "该测试平台下暂无可用终端",
+        type: "error",
+        duration: 2500,
+      });
+    } else {
+      termmailInfo.value = res.data[0]
+      data.isShowTermail = true
+      isShowTermail.value = true
+    }
+  }
+  console.log("设备管理...", termmailInfo.value);
 }
 </script>
 

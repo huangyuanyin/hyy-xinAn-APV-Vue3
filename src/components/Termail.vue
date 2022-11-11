@@ -14,12 +14,16 @@ export default {
         cols: 400,
         rows: 400
       }
+    },
+    termmailInfo: {
+      type: Object,
+      default: () => { }
     }
   },
   data() {
     return {
       term: null,
-      terminalSocket: null
+      terminalSocket: null,
     }
   },
   methods: {
@@ -33,7 +37,8 @@ export default {
       console.log('close')
     },
   },
-  mounted() {
+  mounted(props) {
+    const { uname, passw, ip } = this.termmailInfo
     console.log('pid : ' + this.terminal.pid + ' is on ready')
     let terminalContainer = document.getElementById('terminal')
     this.term = new Terminal({
@@ -52,7 +57,7 @@ export default {
     })
     this.term.open(terminalContainer)
     // open websocket
-    this.terminalSocket = new WebSocket('ws://10.20.86.27:1182/terminal/wensock?host_ip=10.20.86.27&host_por=22&user=root&passwd=inf0sec312!')
+    this.terminalSocket = new WebSocket(`ws://10.20.86.27:1182/terminal/wensock?host_ip=${ip}&host_por=22&user=${uname}&passwd=${passw}`)
     this.terminalSocket.onopen = this.runRealTerminal
     this.terminalSocket.onclose = this.closeRealTerminal
     this.terminalSocket.onerror = this.errorRealTerminal

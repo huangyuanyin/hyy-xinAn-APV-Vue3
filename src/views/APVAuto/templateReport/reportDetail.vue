@@ -11,9 +11,9 @@
       </div>
     </div>
     <div class="content">
-      <div class="content-item" v-for="(item,index) in contentItemList" :key="'item'+index">
-        <span class="itemName">{{item.name}}：</span>
-        <span class="itemValue">{{item.value}}</span>
+      <div class="content-item" v-for="(item, index) in contentItemList" :key="'item' + index">
+        <span class="itemName">{{ item.name }}：</span>
+        <span class="itemValue">{{ item.value }}</span>
       </div>
     </div>
   </el-card>
@@ -44,12 +44,12 @@
               <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
                 <el-tab-pane label="用例脚本" name="first">
                   <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
-                  <el-input v-model="case_script" :autosize="{ minRows: 12, maxRows: 20}" type="textarea"
+                  <el-input v-model="case_script" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea"
                     placeholder="暂无用例脚本" />
                 </el-tab-pane>
                 <el-tab-pane label="脚本执行日志" name="second">
                   <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
-                  <el-input v-model="case_log" :autosize="{ minRows: 12, maxRows: 20}" type="textarea"
+                  <el-input v-model="case_log" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea"
                     placeholder="暂无脚本执行日志" />
                 </el-tab-pane>
                 <el-tab-pane label="APV交互日志" name="three">
@@ -143,7 +143,7 @@ const expands = ref([]) // 通过该属性设置Table目前的展开行，需要
 const casValue: any = ref([]);
 const caseOptions = ref([])
 const currentPage = ref(1)
-const pageSize = ref(10)
+const pageSize = ref(20)
 const total = ref(0)
 const isShow = ref(false)
 
