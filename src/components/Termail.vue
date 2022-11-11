@@ -3,6 +3,7 @@
 </template>
 <script>
 import Terminal from '../config/Xterm'
+import baseUrl from "@/config/api";
 export default {
   name: 'Console',
   props: {
@@ -24,6 +25,7 @@ export default {
     return {
       term: null,
       terminalSocket: null,
+      baseUrl
     }
   },
   methods: {
@@ -57,7 +59,8 @@ export default {
     })
     this.term.open(terminalContainer)
     // open websocket
-    this.terminalSocket = new WebSocket(`ws://10.20.86.27:1182/terminal/wensock?host_ip=${ip}&host_por=22&user=${uname}&passwd=${passw}`)
+    this.terminalSocket = new WebSocket(`ws://${baseUrl.Base_APV_XTERM}/terminal/wensock?host_ip=${ip}&host_por=22&user=${uname}&passwd=${passw}`)
+    console.log("dada", this.terminalSocket);
     this.terminalSocket.onopen = this.runRealTerminal
     this.terminalSocket.onclose = this.closeRealTerminal
     this.terminalSocket.onerror = this.errorRealTerminal
