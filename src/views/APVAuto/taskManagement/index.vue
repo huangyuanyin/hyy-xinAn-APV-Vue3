@@ -217,7 +217,8 @@
             </el-select>
           </el-form-item>
           <el-form-item label="测试平台" prop="group">
-            <el-select multiple clearable v-model="addTaskForm.group" placeholder="请选择..." @change="getGroupDataId">
+            <el-select multiple clearable v-model="addTaskForm.group" placeholder="请选择..." @change="getGroupDataId"
+              @remove-tag="deleteGroupDataId">
               <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name"
                 :value="item.id" />
             </el-select>
@@ -238,18 +239,23 @@
               <el-radio label="0">否</el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-form-item v-show="isPhysicalMachine == '1'" label="TipServer IP " prop="TipServer">
-            <el-input v-model="addTaskForm.config.TipServer" :placeholder="placeholderTipServer" />
-          </el-form-item>
-          <el-form-item v-show="isPhysicalMachine == '1'" label="TipServer Port" prop="TipPort">
-            <el-input v-model="addTaskForm.config.TipPort" :placeholder="placeholderTipPort" />
-          </el-form-item>
-          <el-form-item v-show="isPhysicalMachine == '1'" label="TipServer PassWord" prop="TestPass">
-            <el-input v-model="addTaskForm.config.TestPass" :placeholder="placeholderTestPass" />
-          </el-form-item>
-          <!-- <el-form-item v-show="isPhysicalMachine == '1'" label="物理设备硬件型号" prop="model">
-            <el-input v-model="addTaskForm.config.model" :placeholder="placeholderTipModel" />
-          </el-form-item> -->
+          <el-collapse v-show="isPhysicalMachine == '1'" v-model="activeNames" @change="handleChange">
+            <el-collapse-item v-for="(item, index) in physicalItems" :key="'physicalItems' + index"
+              :title="item.name + `&nbsp&nbsp&nbsp` + '的物理机配置项'" :name="item.name">
+              <el-form-item label="TipServer IP " prop="TipServer">
+                <el-input v-model="item.TipServer" :placeholder="placeholderTipServer" />
+              </el-form-item>
+              <el-form-item label="TipServer Port" prop="TipPort">
+                <el-input v-model="item.TipPort" :placeholder="placeholderTipPort" />
+              </el-form-item>
+              <el-form-item label="TipServer PassWord" prop="TestPass">
+                <el-input v-model="item.TestPass" :placeholder="placeholderTestPass" />
+              </el-form-item>
+              <!--<el-form-item v-show="isPhysicalMachine == '1'" label="物理设备硬件型号" prop="model">
+                    <el-input v-model="addTaskForm.config.model" :placeholder="placeholderTipModel" />
+                  </el-form-item> -->
+            </el-collapse-item>
+          </el-collapse>
         </el-form>
       </span>
       <template #footer>
@@ -309,7 +315,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, toRefs, nextTick } from "vue";
+import { onMounted, nextTick } from "vue";
 import { ref, reactive } from "vue";
 import type { TabsPaneContext } from "element-plus";
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -341,6 +347,11 @@ const timer = ref(null) // 定时器
 const taskCurrentPage = ref(1)
 const taskPageSize = ref(10)
 const taskTotal = ref(0)
+const activeNames = ref(['1'])
+const physicalItems = ref([])
+const handleChange = (val: string[]) => {
+  console.log(val)
+}
 const casesProps = {
   multiple: true,
   label: 'name',
@@ -453,12 +464,13 @@ const addTaskForm = reactive({
   group: [],
   cases: null,
   remark: "",
-  config: {
-    TipServer: "",
-    TipPort: "",
-    TestPass: "",
-    // model: ""
-  }
+  config: []
+  // config: {
+  //   TipServer: "",
+  //   TipPort: "",
+  //   TestPass: "",
+  //   // model: ""
+  // }
 });
 
 const addTaskRuleFormRef = ref<FormInstance>();
@@ -466,33 +478,39 @@ const validateTipServer = (rule: any, value: any, callback: any) => {
   if (isPhysicalMachine.value == '0') {
     return callback()
   } else {
-    if (addTaskForm.config.TipServer === '') {
-      callback(new Error('请输入物理机ip'))
-    } else {
-      callback()
-    }
+    physicalItems.value.map(item => {
+      if (item.TipServer === '') {
+        callback(new Error('请输入物理机ip'))
+      } else {
+        callback()
+      }
+    })
   }
 }
 const validateTipPort = (rule: any, value: any, callback: any) => {
   if (isPhysicalMachine.value == '0') {
     return callback()
   } else {
-    if (addTaskForm.config.TipPort === '') {
-      callback(new Error('请输入物理机port'))
-    } else {
-      callback()
-    }
+    physicalItems.value.map(item => {
+      if (item.TipPort === '') {
+        callback(new Error('请输入物理机port'))
+      } else {
+        callback()
+      }
+    })
   }
 }
 const validateTestPass = (rule: any, value: any, callback: any) => {
   if (isPhysicalMachine.value == '0') {
     return callback()
   } else {
-    if (addTaskForm.config.TestPass === '') {
-      callback(new Error('请输入物理机PassWord'))
-    } else {
-      callback()
-    }
+    physicalItems.value.map(item => {
+      if (item.TestPass === '') {
+        callback(new Error('请输入物理机PassWord'))
+      } else {
+        callback()
+      }
+    })
   }
 }
 const validateModel = (rule: any, value: any, callback: any) => {
@@ -520,9 +538,9 @@ const addTaskFormRules = reactive<FormRules>({
   cases: [
     { required: true, message: "请选择用例集", trigger: "blur" },
   ],
-  config: [
-    { required: true, message: "请选择是否需要物理机", trigger: "blur" },
-  ],
+  // config: [
+  //   { required: true, message: "请选择是否需要物理机", trigger: "blur" },
+  // ],
   TipServer: [
     { required: true, validator: validateTipServer, trigger: "blur" },
   ],
@@ -555,9 +573,9 @@ const openAddDialog = async (type, operation, data) => {
           isPhysicalMachine.value = '0'
         } else {
           isPhysicalMachine.value = '1'
-          addTaskForm.config.TipServer = data.config.TipServer
-          addTaskForm.config.TipPort = data.config.TipPort
-          addTaskForm.config.TestPass = data.config.TestPass
+          // addTaskForm.config.TipServer = data.config.TipServer
+          // addTaskForm.config.TipPort = data.config.TipPort
+          // addTaskForm.config.TestPass = data.config.TestPass
           // addTaskForm.config.model = data.config.model
         }
       }
@@ -636,6 +654,7 @@ const handleCaseValue = (data) => {
 
 // 添加任务
 const onAddTaskForm = async (formEl: FormInstance | undefined) => {
+  addTaskForm.config = physicalItems.value
   if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
     if (valid) {
@@ -749,6 +768,7 @@ const addTask = async (params) => {
       type: "success",
       duration: 1000,
     });
+    physicalItems.value = []
   } else {
     ElMessage({
       message: res?.msg || "添加失败",
@@ -756,6 +776,7 @@ const addTask = async (params) => {
       duration: 3000,
       showClose: true,
     });
+    physicalItems.value = []
   }
 }
 
@@ -811,7 +832,26 @@ const getBuild = async () => {
 
 // 分组名称 下拉选择框
 const getGroupDataId = (value) => {
+  physicalItems.value = []
   addTaskForm.group = value
+  addTaskForm.group.map(item => {
+    state.d_groupData.map(it => {
+      if (item === it.id) {
+        physicalItems.value.push({
+          id: it.id,
+          name: it.name,
+          TipServer: "",
+          TipPort: "",
+          TestPass: "",
+        })
+      }
+    })
+  })
+  console.log("physicalItems.value", physicalItems.value);
+}
+
+const deleteGroupDataId = (value) => {
+  physicalItems.value.filter(item => item.id !== value)
 }
 
 // 测试平台 下拉选择框
