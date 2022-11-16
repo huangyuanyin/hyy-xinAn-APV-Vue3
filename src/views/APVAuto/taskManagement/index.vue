@@ -241,7 +241,7 @@
           </el-form-item>
           <el-collapse v-show="isPhysicalMachine == '1'" v-model="activeNames" @change="handleChange">
             <el-collapse-item v-for="(item, index) in physicalItems" :key="'physicalItems' + index"
-              :title="item.name + `&nbsp&nbsp&nbsp` + '的物理机配置项'" :name="item.name">
+              :title="`【${item.name}】` + `&nbsp` + '的物理机配置项：'" :name="item.name">
               <el-form-item label="TipServer IP " prop="TipServer">
                 <el-input v-model="item.TipServer" :placeholder="placeholderTipServer" />
               </el-form-item>
@@ -347,7 +347,7 @@ const timer = ref(null) // 定时器
 const taskCurrentPage = ref(1)
 const taskPageSize = ref(10)
 const taskTotal = ref(0)
-const activeNames = ref(['1'])
+const activeNames = ref([1])
 const physicalItems = ref([])
 const handleChange = (val: string[]) => {
   console.log(val)
@@ -478,9 +478,9 @@ const validateTipServer = (rule: any, value: any, callback: any) => {
   if (isPhysicalMachine.value == '0') {
     return callback()
   } else {
-    physicalItems.value.map(item => {
+    physicalItems.value.forEach(item => {
       if (item.TipServer === '') {
-        callback(new Error('请输入物理机ip'))
+        return callback(new Error('请输入物理机ip'))
       } else {
         callback()
       }
@@ -491,22 +491,29 @@ const validateTipPort = (rule: any, value: any, callback: any) => {
   if (isPhysicalMachine.value == '0') {
     return callback()
   } else {
-    physicalItems.value.map(item => {
-      if (item.TipPort === '') {
-        callback(new Error('请输入物理机port'))
-      } else {
-        callback()
-      }
+    let _arr = []
+    physicalItems.value.forEach(item => {
+      _arr.push(item.TipPort)
+      // if (item.TipPort === '') {
+      //   return callback(new Error('请输入物理机port'))
+      // } else {
+      //   callback()
+      // }
     })
+    if (_arr.some(val => val === '')) {
+      callback(new Error('请输入物理机port'))
+    } else {
+      callback()
+    }
   }
 }
 const validateTestPass = (rule: any, value: any, callback: any) => {
   if (isPhysicalMachine.value == '0') {
     return callback()
   } else {
-    physicalItems.value.map(item => {
+    physicalItems.value.forEach(item => {
       if (item.TestPass === '') {
-        callback(new Error('请输入物理机PassWord'))
+        return callback(new Error('请输入物理机PassWord'))
       } else {
         callback()
       }
@@ -760,7 +767,7 @@ const getTask = async (page) => {
 // 任务管理 添加接口
 const addTask = async (params) => {
   let res = await addTaskApi(params)
-  if (res.code === 1000) {
+  if (res?.code === 1000) {
     await getTask(1)
     await handle()
     ElMessage({
@@ -768,16 +775,8 @@ const addTask = async (params) => {
       type: "success",
       duration: 1000,
     });
-    physicalItems.value = []
-  } else {
-    ElMessage({
-      message: res?.msg || "添加失败",
-      type: "error",
-      duration: 3000,
-      showClose: true,
-    });
-    physicalItems.value = []
   }
+  physicalItems.value = []
 }
 
 // 任务管理 编辑接口
@@ -791,14 +790,8 @@ const editTask = async (params) => {
       type: "success",
       duration: 1000,
     });
-  } else {
-    ElMessage({
-      message: res?.msg || "编辑失败",
-      type: "error",
-      duration: 3000,
-      showClose: true,
-    });
   }
+  physicalItems.value = []
 }
 
 // 任务管理 删除接口
@@ -832,26 +825,52 @@ const getBuild = async () => {
 
 // 分组名称 下拉选择框
 const getGroupDataId = (value) => {
-  physicalItems.value = []
+  let items = []
   addTaskForm.group = value
   addTaskForm.group.map(item => {
     state.d_groupData.map(it => {
       if (item === it.id) {
+        items.push(it)
+      }
+    })
+  })
+  if (physicalItems.value.length == 0) {
+    items.map(item => {
+      physicalItems.value.push({
+        id: item.id,
+        name: item.name,
+        TipServer: "",
+        TipPort: "",
+        TestPass: "",
+      })
+    })
+  } else {
+    items.forEach(item => {
+      let isExit = false
+      physicalItems.value.forEach(it => {
+        if (item.id === it.id) {
+          isExit = true
+          return
+        }
+      })
+      if (!isExit) {
         physicalItems.value.push({
-          id: it.id,
-          name: it.name,
+          id: item.id,
+          name: item.name,
           TipServer: "",
           TipPort: "",
           TestPass: "",
         })
       }
     })
-  })
-  console.log("physicalItems.value", physicalItems.value);
+  }
+  activeNames.value = [physicalItems.value[physicalItems.value.length - 1].name]
+  console.log("physicalItems.value", items, physicalItems.value[physicalItems.value.length - 1].name);
 }
 
 const deleteGroupDataId = (value) => {
-  physicalItems.value.filter(item => item.id !== value)
+  physicalItems.value = physicalItems.value.filter(item => item.id !== value)
+  console.log("删一个", value, physicalItems.value);
 }
 
 // 测试平台 下拉选择框
@@ -1091,6 +1110,7 @@ const onResetTaskForm = (formEl: FormInstance | undefined) => {
   groupDialogVisible.value = false;
   platformDialog.value = false;
   addTestPlatForm.group = ''
+  physicalItems.value = []
 };
 
 // 关闭弹窗
@@ -1100,6 +1120,7 @@ const handleClose = (done: () => void) => {
   groupDialogVisible.value = false
   taskProgressDialog.value = false
   addTaskRuleFormRef.value.resetFields()
+  physicalItems.value = []
 };
 
 // 关闭测试平台弹窗
