@@ -233,7 +233,7 @@
           <el-form-item label="备注" prop="remark">
             <el-input v-model="addTaskForm.remark" placeholder="提示信息：可根据测试设备硬件等信息区分同一build的不同测试任务" />
           </el-form-item>
-          <el-form-item label="物理机" prop="config">
+          <el-form-item label="是否含有物理机" prop="config">
             <el-radio-group v-model="isPhysicalMachine">
               <el-radio label="1">是</el-radio>
               <el-radio label="0">否</el-radio>
@@ -261,7 +261,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="onResetTaskForm(addTaskRuleFormRef)">取消</el-button>
-          <el-button type="primary" @click="onAddTaskForm(addTaskRuleFormRef)">{{ buttonText }}</el-button>
+          <el-button type="primary" @click="toShowPreviewDialog(addTaskRuleFormRef)">{{ buttonText }}</el-button>
         </span>
       </template>
     </el-dialog>
@@ -311,11 +311,72 @@
         </span>
       </template>
     </el-dialog>
+    <!--确认预览弹窗-->
+    <el-dialog v-model="submitPreviewDialog" title="添加任务详情预览" custom-class="submitPreviewDialog" width="50%">
+      <div class="preview">
+        <div class="preview_item">
+          <span class="left">任务名称：</span>
+          <span>{{ addTaskForm.name }}</span>
+        </div>
+        <div class="preview_item">
+          <span class="left">build版本：</span>
+          <span>{{ addTaskForm.build }}</span>
+        </div>
+        <div class="preview_item" style="display:flex;">
+          <span class="left" style="display:block">测试平台：</span>
+          <span>{{ physicalNames }}</span>
+        </div>
+        <div class="preview_item">
+          <span class="left">负责人：</span>
+          <span>{{ addTaskForm.user }}</span>
+        </div>
+        <div class="preview_item" style="display:flex;">
+          <span class="left" style="width:580px;display: block;">用例集：</span>
+          <div>
+            <div>
+              <span>用例版本：</span><span>{{ casesName }}</span>
+            </div>
+            <div style="margin-top:10px">
+              <span>用例模块：</span><span>{{ caseModule }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="preview_item">
+          <span class="left">备注：</span>
+          <span>{{ addTaskForm.remark || "无" }} </span>
+        </div>
+        <div class="preview_item">
+          <span class="left">是否含有物理机：</span>
+          <span v-if="isPhysicalMachine == '1'">是</span><span v-else>否</span>
+        </div>
+        <template v-if="isPhysicalMachine == '1'">
+          <div class="phy-items" v-for="(item, index) in physicalItems" :key="'physicalItems' + index">
+            <div v-if="item.TipPort !== ''" style="display:flex;margin-bottom: 20px;">
+              <span class="title">{{ `【${item.name}】` + `&nbsp` + '为物理机，配置项：' }}</span>
+              <div>
+                <div style="margin-bottom: 10px;"><span>TipServer：</span><span>{{ item.TipServer }}</span></div>
+                <div style="margin-bottom: 10px;"><span>TipPort：</span><span>{{ item.TipPort }}</span></div>
+                <div style="margin-bottom: 10px;"><span>TestPass：</span><span>{{ item.TestPass }}</span></div>
+              </div>
+            </div>
+            <div v-else>
+              <span class="title">{{ `【${item.name}】` + `&nbsp` + '无配置项' }}</span>
+            </div>
+          </div>
+        </template>
+      </div>
+      <template #footer>
+        <span class=" dialog-footer">
+          <el-button @click="submitPreviewDialog = false">取消</el-button>
+          <el-button type="primary" @click="onAddTaskForm(addTaskRuleFormRef)">确定</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, nextTick } from "vue";
+import { onMounted, nextTick, watch } from "vue";
 import { ref, reactive } from "vue";
 import type { TabsPaneContext } from "element-plus";
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -340,6 +401,7 @@ const platformDialog = ref(false)
 const tableLoading = ref(false)
 const editDisabled = ref(false)
 const showDetail = ref(false)
+const submitPreviewDialog = ref(false)
 const textarea = ref('')
 const testPlatList = ref([]) // 已有测试平台集合List
 const buttonText = ref("添加")
@@ -438,6 +500,9 @@ const state: any = reactive({
   ]
 })
 
+const physicalNames = ref([])
+const casesName = ref("")
+const caseModule = ref([])
 const searchForm = ref({
   build: "",
   group: "",
@@ -659,11 +724,25 @@ const handleCaseValue = (data) => {
   })
 }
 
-// 添加任务
-const onAddTaskForm = async (formEl: FormInstance | undefined) => {
+// 展示预览弹窗
+const toShowPreviewDialog = async (formEl: FormInstance | undefined) => {
   addTaskForm.config = physicalItems.value
   if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
+    if (valid) {
+      submitPreviewDialog.value = true
+      casesName.value = addTaskForm.cases.cases_name
+      caseModule.value = addTaskForm.cases.module_name
+    }
+  })
+}
+
+// 添加任务
+const onAddTaskForm = async (formEl: FormInstance | undefined) => {
+  // addTaskForm.config = physicalItems.value
+  if (!formEl) return;
+  await formEl.validate(async (valid, fields) => {
+    submitPreviewDialog.value = false
     if (valid) {
       console.log("添加成功...", JSON.parse(JSON.stringify(addTaskForm)));
       // addTaskForm.group = "[" + String(addTaskForm.group) + "]"
@@ -866,6 +945,9 @@ const getGroupDataId = (value) => {
   }
   activeNames.value = [physicalItems.value[physicalItems.value.length - 1].name]
   console.log("physicalItems.value", items, physicalItems.value[physicalItems.value.length - 1].name);
+  physicalItems.value.map(item => {
+    physicalNames.value.push(item.name)
+  })
 }
 
 const deleteGroupDataId = (value) => {
@@ -1374,6 +1456,35 @@ const handleTaskCurrentChange = (val: number) => {
 
 .failNumStyle:hover {
   cursor: pointer;
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 30px;
+
+  .preview_item {
+    margin-bottom: 10px;
+    display: flex;
+  }
+
+  .left {
+    display: inline-block;
+    width: 140px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .phy-items {
+    display: flex;
+    flex-direction: column;
+
+    .title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+  }
 }
 </style>
 
