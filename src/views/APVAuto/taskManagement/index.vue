@@ -239,24 +239,29 @@
               <el-radio label="0">否</el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-collapse v-show="isPhysicalMachine == '1'" v-model="activeNames" @change="handleChange">
-            <el-collapse-item v-for="(item, index) in physicalItems" :key="'physicalItems' + index"
-              :title="`【${item.name}】` + `&nbsp` + '的物理机配置项：'" :name="item.name">
-              <el-form-item label="TipServer IP " prop="TipServer">
-                <el-input v-model="item.TipServer" :placeholder="placeholderTipServer" />
+        </el-form>
+        <el-collapse v-show="isPhysicalMachine == '1'" v-model="activeNames" @change="handleChange">
+          <el-collapse-item v-for="(item, index) in physicalItems" :key="'physicalItems' + index"
+            :title="`【${item.name}】` + `&nbsp` + '的物理机配置项：'" :name="item.name">
+            <el-form :model="item" ref="physicalForms">
+              <el-form-item label="TipServer IP " prop="TipServer" :required="item.required">
+                <el-input v-model="item.TipServer" :placeholder="placeholderTipServer"
+                  @input="onPhysicalItemChange(item, index)" />
               </el-form-item>
-              <el-form-item label="TipServer Port" prop="TipPort">
-                <el-input v-model="item.TipPort" :placeholder="placeholderTipPort" />
+              <el-form-item label="TipServer Port" prop="TipPort" :required="item.required">
+                <el-input v-model="item.TipPort" :placeholder="placeholderTipPort"
+                  @input="onPhysicalItemChange(item, index)" />
               </el-form-item>
-              <el-form-item label="TipServer PassWord" prop="TestPass">
-                <el-input v-model="item.TestPass" :placeholder="placeholderTestPass" />
+              <el-form-item label="TipServer PassWord" prop="TestPass" :required="item.required">
+                <el-input v-model="item.TestPass" :placeholder="placeholderTestPass"
+                  @input="onPhysicalItemChange(item, index)" />
               </el-form-item>
               <!--<el-form-item v-show="isPhysicalMachine == '1'" label="物理设备硬件型号" prop="model">
                     <el-input v-model="addTaskForm.config.model" :placeholder="placeholderTipModel" />
                   </el-form-item> -->
-            </el-collapse-item>
-          </el-collapse>
-        </el-form>
+            </el-form>
+          </el-collapse-item>
+        </el-collapse>
       </span>
       <template #footer>
         <span class="dialog-footer">
@@ -352,7 +357,7 @@
         <template v-if="isPhysicalMachine == '1'">
           <div class="phy-items" v-for="(item, index) in physicalItems" :key="'physicalItems' + index">
             <div v-if="item.TipPort !== ''" style="display:flex;margin-bottom: 20px;">
-              <span class="title">{{ `【${item.name}】` + `&nbsp` + '为物理机，配置项：' }}</span>
+              <span class="title">{{ `【${item.name}】` + '为物理机，配置项：' }}</span>
               <div>
                 <div style="margin-bottom: 10px;"><span>TipServer：</span><span>{{ item.TipServer }}</span></div>
                 <div style="margin-bottom: 10px;"><span>TipPort：</span><span>{{ item.TipPort }}</span></div>
@@ -360,7 +365,7 @@
               </div>
             </div>
             <div v-else>
-              <span class="title">{{ `【${item.name}】` + `&nbsp` + '无配置项' }}</span>
+              <span class="title">{{ `【${item.name}】` + '为虚拟机，无配置项' }}</span>
             </div>
           </div>
         </template>
@@ -613,19 +618,29 @@ const addTaskFormRules = reactive<FormRules>({
   // config: [
   //   { required: true, message: "请选择是否需要物理机", trigger: "blur" },
   // ],
-  TipServer: [
-    { required: true, validator: validateTipServer, trigger: "blur" },
-  ],
-  TipPort: [
-    { required: true, validator: validateTipPort, trigger: "blur" },
-  ],
-  TestPass: [
-    { required: true, validator: validateTestPass, trigger: "blur" },
-  ],
+  // TipServer: [
+  //   { required: true, validator: validateTipServer, trigger: "blur" },
+  // ],
+  // TipPort: [
+  //   { required: true, validator: validateTipPort, trigger: "blur" },
+  // ],
+  // TestPass: [
+  //   { required: true, validator: validateTestPass, trigger: "blur" },
+  // ],
   model: [
     { required: true, validator: validateModel, trigger: "blur" },
   ]
 });
+
+const physicalForms = ref([])
+
+const onPhysicalItemChange = (item, index) => {
+  const { TipServer, TipPort, TestPass } = item
+  item.required = !!(TipServer || TipPort || TestPass)
+  if (!item.required) {
+    physicalForms.value[index].clearValidate();
+  }
+}
 
 // 切换Tab
 const handleClick = (tab: TabsPaneContext, event: Event) => {
@@ -726,6 +741,15 @@ const handleCaseValue = (data) => {
 
 // 展示预览弹窗
 const toShowPreviewDialog = async (formEl: FormInstance | undefined) => {
+  const forms = physicalForms.value;
+
+  if (forms) {
+    for (const item of forms) {
+      const result = await item.validate()
+      if (!result) return
+    }
+  }
+
   addTaskForm.config = physicalItems.value
   if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
