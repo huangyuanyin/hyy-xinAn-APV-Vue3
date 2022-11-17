@@ -203,7 +203,8 @@
       <!-- </el-tab-pane> -->
     </el-tabs>
     <!--添加任务弹窗-->
-    <el-dialog v-model="dialogVisible" :title="titleDialog" width="40%" :before-close="handleClose">
+    <el-dialog v-model="dialogVisible" :title="titleDialog" width="40%" :before-close="handleClose"
+      :close-on-click-modal="false">
       <span>
         <el-form :inline="false" :model="addTaskForm" ref="addTaskRuleFormRef" :rules="addTaskFormRules"
           class="addDevice-form" label-width="160px">
@@ -212,14 +213,14 @@
           </el-form-item>
           <el-form-item label="build版本" prop="build">
             <el-select v-model="addTaskForm.build" placeholder="请选择..." :disabled="editDisabled">
-              <el-option v-for="(item, index) in state.buildData" :key="'buildData' + index" :label="item.name"
+              <el-option v-for="(item, index) in state.buildData  " :key="'buildData' + index" :label="item.name"
                 :value="item.name" />
             </el-select>
           </el-form-item>
           <el-form-item label="测试平台" prop="group">
             <el-select multiple clearable v-model="addTaskForm.group" placeholder="请选择..." @change="getGroupDataId"
               @remove-tag="deleteGroupDataId">
-              <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name"
+              <el-option v-for="(item, index) in state.d_groupData  " :key="'d_groupData' + index" :label="item.name"
                 :value="item.id" />
             </el-select>
           </el-form-item>
@@ -241,7 +242,7 @@
           </el-form-item>
         </el-form>
         <el-collapse v-show="isPhysicalMachine == '1'" v-model="activeNames" @change="handleChange">
-          <el-collapse-item v-for="(item, index) in physicalItems" :key="'physicalItems' + index" :name="item.name">
+          <el-collapse-item v-for="(item, index) in physicalItems  " :key="'physicalItems' + index" :name="item.name">
             <template #title>
               <span>{{ `【${item.name}】` + `&nbsp` + '的物理机配置项：' }}</span>
               <span v-if="item.requiredTip" class="requiredTip">【待完善】</span>
@@ -300,7 +301,7 @@
         <span class="title">已有测试平台：</span>
         <el-tag v-if="testPlatList.length == 0" class="ml-2" type="info">暂无测试平台</el-tag>
         <div>
-          <el-tag class="tagType" v-for="item, index in testPlatList" :key="'testPlatList' + index" closable
+          <el-tag class="tagType" v-for="item, index in testPlatList  " :key="'testPlatList' + index" closable
             @close="handleCloseTag(item, item.id)">
             {{ item.label }}
           </el-tag>
@@ -310,7 +311,7 @@
         label-width="130px">
         <el-form-item label="添加测试平台：">
           <el-select clearable v-model="addTestPlatForm.group" placeholder="请选择要添加的测试平台..." @change="getTestPlatDataId">
-            <el-option v-for="(item, index) in state.d_groupDataAfter" :key="'d_groupDataAfter' + index"
+            <el-option v-for="(item, index) in state.d_groupDataAfter  " :key="'d_groupDataAfter' + index"
               :label="item.name" :value="item.id" :disabled="item.disabled" />
           </el-select>
         </el-form-item>
@@ -323,7 +324,13 @@
       </template>
     </el-dialog>
     <!--确认预览弹窗-->
-    <el-dialog v-model="submitPreviewDialog" title="添加任务详情预览" custom-class="submitPreviewDialog" width="50%">
+    <el-dialog v-model="submitPreviewDialog" title="添加任务预览" custom-class="submitPreviewDialog" width="50%"
+      :close-on-click-modal="false">
+      <template #header="{ close, titleId, titleClass }">
+        <div class="my-header">
+          <h4 :id="titleId" :class="titleClass">添加任务预览清单<span>【请仔细核对每一项后提交】</span></h4>
+        </div>
+      </template>
       <div class="preview">
         <div class="preview_item">
           <span class="left">任务名称：</span>
@@ -335,20 +342,26 @@
         </div>
         <div class="preview_item" style="display:flex;">
           <span class="left" style="display:block">测试平台：</span>
-          <span>{{ physicalNames }}</span>
+          <div v-for="(item, index) in physicalNames" :key="'physicalNames' + index">
+            <el-tag style="margin-right:10px">{{ item }}</el-tag>
+          </div>
         </div>
         <div class="preview_item">
           <span class="left">负责人：</span>
           <span>{{ addTaskForm.user }}</span>
         </div>
         <div class="preview_item" style="display:flex;">
-          <span class="left" style="width:580px;display: block;">用例集：</span>
-          <div>
-            <div>
-              <span>用例版本：</span><span>{{ casesName }}</span>
-            </div>
-            <div style="margin-top:10px">
-              <span>用例模块：</span><span>{{ caseModule }}</span>
+          <span class="left" style="display: block;">用例集：</span>
+          <div style="width: 80%;">
+            <span>用例版本：</span>
+            <el-tag>{{ casesName }}</el-tag>
+            <div style="margin-top:10px;display: flex;">
+              <div style="min-width:70px">用例模块：</div>
+              <div style="display:flex;flex-wrap: wrap;">
+                <div v-for="(item, index) in caseModule" :key="'caseModule' + index">
+                  <el-tag type="info" style="margin-right:10px;margin-bottom: 5px;">{{ item }}</el-tag>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -370,7 +383,7 @@
                 <!-- <div style="margin-bottom: 10px;"><span>TestPass：</span><span>{{ item.TestPass }}</span></div> -->
               </div>
             </div>
-            <div v-else>
+            <div v-else style="display:flex;margin-bottom: 20px;">
               <span class="title">{{ `【${item.name}】` + '为虚拟机，无配置项' }}</span>
             </div>
           </div>
@@ -993,6 +1006,7 @@ const getGroupDataId = (value) => {
   }
   activeNames.value = [physicalItems.value[physicalItems.value.length - 1].name]
   console.log("physicalItems.value", items, physicalItems.value[physicalItems.value.length - 1].name);
+  physicalNames.value = []
   physicalItems.value.map(item => {
     physicalNames.value.push(item.name)
   })
@@ -1283,6 +1297,18 @@ const handleTaskCurrentChange = (val: number) => {
 </script>
 
 <style lang="scss" scoped>
+.my-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 20px;
+
+  span {
+    color: red;
+    font-size: 14px
+  }
+}
+
 :deep(.el-timeline-item__timestamp.is-top) {
   font-size: 15px;
   font-weight: 600;
