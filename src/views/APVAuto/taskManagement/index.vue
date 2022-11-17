@@ -241,9 +241,15 @@
           </el-form-item>
         </el-form>
         <el-collapse v-show="isPhysicalMachine == '1'" v-model="activeNames" @change="handleChange">
-          <el-collapse-item v-for="(item, index) in physicalItems" :key="'physicalItems' + index"
-            :title="`【${item.name}】` + `&nbsp` + '的物理机配置项：'" :name="item.name">
-            <el-form :model="item" ref="physicalForms">
+          <el-collapse-item v-for="(item, index) in physicalItems" :key="'physicalItems' + index" :name="item.name">
+            <template #title>
+              <span>{{ `【${item.name}】` + `&nbsp` + '的物理机配置项：' }}</span>
+              <span v-if="item.requiredTip" class="requiredTip">【待完善】</span>
+              <el-icon class="header-icon">
+                <info-filled />
+              </el-icon>
+            </template>
+            <el-form :model="item" ref="physicalForms" label-width="160px">
               <el-form-item label="TipServer IP " prop="TipServer" :required="item.required">
                 <el-input v-model="item.TipServer" :placeholder="placeholderTipServer"
                   @input="onPhysicalItemChange(item, index)" />
@@ -252,10 +258,10 @@
                 <el-input v-model="item.TipPort" :placeholder="placeholderTipPort"
                   @input="onPhysicalItemChange(item, index)" />
               </el-form-item>
-              <el-form-item label="TipServer PassWord" prop="TestPass" :required="item.required">
+              <!-- <el-form-item label="TipServer PassWord" prop="TestPass" :required="item.required">
                 <el-input v-model="item.TestPass" :placeholder="placeholderTestPass"
                   @input="onPhysicalItemChange(item, index)" />
-              </el-form-item>
+              </el-form-item> -->
               <!--<el-form-item v-show="isPhysicalMachine == '1'" label="物理设备硬件型号" prop="model">
                     <el-input v-model="addTaskForm.config.model" :placeholder="placeholderTipModel" />
                   </el-form-item> -->
@@ -361,7 +367,7 @@
               <div>
                 <div style="margin-bottom: 10px;"><span>TipServer：</span><span>{{ item.TipServer }}</span></div>
                 <div style="margin-bottom: 10px;"><span>TipPort：</span><span>{{ item.TipPort }}</span></div>
-                <div style="margin-bottom: 10px;"><span>TestPass：</span><span>{{ item.TestPass }}</span></div>
+                <!-- <div style="margin-bottom: 10px;"><span>TestPass：</span><span>{{ item.TestPass }}</span></div> -->
               </div>
             </div>
             <div v-else>
@@ -635,8 +641,12 @@ const addTaskFormRules = reactive<FormRules>({
 const physicalForms = ref([])
 
 const onPhysicalItemChange = (item, index) => {
-  const { TipServer, TipPort, TestPass } = item
-  item.required = !!(TipServer || TipPort || TestPass)
+  // const { TipServer, TipPort, TestPass } = item
+  // item.required = !!(TipServer || TipPort || TestPass)
+  // item.required && !(TipServer && TipPort && TestPass) ? item.requiredTip = true : item.requiredTip = false
+  const { TipServer, TipPort } = item
+  item.required = !!(TipServer || TipPort)
+  item.required && !(TipServer && TipPort) ? item.requiredTip = true : item.requiredTip = false
   if (!item.required) {
     physicalForms.value[index].clearValidate();
   }
@@ -741,16 +751,30 @@ const handleCaseValue = (data) => {
 
 // 展示预览弹窗
 const toShowPreviewDialog = async (formEl: FormInstance | undefined) => {
+  // 配置项中已填写但未完善提醒
   const forms = physicalForms.value;
-
   if (forms) {
     for (const item of forms) {
       const result = await item.validate()
       if (!result) return
     }
   }
-
-  addTaskForm.config = physicalItems.value
+  // 去除未填写的配置项
+  physicalItems.value.map((item) => {
+    // const { TipServer, TipPort, TestPass } = item
+    // if (!!(TipServer || TipPort || TestPass)) {
+    //   addTaskForm.config.push(item)
+    // }
+    const { TipServer, TipPort } = item
+    if (!!(TipServer || TipPort)) {
+      addTaskForm.config.push(item)
+    }
+  })
+  // 选择含有物理机，未填写配置项提醒
+  if (addTaskForm.config.length == 0 && isPhysicalMachine.value === '1') {
+    return ElMessage.error("至少填写一个物理机配置项")
+  }
+  console.log("forms", addTaskForm);
   if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
     if (valid) {
@@ -944,7 +968,7 @@ const getGroupDataId = (value) => {
         name: item.name,
         TipServer: "",
         TipPort: "",
-        TestPass: "",
+        // TestPass: "",
       })
     })
   } else {
@@ -962,7 +986,7 @@ const getGroupDataId = (value) => {
           name: item.name,
           TipServer: "",
           TipPort: "",
-          TestPass: "",
+          // TestPass: "",
         })
       }
     })
@@ -1169,7 +1193,7 @@ const getTaskConfig = async () => {
   let res = await getTaskConfigApi()
   placeholderTipServer.value = res.data.TipServer || ''
   placeholderTipPort.value = res.data.TipPort || ''
-  placeholderTestPass.value = res.data.TestPass || ''
+  // placeholderTestPass.value = res.data.TestPass || ''
   // placeholderTipModel.value = res.data.model || ''
 }
 
@@ -1315,6 +1339,18 @@ const handleTaskCurrentChange = (val: number) => {
   height: 10px;
   border-radius: 50%;
   margin-right: 3px;
+}
+
+.el-collapse {
+
+  .el-input,
+  .el-select {
+    width: 450px;
+  }
+
+  .requiredTip {
+    color: #F56C6C;
+  }
 }
 
 .addDevice-form {
