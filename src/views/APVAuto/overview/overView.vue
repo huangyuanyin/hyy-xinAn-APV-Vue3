@@ -9,7 +9,7 @@
       </span>
       <span class="title">APV自动化平台概览</span>
       <div class="title-right">
-        <img :src="refresh" class="qiehuan" @click="handleChangeTheme">
+        <img :src="refresh" class="qiehuan" @click="handleRefresh">
         <span class="datetime">{{ getNowDate() }}</span>
       </div>
     </header>
@@ -56,13 +56,13 @@
       <section class="screen-middle">
         <div id="middle-top" :class="[fullScreenStatus.hot ? 'fullscreen' : '']">
           <!-- Case图表 -->
-          <CasesEcharts />
+          <CasesEcharts v-if="isRefresh" />
         </div>
       </section>
       <section class="screen-right">
         <div id="right-top" :class="[fullScreenStatus.hot ? 'fullscreen' : '']">
           <!-- 任务列表图表 -->
-          <TaskEcharts ref="hot" />
+          <TaskEcharts v-if="isRefresh" />
         </div>
       </section>
     </div>
@@ -70,7 +70,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineProps } from 'vue'
+import { computed, defineProps, nextTick, ref } from 'vue'
 import { getThemeValue } from '@/utils/theme_utils'
 import { useAppStore } from '@/store/modules/app';
 import TaskEcharts from './component/TaskEcharts.vue'
@@ -120,8 +120,12 @@ const fullScreenStatus = { // 定义每一个图表的全屏状态
   stock: false
 }
 
-const handleChangeTheme = () => {
-
+const isRefresh = ref(true)
+const handleRefresh = () => {
+  isRefresh.value = false
+  nextTick(() => {
+    isRefresh.value = true
+  })
 }
 </script>
 
