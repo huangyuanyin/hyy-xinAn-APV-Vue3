@@ -91,6 +91,16 @@ export function getCaseApi(params) {
   });
 }
 
+// 获取用例集 - 刷新
+export function getCaseRefreshApi(params) {
+  return request({
+    url: `/autoapv/case/`,
+    method: "put",
+    urlType: "APV",
+    params,
+  });
+}
+
 // 获取参数配置列表
 export function getTaskConfigApi(params) {
   return request({
