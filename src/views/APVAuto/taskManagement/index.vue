@@ -199,7 +199,16 @@
             <el-input v-model="addTaskForm.user" placeholder="请输入..." />
           </el-form-item>
           <el-form-item label="用例集" prop="cases">
-            <el-cascader v-model="casValue" :options="casesOptions" :props="casesProps" @change="getCasesOptions" popper-class="casesProps-tree" collapse-tags collapse-tags-tooltip clearable />
+            <el-cascader
+              v-model="casValue"
+              :options="casesOptions"
+              :props="casesProps"
+              @change="getCasesOptions"
+              popper-class="casesProps-tree"
+              collapse-tags
+              collapse-tags-tooltip
+              clearable
+            />
           </el-form-item>
           <el-form-item label="备注" prop="remarks">
             <el-input v-model="addTaskForm.remarks" placeholder="提示信息：可根据测试设备硬件等信息区分同一build的不同测试任务" />
@@ -214,7 +223,7 @@
         <el-collapse v-show="isPhysicalMachine == '1'" v-model="activeNames" @change="handleChange">
           <el-collapse-item v-for="(item, index) in physicalItems" :key="'physicalItems' + index" :name="item.name">
             <template #title>
-              <span>{{ `【${item.name}】` + `&nbsp` + "的物理机配置项：" }}</span>
+              <span>{{ `【${item.name}】` + `&nbsp` + '的物理机配置项：' }}</span>
               <span v-if="item.requiredTip" class="requiredTip">【待完善】</span>
               <el-icon class="header-icon">
                 <info-filled />
@@ -329,7 +338,7 @@
         </div>
         <div class="preview_item">
           <span class="left">备注：</span>
-          <span>{{ addTaskForm.remarks || "无" }} </span>
+          <span>{{ addTaskForm.remarks || '无' }} </span>
         </div>
         <div class="preview_item">
           <span class="left">是否含有物理机：</span>
@@ -338,7 +347,7 @@
         <template v-if="isPhysicalMachine == '1'">
           <div class="phy-items" v-for="(item, index) in physicalItems" :key="'physicalItems' + index">
             <div v-if="item.TipPort !== ''" style="display: flex; margin-bottom: 20px">
-              <span class="title">{{ `【${item.name}】` + "为物理机，配置项：" }}</span>
+              <span class="title">{{ `【${item.name}】` + '为物理机，配置项：' }}</span>
               <div>
                 <div style="margin-bottom: 10px">
                   <span>TipServer：</span><span>{{ item.TipServer }}</span>
@@ -350,7 +359,7 @@
               </div>
             </div>
             <div v-else style="display: flex; margin-bottom: 20px">
-              <span class="title">{{ `【${item.name}】` + "为虚拟机，无配置项" }}</span>
+              <span class="title">{{ `【${item.name}】` + '为虚拟机，无配置项' }}</span>
             </div>
           </div>
         </template>
@@ -366,13 +375,13 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, nextTick, watch } from "vue";
-import { ref, reactive } from "vue";
-import type { TabsPaneContext } from "element-plus";
-import { ElMessage, ElMessageBox } from "element-plus";
-import type { FormInstance, FormRules } from "element-plus";
-import { Calendar, Search } from "@element-plus/icons-vue";
-import { ElInput } from "element-plus";
+import { onMounted, nextTick, watch } from 'vue'
+import { ref, reactive } from 'vue'
+import type { TabsPaneContext } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
+import { Calendar, Search } from '@element-plus/icons-vue'
+import { ElInput } from 'element-plus'
 import {
   deviceApi,
   addDeviceApi,
@@ -385,83 +394,94 @@ import {
   d_groupApi,
   addD_groupApi,
   editD_groupApi,
-  deleteD_groupApi,
-} from "@/api/APV/index.js";
-import { taskApi, addTaskApi, editTaskApi, deleteTaskApi, taskRunApi, taskStatusApi, deleteTestPlatApi, putTestPlatApi, getCaseApi, getTaskConfigApi } from "@/api/APV/taskManagement.js";
-import { getReportApi } from "@/api/APV/testReport.js";
-import { buildApi } from "@/api/APV/buildManagement.js";
-import { utc2beijing } from "@/utils/util.js";
-import reportDetailVue from "./components/reportDetailEchart.vue";
-import { useRouter } from "vue-router";
+  deleteD_groupApi
+} from '@/api/APV/index.js'
+import {
+  taskApi,
+  addTaskApi,
+  editTaskApi,
+  deleteTaskApi,
+  taskRunApi,
+  taskStatusApi,
+  deleteTestPlatApi,
+  putTestPlatApi,
+  getCaseApi,
+  getTaskConfigApi
+} from '@/api/APV/taskManagement.js'
+import { getReportApi } from '@/api/APV/testReport.js'
+import { buildApi } from '@/api/APV/buildManagement.js'
+import { utc2beijing } from '@/utils/util.js'
+import reportDetailVue from './components/reportDetailEchart.vue'
+import { useRouter } from 'vue-router'
 
-const router = useRouter();
-const activeName = ref("taskManagement");
-const dialogVisible = ref(false);
-const deviceTypeDialogVisible = ref(false);
-const groupDialogVisible = ref(false);
-const taskProgressDialog = ref(false);
-const platformDialog = ref(false);
-const tableLoading = ref(false);
-const editDisabled = ref(false);
-const showDetail = ref(false);
-const submitPreviewDialog = ref(false);
-const textarea = ref("");
-const testPlatList = ref([]); // 已有测试平台集合List
-const buttonText = ref("添加");
-const timer = ref(null); // 定时器
-const taskCurrentPage = ref(1);
-const taskPageSize = ref(10);
-const taskTotal = ref(0);
-const activeNames = ref([1]);
-const physicalItems = ref([]);
+const router = useRouter()
+const activeName = ref('taskManagement')
+const dialogVisible = ref(false)
+const deviceTypeDialogVisible = ref(false)
+const groupDialogVisible = ref(false)
+const taskProgressDialog = ref(false)
+const platformDialog = ref(false)
+const tableLoading = ref(false)
+const editDisabled = ref(false)
+const showDetail = ref(false)
+const submitPreviewDialog = ref(false)
+const textarea = ref('')
+const testPlatList = ref([]) // 已有测试平台集合List
+const buttonText = ref('添加')
+const timer = ref(null) // 定时器
+const taskCurrentPage = ref(1)
+const taskPageSize = ref(10)
+const taskTotal = ref(0)
+const activeNames = ref([1])
+const physicalItems = ref([])
 const handleChange = (val: string[]) => {
-  console.log(val);
-};
+  console.log(val)
+}
 const casesProps = {
   multiple: true,
-  label: "name",
-  value: "name",
-};
-const casesOptions = ref([]);
+  label: 'name',
+  value: 'name'
+}
+const casesOptions = ref([])
 
 // 调用 获取用例集接口
 const getCase = async () => {
-  let res = await getCaseApi();
-  casesOptions.value = res.data || [];
-};
+  let res = await getCaseApi()
+  casesOptions.value = res.data || []
+}
 
-const tag = ref(-1);
-const casValue: any = ref([]);
+const tag = ref(-1)
+const casValue: any = ref([])
 // 处理用例集字段传参
 const getCasesOptions = (data) => {
   /* 解决父节点为单选，子节点为多选的需求 */
   data.forEach((i: any) => {
     if (i[0] != tag.value) {
-      tag.value = i[0];
+      tag.value = i[0]
     }
-  });
-  let filterd = data.filter((v: any) => v[0] == tag.value);
-  casValue.value = [];
-  casValue.value.push(...filterd);
+  })
+  let filterd = data.filter((v: any) => v[0] == tag.value)
+  casValue.value = []
+  casValue.value.push(...filterd)
   /* 解决父节点为单选，子节点为多选的需求 */
 
-  let cases_name = [];
-  let modules_name = [];
-  let arr = [];
+  let cases_name = []
+  let modules_name = []
+  let arr = []
   for (var i = 0; i < data.length; i++) {
-    cases_name.push(data[i][0]);
+    cases_name.push(data[i][0])
   }
-  cases_name = [...new Set(cases_name)];
+  cases_name = [...new Set(cases_name)]
   cases_name.map((item) => {
     arr.push({
       cases_name: item,
-      module_name: [],
-    });
-  });
+      module_name: []
+    })
+  })
   for (var i = 0; i < arr.length; i++) {
     for (var j = 0; j < data.length; j++) {
       if (arr[i].cases_name == data[j][0]) {
-        arr[i].module_name.push(data[j][1]);
+        arr[i].module_name.push(data[j][1])
       }
     }
   }
@@ -470,17 +490,17 @@ const getCasesOptions = (data) => {
   // addTaskForm.cases = arr
 
   // 只单选
-  addTaskForm.cases = arr[0];
+  addTaskForm.cases = arr[0]
   // console.log("dada", cases_name, modules_name, arr);
-};
+}
 
 const colors = [
-  { color: "#f56c6c", percentage: 20 },
-  { color: "#e6a23c", percentage: 40 },
-  { color: "#5cb87a", percentage: 60 },
-  { color: "#1989fa", percentage: 80 },
-  { color: "#6f7ad3", percentage: 100 },
-];
+  { color: '#f56c6c', percentage: 20 },
+  { color: '#e6a23c', percentage: 40 },
+  { color: '#5cb87a', percentage: 60 },
+  { color: '#1989fa', percentage: 80 },
+  { color: '#6f7ad3', percentage: 100 }
+]
 
 const state: any = reactive({
   tableData: [], // 任务管理数据
@@ -489,105 +509,105 @@ const state: any = reactive({
   d_groupDataAfter: [],
   selectStatusList: [
     {
-      value: "running",
-      label: "运行中",
+      value: 'running',
+      label: '运行中'
     },
     {
-      value: "fail",
-      label: "已失败",
+      value: 'fail',
+      label: '已失败'
     },
     {
-      value: "stop",
-      label: "已停止",
-    },
-  ],
-});
+      value: 'stop',
+      label: '已停止'
+    }
+  ]
+})
 
-const physicalNames = ref([]);
-const casesName = ref("");
-const caseModule = ref([]);
+const physicalNames = ref([])
+const casesName = ref('')
+const caseModule = ref([])
 const searchForm = ref({
-  build: "",
-  group: "",
-  user: "",
-});
-const searchUser = ref("");
-const searchBuild = ref("");
-const searchGroup = ref("");
+  build: '',
+  group: '',
+  user: ''
+})
+const searchUser = ref('')
+const searchBuild = ref('')
+const searchGroup = ref('')
 
 // 添加测试平台数据
 const addTestPlatForm = reactive({
   id: null,
-  group: null,
-});
-const addTestPlatFormRef = ref<FormInstance>();
+  group: null
+})
+const addTestPlatFormRef = ref<FormInstance>()
 
-const isPhysicalMachine = ref("0");
-const titleDialog = ref("");
+const isPhysicalMachine = ref('0')
+const titleDialog = ref('')
 const addTaskForm = reactive({
-  id: "",
-  name: "",
-  user: "",
-  build: "",
+  id: '',
+  name: '',
+  user: '',
+  build: '',
   group: [],
   cases: null,
-  remarks: "",
-  config: [],
+  remarks: '',
+  config: []
   // config: {
   //   TipServer: "",
   //   TipPort: "",
   //   TestPass: "",
   //   // model: ""
   // }
-});
+})
 
-const addTaskRuleFormRef = ref<FormInstance>();
+const addTaskRuleFormRef = ref<FormInstance>()
 const validateTipServer = (rule: any, value: any, callback: any) => {
-  if (isPhysicalMachine.value == "0") {
-    return callback();
+  if (isPhysicalMachine.value == '0') {
+    return callback()
   } else {
     physicalItems.value.forEach((item) => {
-      if (item.TipServer === "") {
-        return callback(new Error("请输入物理机ip"));
+      if (item.TipServer === '') {
+        return callback(new Error('请输入物理机ip'))
       } else {
-        callback();
+        callback()
       }
-    });
+    })
   }
-};
+}
 const validateTipPort = (rule: any, value: any, callback: any) => {
-  if (isPhysicalMachine.value == "0") {
-    return callback();
+  if (isPhysicalMachine.value == '0') {
+    return callback()
   } else {
-    let _arr = [];
+    let _arr = []
     physicalItems.value.forEach((item) => {
-      _arr.push(item.TipPort);
+      _arr.push(item.TipPort)
       // if (item.TipPort === '') {
       //   return callback(new Error('请输入物理机port'))
       // } else {
       //   callback()
       // }
-    });
-    if (_arr.some((val) => val === "")) {
-      callback(new Error("请输入物理机port"));
+    })
+    if (_arr.some((val) => val === '')) {
+      callback(new Error('请输入物理机port'))
     } else {
-      callback();
+      callback()
     }
   }
-};
+}
 const validateTestPass = (rule: any, value: any, callback: any) => {
-  if (isPhysicalMachine.value == "0") {
-    return callback();
+  if (isPhysicalMachine.value == '0') {
+    return callback()
   } else {
     physicalItems.value.forEach((item) => {
-      if (item.TestPass === "") {
-        return callback(new Error("请输入物理机PassWord"));
+      if (item.TestPass === '') {
+        return callback(new Error('请输入物理机PassWord'))
       } else {
-        callback();
+        callback()
       }
-    });
+    })
   }
-};
+}
 const validateModel = (rule: any, value: any, callback: any) => {
   // if (isPhysicalMachine.value == '0') {
   //   return callback()
@@ -598,13 +618,13 @@ const validateModel = (rule: any, value: any, callback: any) => {
   //     callback()
   //   }
   // }
-};
+}
 const addTaskFormRules = reactive<FormRules>({
-  name: [{ required: true, message: "任务名称不能为空", trigger: "blur" }],
-  user: [{ required: true, message: "负责人不能为空", trigger: "blur" }],
-  build: [{ required: true, message: "请选择测build版本", trigger: "blur" }],
-  group: [{ required: true, message: "请选择测试平台", trigger: "blur" }],
-  cases: [{ required: true, message: "请选择用例集", trigger: "blur" }],
+  name: [{ required: true, message: '任务名称不能为空', trigger: 'blur' }],
+  user: [{ required: true, message: '负责人不能为空', trigger: 'blur' }],
+  build: [{ required: true, message: '请选择测build版本', trigger: 'blur' }],
+  group: [{ required: true, message: '请选择测试平台', trigger: 'blur' }],
+  cases: [{ required: true, message: '请选择用例集', trigger: 'blur' }],
   // config: [
   //   { required: true, message: "请选择是否需要物理机", trigger: "blur" },
   // ],
@@ -617,130 +637,130 @@ const addTaskFormRules = reactive<FormRules>({
   // TestPass: [
   //   { required: true, validator: validateTestPass, trigger: "blur" },
   // ],
-  model: [{ required: true, validator: validateModel, trigger: "blur" }],
-});
+  model: [{ required: true, validator: validateModel, trigger: 'blur' }]
+})
 
-const physicalForms = ref([]);
+const physicalForms = ref([])
 
 const onPhysicalItemChange = (item, index) => {
   // const { TipServer, TipPort, TestPass } = item
   // item.required = !!(TipServer || TipPort || TestPass)
   // item.required && !(TipServer && TipPort && TestPass) ? item.requiredTip = true : item.requiredTip = false
-  const { TipServer, TipPort } = item;
-  item.required = !!(TipServer || TipPort);
-  item.required && !(TipServer && TipPort) ? (item.requiredTip = true) : (item.requiredTip = false);
+  const { TipServer, TipPort } = item
+  item.required = !!(TipServer || TipPort)
+  item.required && !(TipServer && TipPort) ? (item.requiredTip = true) : (item.requiredTip = false)
   if (!item.required) {
-    physicalForms.value[index].clearValidate();
+    physicalForms.value[index].clearValidate()
   }
-};
+}
 
 // 切换Tab
 const handleClick = (tab: TabsPaneContext, event: Event) => {
   // console.log(tab, event);
-};
+}
 
 // 打开添加/编辑弹窗
 const openAddDialog = async (type, operation, data) => {
   switch (type) {
-    case "task":
-      operation == "add"
-        ? (titleDialog.value = "添加任务") && (buttonText.value = "添加") && (editDisabled.value = false)
-        : (titleDialog.value = "编辑任务") && (buttonText.value = "确定") && (editDisabled.value = true);
-      casValue.value = [];
-      if (operation == "add") {
-        isPhysicalMachine.value = "0";
+    case 'task':
+      operation == 'add'
+        ? (titleDialog.value = '添加任务') && (buttonText.value = '添加') && (editDisabled.value = false)
+        : (titleDialog.value = '编辑任务') && (buttonText.value = '确定') && (editDisabled.value = true)
+      casValue.value = []
+      if (operation == 'add') {
+        isPhysicalMachine.value = '0'
       } else {
-        if (JSON.stringify(data.config) === "{}" || data.config == null) {
-          isPhysicalMachine.value = "0";
+        if (JSON.stringify(data.config) === '{}' || data.config == null) {
+          isPhysicalMachine.value = '0'
         } else {
-          isPhysicalMachine.value = "1";
+          isPhysicalMachine.value = '1'
           // addTaskForm.config.TipServer = data.config.TipServer
           // addTaskForm.config.TipPort = data.config.TipPort
           // addTaskForm.config.TestPass = data.config.TestPass
           // addTaskForm.config.model = data.config.model
         }
       }
-      if (data && data.state === "running") {
+      if (data && data.state === 'running') {
         return ElMessage({
-          message: "任务运行中，禁止编辑！",
-          type: "warning",
-          duration: 1000,
-        });
+          message: '任务运行中，禁止编辑！',
+          type: 'warning',
+          duration: 1000
+        })
       }
       nextTick(() => {
-        getOneData(type, data?.id);
-      });
-      dialogVisible.value = true;
-      break;
+        getOneData(type, data?.id)
+      })
+      dialogVisible.value = true
+      break
     default:
-      break;
+      break
   }
-};
+}
 
 // 获取单个数据
 const getOneData = (type, id) => {
   switch (type) {
-    case "task":
+    case 'task':
       state.tableData.map((item) => {
         if (item.id === id) {
-          addTaskForm.id = item.id;
-          addTaskForm.name = item.name;
-          addTaskForm.user = item.user;
-          addTaskForm.remarks = item.remarks;
-          addTaskForm.build = item.build;
-          addTaskForm.group = item.group;
-          addTaskForm.cases = item.cases;
-          handleSelectData(addTaskForm.group);
-          handleCaseValue(item.cases);
+          addTaskForm.id = item.id
+          addTaskForm.name = item.name
+          addTaskForm.user = item.user
+          addTaskForm.remarks = item.remarks
+          addTaskForm.build = item.build
+          addTaskForm.group = item.group
+          addTaskForm.cases = item.cases
+          handleSelectData(addTaskForm.group)
+          handleCaseValue(item.cases)
         }
-      });
-      break;
+      })
+      break
     default:
-      break;
+      break
   }
-};
+}
 
 // 处理 编辑弹窗 - 测试平台字段回显数据
 const handleSelectData = (data) => {
-  let arr = [];
+  let arr = []
   data.forEach((item) => {
     state.d_groupData.map((it) => {
       if (it.id == item) {
-        arr.push(it.id);
+        arr.push(it.id)
       }
-    });
-  });
-  addTaskForm.group = arr;
-};
+    })
+  })
+  addTaskForm.group = arr
+}
 
 // 处理 编辑弹窗 - 用例集字段回显数据
 const handleCaseValue = (data) => {
-  let module_nameList = [];
-  if (data.module_name && data.module_name[0] == "all") {
+  let module_nameList = []
+  if (data.module_name && data.module_name[0] == 'all') {
     // 获取当前版本下全部的模块名
     casesOptions.value.map((item) => {
       if (data.cases_name === item.name) {
-        item.children.map((it) => module_nameList.push(it.name));
+        item.children.map((it) => module_nameList.push(it.name))
       }
-    });
+    })
   } else {
     // 获取当前版本下返回的模块名
-    module_nameList = data.module_name || [];
+    module_nameList = data.module_name || []
   }
   // casValue.value数据结构： [["10_5_runcase","AAA"],["10_5_runcase","Boundary"]]
   module_nameList.map((item) => {
-    casValue.value = casValue.value.concat([[data.cases_name, item]]);
-  });
-};
+    casValue.value = casValue.value.concat([[data.cases_name, item]])
+  })
+}
 
 // 展示预览弹窗
 const toShowPreviewDialog = async (formEl: FormInstance | undefined) => {
   // 配置项中已填写但未完善提醒
-  const forms = physicalForms.value;
+  const forms = physicalForms.value
   if (forms) {
     for (const item of forms) {
-      const result = await item.validate();
-      if (!result) return;
+      const result = await item.validate()
+      if (!result) return
     }
   }
   // 去除未填写的配置项
@@ -749,516 +769,515 @@ const toShowPreviewDialog = async (formEl: FormInstance | undefined) => {
     // if (!!(TipServer || TipPort || TestPass)) {
     //   addTaskForm.config.push(item)
     // }
-    const { TipServer, TipPort } = item;
+    const { TipServer, TipPort } = item
     if (!!(TipServer || TipPort)) {
-      addTaskForm.config.push(item);
+      addTaskForm.config.push(item)
     }
-  });
+  })
   // 选择含有物理机，未填写配置项提醒
-  if (addTaskForm.config.length == 0 && isPhysicalMachine.value === "1") {
-    return ElMessage.error("至少填写一个物理机配置项");
+  if (addTaskForm.config.length == 0 && isPhysicalMachine.value === '1') {
+    return ElMessage.error('至少填写一个物理机配置项')
   }
-  console.log("forms", addTaskForm);
-  if (!formEl) return;
+  console.log('forms', addTaskForm)
+  if (!formEl) return
   await formEl.validate(async (valid, fields) => {
     if (valid) {
-      submitPreviewDialog.value = true;
-      casesName.value = addTaskForm.cases.cases_name;
-      caseModule.value = addTaskForm.cases.module_name;
+      submitPreviewDialog.value = true
+      casesName.value = addTaskForm.cases.cases_name
+      caseModule.value = addTaskForm.cases.module_name
     }
-  });
-};
+  })
+}
 
 // 添加任务
 const onAddTaskForm = async (formEl: FormInstance | undefined) => {
   // addTaskForm.config = physicalItems.value
-  if (!formEl) return;
+  if (!formEl) return
   await formEl.validate(async (valid, fields) => {
-    submitPreviewDialog.value = false;
+    submitPreviewDialog.value = false
     if (valid) {
-      console.log("添加成功...", JSON.parse(JSON.stringify(addTaskForm)));
+      console.log('添加成功...', JSON.parse(JSON.stringify(addTaskForm)))
       // addTaskForm.group = "[" + String(addTaskForm.group) + "]"
-      if (isPhysicalMachine.value == "0") {
-        delete addTaskForm.config;
+      if (isPhysicalMachine.value == '0') {
+        delete addTaskForm.config
       }
-      if (titleDialog.value == "添加任务") {
-        delete addTaskForm.id;
-        addTask(addTaskForm);
+      if (titleDialog.value == '添加任务') {
+        delete addTaskForm.id
+        addTask(addTaskForm)
       } else {
-        editTask(addTaskForm);
+        editTask(addTaskForm)
       }
-      addTaskRuleFormRef.value.resetFields();
-      dialogVisible.value = false;
+      addTaskRuleFormRef.value.resetFields()
+      dialogVisible.value = false
     } else {
-      console.log("error submit!", fields);
+      console.log('error submit!', fields)
     }
-  });
-};
+  })
+}
 
 // 删除
 const handleDelete = (type, data) => {
   switch (type) {
-    case "task":
-      if (data.state === "running") {
+    case 'task':
+      if (data.state === 'running') {
         return ElMessage({
-          message: "任务运行中，禁止删除！",
-          type: "warning",
-          duration: 1000,
-        });
+          message: '任务运行中，禁止删除！',
+          type: 'warning',
+          duration: 1000
+        })
       }
-      deleteTask(data.id);
-      break;
+      deleteTask(data.id)
+      break
     default:
-      break;
+      break
   }
-};
+}
 
 onMounted(async () => {
-  await getD_group();
-  await getTask(1);
-  await getBuild();
+  await getD_group()
+  await getTask(1)
+  await getBuild()
   // await handle()
-  await getTaskConfig();
-  await getCase();
-});
+  await getTaskConfig()
+  await getCase()
+})
 
 // 处理数据 - 表格 测试平台/更新时间 字段回显
 const handle = () => {
   state.tableData.map((item, index) => {
-    item.number = [].concat(item.counts, item.fail_cases);
-    item.uptimeAfter = utc2beijing(item.uptime); // '2022-09-16T17:44:08Z' => '2022/9/16 16:43:40'
+    item.number = [].concat(item.counts, item.fail_cases)
+    item.uptimeAfter = utc2beijing(item.uptime) // '2022-09-16T17:44:08Z' => '2022/9/16 16:43:40'
     // let groupData = item.group.replace(/\[|]/g, '').split(",") // 将 '[21,22,23]' => [21,22,23]
-    item.groupAfter = []; // 成功的测试平台回显展示
-    item.failGroupAfter = []; // 失败的测试平台回显展示
+    item.groupAfter = [] // 成功的测试平台回显展示
+    item.failGroupAfter = [] // 失败的测试平台回显展示
     item.group.map((it) => {
       state.d_groupData.forEach((d_item, index) => {
         if (it == d_item.id) {
           item.groupAfter.push({
             value: d_item.id,
-            label: d_item.name,
-          });
+            label: d_item.name
+          })
         }
-      });
-    });
+      })
+    })
     item.fail_group.map((it) => {
       state.d_groupData.forEach((d_item, index) => {
         if (it == d_item.id) {
           item.failGroupAfter.push({
             value: d_item.id,
-            label: d_item.name,
-          });
+            label: d_item.name
+          })
         }
-      });
-    });
-  });
-  tableLoading.value = false;
-};
+      })
+    })
+  })
+  tableLoading.value = false
+}
 
 // 任务管理 获取接口
 const getTask = async (page) => {
-  tableLoading.value = true;
-  let build = searchBuild.value;
-  let user = searchUser.value;
-  let res = await taskApi({ page, build, state: searchGroup.value, user });
+  tableLoading.value = true
+  let build = searchBuild.value
+  let user = searchUser.value
+  let res = await taskApi({ page, build, state: searchGroup.value, user })
+  tableLoading.value = false
   if (res.code == 1000) {
-    tableLoading.value = false;
-    state.tableData = res.data;
-    taskTotal.value = res.total || 0;
-    handle();
+    state.tableData = res.data
+    taskTotal.value = res.total || 0
+    handle()
   } else {
-    tableLoading.value = false;
     ElMessage({
-      message: res.msg || "请求失败",
-      type: "error",
-      duration: 2000,
-    });
+      message: res.msg || '请求失败',
+      type: 'error',
+      duration: 2000
+    })
   }
-};
+}
 
 // 任务管理 添加接口
 const addTask = async (params) => {
-  let res = await addTaskApi(params);
+  let res = await addTaskApi(params)
   if (res?.code === 1000) {
-    await getTask(1);
-    await handle();
+    await getTask(1)
+    await handle()
     ElMessage({
-      message: "添加成功",
-      type: "success",
-      duration: 1000,
-    });
+      message: '添加成功',
+      type: 'success',
+      duration: 1000
+    })
   }
-  physicalItems.value = [];
-};
+  physicalItems.value = []
+}
 
 // 任务管理 编辑接口
 const editTask = async (params) => {
-  let res = await editTaskApi(params);
+  let res = await editTaskApi(params)
   if (res.code === 1000) {
-    await getTask(1);
-    await handle();
+    await getTask(1)
+    await handle()
     ElMessage({
-      message: "编辑成功",
-      type: "success",
-      duration: 1000,
-    });
+      message: '编辑成功',
+      type: 'success',
+      duration: 1000
+    })
   }
-  physicalItems.value = [];
-};
+  physicalItems.value = []
+}
 
 // 任务管理 删除接口
 const deleteTask = async (id) => {
   let params = {
-    id: id,
-  };
-  let res = await deleteTaskApi(params);
-  if (res.code === 1000) {
-    await getTask(1);
-    await handle();
-    ElMessage({
-      message: res?.msg || "删除成功",
-      type: "success",
-      duration: 1000,
-    });
+    id: id
   }
-};
+  let res = await deleteTaskApi(params)
+  if (res.code === 1000) {
+    await getTask(1)
+    await handle()
+    ElMessage({
+      message: res?.msg || '删除成功',
+      type: 'success',
+      duration: 1000
+    })
+  }
+}
 
 // 分组管理 获取接口
 const getD_group = async () => {
-  let group = await d_groupApi();
-  state.d_groupData = group.data?.data;
-};
+  let group = await d_groupApi()
+  state.d_groupData = group.data?.data
+}
 
 // 压测版本 获取接口
 const getBuild = async () => {
-  let res = await buildApi({ filetype: "apvbuild" });
-  state.buildData = res.data.map((item) => ({ name: item }));
-};
+  let res = await buildApi({ filetype: 'apvbuild' })
+  state.buildData = res.data.map((item) => ({ name: item }))
+}
 
 // 分组名称 下拉选择框
 const getGroupDataId = (value) => {
-  let items = [];
-  addTaskForm.group = value;
+  let items = []
+  addTaskForm.group = value
   addTaskForm.group.map((item) => {
     state.d_groupData.map((it) => {
       if (item === it.id) {
-        items.push(it);
+        items.push(it)
       }
-    });
-  });
+    })
+  })
   if (physicalItems.value.length == 0) {
     items.map((item) => {
       physicalItems.value.push({
         id: item.id,
         name: item.name,
-        TipServer: "",
-        TipPort: "",
+        TipServer: '',
+        TipPort: ''
         // TestPass: "",
-      });
-    });
+      })
+    })
   } else {
     items.forEach((item) => {
-      let isExit = false;
+      let isExit = false
       physicalItems.value.forEach((it) => {
         if (item.id === it.id) {
-          isExit = true;
-          return;
+          isExit = true
+          return
         }
-      });
+      })
       if (!isExit) {
         physicalItems.value.push({
           id: item.id,
           name: item.name,
-          TipServer: "",
-          TipPort: "",
+          TipServer: '',
+          TipPort: ''
           // TestPass: "",
-        });
+        })
       }
-    });
+    })
   }
-  activeNames.value = [physicalItems.value[physicalItems.value.length - 1].name];
-  console.log("physicalItems.value", items, physicalItems.value[physicalItems.value.length - 1].name);
-  physicalNames.value = [];
+  activeNames.value = [physicalItems.value[physicalItems.value.length - 1].name]
+  console.log('physicalItems.value', items, physicalItems.value[physicalItems.value.length - 1].name)
+  physicalNames.value = []
   physicalItems.value.map((item) => {
-    physicalNames.value.push(item.name);
-  });
-};
+    physicalNames.value.push(item.name)
+  })
+}
 
 const deleteGroupDataId = (value) => {
-  physicalItems.value = physicalItems.value.filter((item) => item.id !== value);
-  console.log("删一个", value, physicalItems.value);
-};
+  physicalItems.value = physicalItems.value.filter((item) => item.id !== value)
+  console.log('删一个', value, physicalItems.value)
+}
 
 // 测试平台 下拉选择框
 const getTestPlatDataId = (value) => {
-  addTestPlatForm.group = value;
-};
+  addTestPlatForm.group = value
+}
 
 // 打开添加测试平台弹窗
 const openTestPlatformDialog = (data) => {
-  if (data.state === "fail") {
+  if (data.state === 'fail') {
     return ElMessage({
-      message: "任务已失败，禁止修改测试平台！",
-      type: "warning",
-      duration: 1000,
-    });
+      message: '任务已失败，禁止修改测试平台！',
+      type: 'warning',
+      duration: 1000
+    })
   }
-  let group = [];
-  testPlatList.value = [];
-  addTestPlatForm.id = data.id;
+  let group = []
+  testPlatList.value = []
+  addTestPlatForm.id = data.id
   state.tableData.map((item) => {
     if (item.id === data.id) {
       // group = item.group.toString().replace(/\[|]/g, "").split(",") // 后端返回 '[21,22]' => 前端回显 ["21","22"]
-      group = item.group;
+      group = item.group
     }
-  });
-  state.d_groupDataAfter = JSON.parse(JSON.stringify(state.d_groupData));
+  })
+  state.d_groupDataAfter = JSON.parse(JSON.stringify(state.d_groupData))
   group.map((item) => {
     state.d_groupDataAfter.map((it) => {
       if (it.id == item) {
-        it.disabled = true;
+        it.disabled = true
         testPlatList.value.push({
           label: it.name,
-          id: it.id,
-        });
+          id: it.id
+        })
       }
-    });
-  });
-  platformDialog.value = true;
-};
+    })
+  })
+  platformDialog.value = true
+}
 
 // 添加测试平台
 const onAddTestPlatForm = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid, fields) => {
-    if (addTestPlatForm.group != "") {
+    if (addTestPlatForm.group != '') {
       const params = {
         id: addTestPlatForm.id,
-        group: addTestPlatForm.group,
-      };
-      putTestPlat(params);
+        group: addTestPlatForm.group
+      }
+      putTestPlat(params)
     } else {
-      platformDialog.value = false;
-      console.log("error submit!", fields);
+      platformDialog.value = false
+      console.log('error submit!', fields)
     }
-  });
-};
+  })
+}
 
 // 添加测试平台 api
 const putTestPlat = async (params) => {
-  let res = await putTestPlatApi(params);
+  let res = await putTestPlatApi(params)
   if (res.code === 1000) {
-    await getTask(taskCurrentPage.value);
-    await handle();
-    platformDialog.value = false;
+    await getTask(taskCurrentPage.value)
+    await handle()
+    platformDialog.value = false
     ElMessage({
-      message: res?.msg || "添加成功",
-      type: "success",
-      duration: 2500,
-    });
+      message: res?.msg || '添加成功',
+      type: 'success',
+      duration: 2500
+    })
   } else {
-    platformDialog.value = false;
+    platformDialog.value = false
     ElMessage({
-      message: res?.msg || "添加失败",
-      type: "error",
+      message: res?.msg || '添加失败',
+      type: 'error',
       duration: 3500,
-      showClose: true,
-    });
+      showClose: true
+    })
   }
-};
+}
 
 // 删除测试环境平台
 const handleCloseTag = (data, id) => {
-  ElMessageBox.confirm("确认删除该测试平台?", "警告", {
-    confirmButtonText: "确认",
-    cancelButtonText: "取消",
-    type: "warning",
+  ElMessageBox.confirm('确认删除该测试平台?', '警告', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning'
   })
     .then(() => {
       const params = {
         id,
-        group: data.id,
-      };
-      deleteTestPlat(params);
+        group: data.id
+      }
+      deleteTestPlat(params)
     })
     .catch(() => {
       ElMessage({
-        type: "info",
-        message: "取消删除",
-      });
-    });
-};
+        type: 'info',
+        message: '取消删除'
+      })
+    })
+}
 
 // 删除测试环境平台 api
 const deleteTestPlat = async (params) => {
-  let res = await deleteTestPlatApi(params);
+  let res = await deleteTestPlatApi(params)
   if (res.code === 1000) {
     ElMessage({
-      message: res?.msg || "删除成功",
-      type: "success",
-      duration: 1500,
-    });
+      message: res?.msg || '删除成功',
+      type: 'success',
+      duration: 1500
+    })
   } else {
     ElMessage({
-      message: res?.msg || "删除失败",
-      type: "error",
-      duration: 1500,
-    });
+      message: res?.msg || '删除失败',
+      type: 'error',
+      duration: 1500
+    })
   }
-};
+}
 
-const reportDetailData = ref({});
+const reportDetailData = ref({})
 // 任务进度
 const taskProgress = async (data) => {
-  showDetail.value = false;
-  textarea.value = "";
+  showDetail.value = false
+  textarea.value = ''
   // 获取对应的测试报告失败数/成功数/用例数
-  await getReport(data);
-};
+  await getReport(data)
+}
 
 // 任务启动/终止
 const changeTaskStatus = (val, id) => {
   const params = {
     id,
-    state: val,
-  };
-  getTaskStatus(params);
-};
+    state: val
+  }
+  getTaskStatus(params)
+}
 
 // 任务start or stop api
 const getTaskStatus = async (params) => {
-  let res = await taskStatusApi(params);
+  let res = await taskStatusApi(params)
   if (res?.code === 1000) {
-    await getTask(taskCurrentPage.value);
-    await handle();
+    await getTask(taskCurrentPage.value)
+    await handle()
     ElMessage({
-      message: res?.msg || "任务已启动",
-      type: "success",
-      duration: 1500,
-    });
+      message: res?.msg || '任务已启动',
+      type: 'success',
+      duration: 1500
+    })
   }
-};
+}
 
 // 任务进度 接口
 const getTaskRun = async (id) => {
-  let res = await taskRunApi({ id });
+  let res = await taskRunApi({ id })
   if (res?.code == 1000) {
-    textarea.value += res.data.log || "";
+    textarea.value += res.data.log || ''
   }
-};
+}
 
 // 测试报告
 const getReport = async (data) => {
-  let res = await getReportApi({ id: data.id });
-  await getTaskRun(data.id);
-  showDetail.value = true;
-  taskProgressDialog.value = true;
+  let res = await getReportApi({ id: data.id })
+  await getTaskRun(data.id)
+  showDetail.value = true
+  taskProgressDialog.value = true
   reportDetailData.value = {
     counts: data.counts,
     success: 0,
-    fail_cases: 0,
-  };
+    fail_cases: 0
+  }
   if (res?.code === 1000) {
     reportDetailData.value = {
       counts: data.counts,
       success: res.data.pass,
-      fail_cases: res.data.fail,
-    };
+      fail_cases: res.data.fail
+    }
   }
-};
+}
 
-const placeholderTipServer = ref("");
-const placeholderTipPort = ref("");
-const placeholderTestPass = ref("");
-const placeholderTipModel = ref("");
+const placeholderTipServer = ref('')
+const placeholderTipPort = ref('')
+const placeholderTestPass = ref('')
+const placeholderTipModel = ref('')
 // 获取物理机参数配置信息
 const getTaskConfig = async () => {
-  let res = await getTaskConfigApi();
-  placeholderTipServer.value = res.data.TipServer || "";
-  placeholderTipPort.value = res.data.TipPort || "";
+  let res = await getTaskConfigApi()
+  placeholderTipServer.value = res.data.TipServer || ''
+  placeholderTipPort.value = res.data.TipPort || ''
   // placeholderTestPass.value = res.data.TestPass || ''
   // placeholderTipModel.value = res.data.model || ''
-};
+}
 
 const runAgain = async (value, data) => {
   const params = {
     group: value,
-    id: data.id,
-  };
-  let res = await putTestPlatApi(params);
-  if (res.code === 1000) {
-    await getTask(taskCurrentPage.value);
-    await handle();
-    platformDialog.value = false;
-    ElMessage({
-      message: res?.msg || "运行成功",
-      type: "success",
-      duration: 1500,
-    });
-  } else {
-    platformDialog.value = false;
-    ElMessage({
-      message: res?.msg || "运行失败",
-      type: "error",
-      duration: 1500,
-    });
+    id: data.id
   }
-};
+  let res = await putTestPlatApi(params)
+  if (res.code === 1000) {
+    await getTask(taskCurrentPage.value)
+    await handle()
+    platformDialog.value = false
+    ElMessage({
+      message: res?.msg || '运行成功',
+      type: 'success',
+      duration: 1500
+    })
+  } else {
+    platformDialog.value = false
+    ElMessage({
+      message: res?.msg || '运行失败',
+      type: 'error',
+      duration: 1500
+    })
+  }
+}
 
 const toDetail = (id) => {
   router.push({
     path: `/APVAuto/templateReport/failNumDetail`,
     query: {
-      reportId: id,
-    },
-  });
-};
+      reportId: id
+    }
+  })
+}
 
 // 取消弹窗
 const onResetTaskForm = (formEl: FormInstance | undefined) => {
-  if (!formEl) return;
-  formEl.resetFields();
-  dialogVisible.value = false;
-  deviceTypeDialogVisible.value = false;
-  groupDialogVisible.value = false;
-  platformDialog.value = false;
-  addTestPlatForm.group = "";
-  physicalItems.value = [];
-};
+  if (!formEl) return
+  formEl.resetFields()
+  dialogVisible.value = false
+  deviceTypeDialogVisible.value = false
+  groupDialogVisible.value = false
+  platformDialog.value = false
+  addTestPlatForm.group = ''
+  physicalItems.value = []
+}
 
 // 关闭弹窗
 const handleClose = (done: () => void) => {
-  dialogVisible.value = false;
-  deviceTypeDialogVisible.value = false;
-  groupDialogVisible.value = false;
-  taskProgressDialog.value = false;
-  addTaskRuleFormRef.value.resetFields();
-  physicalItems.value = [];
-};
+  dialogVisible.value = false
+  deviceTypeDialogVisible.value = false
+  groupDialogVisible.value = false
+  taskProgressDialog.value = false
+  addTaskRuleFormRef.value.resetFields()
+  physicalItems.value = []
+}
 
 // 关闭测试平台弹窗
 const handleTestPlatClose = (done: () => void) => {
-  platformDialog.value = false;
-  addTestPlatForm.group = "";
-  addTestPlatFormRef.value.resetFields();
-};
+  platformDialog.value = false
+  addTestPlatForm.group = ''
+  addTestPlatFormRef.value.resetFields()
+}
 
 // 关闭任务进度弹窗
 const closeTaskProgressDialog = () => {
-  platformDialog.value = false;
-  clearInterval(timer.value);
-  timer.value = null;
-};
+  platformDialog.value = false
+  clearInterval(timer.value)
+  timer.value = null
+}
 
-const onQuery = () => {};
+const onQuery = () => {}
 
-const onResert = () => {};
+const onResert = () => {}
 
 const handleTaskSizeChange = (val: number) => {
-  console.log(`${val} items per page`);
-};
+  console.log(`${val} items per page`)
+}
 const handleTaskCurrentChange = (val: number) => {
-  taskCurrentPage.value = val;
-  getTask(taskCurrentPage.value);
-};
+  taskCurrentPage.value = val
+  getTask(taskCurrentPage.value)
+}
 </script>
 
 <style lang="scss" scoped>
