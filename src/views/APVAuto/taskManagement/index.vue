@@ -27,7 +27,7 @@
         </el-form-item>
       </el-form> -->
       <!-- </el-card> -->
-      <el-card class="box-card" shadow="never">
+      <el-card class="box-card" shadow="never" v-loading="isStartingLoading" :element-loading-text="isLoadingText">
         <div class="search-wrap">
           <div>
             <el-button size="large" type="primary" @click="openAddDialog('task', 'add', null)" style="margin-bottom: 20px"> 添加任务 </el-button>
@@ -133,13 +133,13 @@
                 <div class="moreButton">
                   <el-tooltip content="该任务下所有测试平台均停止运行" v-if="scope.row.state === 'running'" placement="top" effect="dark">
                     <span>
-                      <el-button link type="primary" size="small" @click="changeTaskStatus('stop', scope.row.id)"> 任务终止 </el-button>
+                      <el-button link type="primary" size="small" @click="changeTaskStatus('stop', scope.row)"> 任务终止 </el-button>
                     </span>
                   </el-tooltip>
-                  <el-button link type="primary" size="small" v-else @click="changeTaskStatus('start', scope.row.id)"> 任务启动 </el-button>
+                  <el-button link type="primary" size="small" v-else @click="changeTaskStatus('start', scope.row)"> 任务启动 </el-button>
                   <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
                     <span>
-                      <el-button link type="primary" size="small" v-if="scope.row.state == 'fail'" @click="changeTaskStatus('restart', scope.row.id)"> 继续运行 </el-button>
+                      <el-button link type="primary" size="small" v-if="scope.row.state == 'fail'" @click="changeTaskStatus('restart', scope.row)"> 继续运行 </el-button>
                     </span>
                   </el-tooltip>
                 </div>
@@ -425,6 +425,8 @@ const tableLoading = ref(false)
 const editDisabled = ref(false)
 const showDetail = ref(false)
 const submitPreviewDialog = ref(false)
+const isStartingLoading = ref(false)
+const isLoadingText = ref('')
 const textarea = ref('')
 const testPlatList = ref([]) // 已有测试平台集合List
 const buttonText = ref('添加')
@@ -1134,17 +1136,23 @@ const taskProgress = async (data) => {
 }
 
 // 任务启动/终止
-const changeTaskStatus = (val, id) => {
+const changeTaskStatus = (val, row) => {
   const params = {
-    id,
+    id: row.id,
     state: val
   }
-  getTaskStatus(params)
+  getTaskStatus(params, row.name)
 }
 
 // 任务start or stop api
-const getTaskStatus = async (params) => {
+const getTaskStatus = async (params, name) => {
+  if (params.state === 'stop') {
+    isLoadingText.value = name + '任务正在终止中，请稍后...'
+    isStartingLoading.value = true
+  }
   let res = await taskStatusApi(params)
+  isStartingLoading.value = false
+  isLoadingText.value = ''
   if (res?.code === 1000) {
     await getTask(taskCurrentPage.value)
     await handle()
