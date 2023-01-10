@@ -128,7 +128,7 @@
             <template #default="scope">
               <el-popover placement="bottom" :width="10" trigger="hover" popper-class="morePopover">
                 <template #reference>
-                  <el-button link type="primary" size="small">启停</el-button>
+                  <el-button link type="primary" size="small" :disabled="scope.row.state === 'ready'">启停</el-button>
                 </template>
                 <div class="moreButton">
                   <el-tooltip content="该任务下所有测试平台均停止运行" v-if="scope.row.state === 'running'" placement="top" effect="dark">
@@ -136,10 +136,14 @@
                       <el-button link type="primary" size="small" @click="changeTaskStatus('stop', scope.row)"> 任务终止 </el-button>
                     </span>
                   </el-tooltip>
-                  <el-button link type="primary" size="small" v-else @click="changeTaskStatus('start', scope.row)"> 任务启动 </el-button>
+                  <el-button link type="primary" size="small" v-if="['fail', 'create'].includes(scope.row.state)" @click="changeTaskStatus('start', scope.row)">
+                    任务启动
+                  </el-button>
                   <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
                     <span>
-                      <el-button link type="primary" size="small" v-if="scope.row.state == 'fail'" @click="changeTaskStatus('restart', scope.row)"> 继续运行 </el-button>
+                      <el-button link type="primary" size="small" v-if="['stop', 'complete'].includes(scope.row.state)" @click="changeTaskStatus('restart', scope.row)">
+                        继续运行
+                      </el-button>
                     </span>
                   </el-tooltip>
                 </div>
@@ -1157,7 +1161,7 @@ const getTaskStatus = async (params, name) => {
     await getTask(taskCurrentPage.value)
     await handle()
     ElMessage({
-      message: res?.msg || '任务已启动',
+      message: res?.msg || params.state === 'stop' ? '任务已终止' : '任务已启动',
       type: 'success',
       duration: 1500
     })
