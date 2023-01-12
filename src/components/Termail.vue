@@ -71,10 +71,17 @@ onBeforeMount(() => {
 
 <style lang="scss" scoped>
 .console {
-  margin-top: 40px;
+  margin-top: 20px;
+  height: 500px;
   :deep(.xterm-text-layer) {
     width: 100%;
     height: 100%;
+  }
+  :deep(.terminal) {
+    height: 100%;
+  }
+  ::-webkit-scrollbar {
+    display: none; /* Chrome Safari */
   }
 }
 </style>
