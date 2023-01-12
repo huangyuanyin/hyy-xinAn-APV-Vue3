@@ -5,7 +5,7 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
-import path from "path"
+import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -13,18 +13,18 @@ export default defineConfig(({ mode }) => {
   return {
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "src")
+        '@': path.resolve(__dirname, 'src')
       }
     },
-    base: "/netapv/",
+    base: '/netapv/',
     build: {
       chunkSizeWarningLimit: 1500000,
-      outDir: "dist",
+      outDir: 'dist',
       rollupOptions: {
         output: {
           manualChunks(id) {
             if (id.includes('node_modules')) {
-              return id.toString().split('node_modules/')[1].split('/')[0].toString();
+              return id.toString().split('node_modules/')[1].split('/')[0].toString()
             }
           }
         }
@@ -34,9 +34,9 @@ export default defineConfig(({ mode }) => {
         // 生产环境移除console
         compress: {
           drop_console: true,
-          drop_debugger: true,
-        },
-      },
+          drop_debugger: true
+        }
+      }
     },
     // base: env.VITE_API_BASE_URL,
     // define:{
@@ -59,11 +59,11 @@ export default defineConfig(({ mode }) => {
     plugins: [
       vue(),
       AutoImport({
-        resolvers: [ElementPlusResolver()],
+        resolvers: [ElementPlusResolver()]
       }),
       Components({
-        resolvers: [ElementPlusResolver()],
-      }),
+        resolvers: [ElementPlusResolver()]
+      })
     ],
     pluginOptions: {
       'style-resources-loader': {
@@ -79,8 +79,7 @@ export default defineConfig(({ mode }) => {
         `monaco-editor/esm/vs/language/html/html.worker`,
         `monaco-editor/esm/vs/language/typescript/ts.worker`,
         `monaco-editor/esm/vs/editor/editor.worker`
-      ],
-    },
+      ]
+    }
   }
-
 })
