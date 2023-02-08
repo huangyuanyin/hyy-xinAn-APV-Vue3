@@ -2,14 +2,14 @@
   <div class="screen-container" :style="containerStyle">
     <header class="screen-header">
       <div>
-        <img :src="line" alt="">
+        <img :src="line" alt="" />
       </div>
       <span class="logo">
         <img :src="logo" alt="" />
       </span>
       <span class="title">APV自动化平台概览</span>
       <div class="title-right">
-        <img :src="refresh" class="qiehuan" @click="handleRefresh">
+        <img :src="refresh" class="qiehuan" @click="handleRefresh" />
         <span class="datetime">{{ getNowDate() }}</span>
       </div>
     </header>
@@ -56,7 +56,7 @@
       <section class="screen-middle">
         <div id="middle-top" :class="[fullScreenStatus.hot ? 'fullscreen' : '']">
           <!-- Case图表 -->
-          <CasesEcharts v-if="isRefresh" />
+          <CasesEcharts v-if="isRefresh" :isRefresh="isToRefresh" />
         </div>
       </section>
       <section class="screen-right">
@@ -72,24 +72,24 @@
 <script lang="ts" setup>
 import { computed, defineProps, nextTick, ref } from 'vue'
 import { getThemeValue } from '@/utils/theme_utils'
-import { useAppStore } from '@/store/modules/app';
+import { useAppStore } from '@/store/modules/app'
 import TaskEcharts from './component/TaskEcharts.vue'
 import CasesEcharts from './component/CasesEcharts.vue'
 import TaskBar from './component/TaskBar.vue'
 import WeeklyVersion from './component/WeeklyVersion.vue'
 import { getNowDate } from '@/utils/util.js'
-import logo from "@/assets/logo.png";
-import line from "@/assets/header_border_dark.png";
+import logo from '@/assets/logo.png'
+import line from '@/assets/header_border_dark.png'
 import refresh from '@/assets/qiehuan_dark.png'
 
 const props = defineProps({
   keepAlive: {
     type: Boolean,
-    default: false,
+    default: false
   },
   rootKey: {
     type: Boolean,
-    default: false,
+    default: false
   }
 })
 
@@ -111,7 +111,8 @@ const containerStyle = computed(() => {
 //   return '@/assets/' + getThemeValue(store.theme).themeSrc
 // })
 
-const fullScreenStatus = { // 定义每一个图表的全屏状态
+const fullScreenStatus = {
+  // 定义每一个图表的全屏状态
   trend: false,
   seller: false,
   map: false,
@@ -121,10 +122,12 @@ const fullScreenStatus = { // 定义每一个图表的全屏状态
 }
 
 const isRefresh = ref(true)
+const isToRefresh = ref(false)
 const handleRefresh = () => {
   isRefresh.value = false
   nextTick(() => {
     isRefresh.value = true
+    isToRefresh.value = true
   })
 }
 </script>
@@ -160,7 +163,7 @@ const handleRefresh = () => {
   justify-content: center;
   align-items: center;
 
-  >div {
+  > div {
     width: 100%;
     height: 100%;
 
