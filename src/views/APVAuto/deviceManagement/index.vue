@@ -1,11 +1,5 @@
 <template>
-  <div
-    class="performanceManagement"
-    v-loading="loadingInstance"
-    element-loading-text="上传文件较大，请耐心等待..."
-    :element-loading-spinner="svg"
-    element-loading-svg-view-box="-10, -10, 50, 50"
-  >
+  <div class="performanceManagement" v-loading="loadingInstance" :element-loading-text="loadingText" :element-loading-spinner="svg" element-loading-svg-view-box="-10, -10, 50, 50">
     <el-tabs v-model="activeName" class="tabs" @tab-click="handleClick">
       <el-tab-pane label="测试平台管理" name="testbedManagement">
         <el-card class="group-card" shadow="never">
@@ -88,6 +82,7 @@
           <el-upload class="upload-demo" :show-file-list="false" action="action" :http-request="handleUpload" :on-success="handleSuccess">
             <el-button type="primary" style="margin-bottom: 20px" :auto-upload="false"> 上传文件 </el-button>
           </el-upload>
+          <el-button type="primary" @click="openDownloadDialog = true" style="margin-left: 20px" :auto-upload="false"> 拉取文件 </el-button>
           <el-table :data="state.buildData" border stripe height="62vh">
             <el-table-column prop="name" label="版本名称" align="center" />
             <el-table-column fixed="right" label="Operations" align="center">
@@ -213,6 +208,35 @@
         </el-card>
       </template>
     </el-drawer>
+
+    <!-- 拉取文件弹窗-->
+    <el-dialog
+      v-model="openDownloadDialog"
+      title="拉取文件弹窗"
+      width="35%"
+      @close="handleClose('downloadFileDialog')"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+    >
+      <span>
+        <el-form :inline="false" :model="downloadFileForm" ref="downloadFileRuleFormRef" :rules="downloadFileFormRules" class="downloadFile-form" label-width="100px">
+          <el-form-item label="文件类型" prop="build">
+            <el-select v-model="downloadFileForm.filetype" placeholder="请选择...">
+              <el-option v-for="item in downloadFileOptions" :key="item" :label="item" :value="item" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="下载链接" prop="url">
+            <el-input v-model="downloadFileForm.url" placeholder="请输入下载链接..." />
+          </el-form-item>
+        </el-form>
+      </span>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="onResetDownloadFileForm(downloadFileRuleFormRef)">取消</el-button>
+          <el-button type="primary" :disabled="downloadLoading" @click="onDownloadFile(downloadFileRuleFormRef)">{{ downloadLoading ? '拉取中...' : '拉取' }}</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -238,9 +262,9 @@ import {
   editD_groupApi,
   deleteD_groupApi
 } from '@/api/APV/index.js'
-import { buildApi, buildUploadApi, deleteBuildApi } from '@/api/APV/buildManagement.js'
+import { buildApi, buildUploadApi, deleteBuildApi, downloadBuildFileApi } from '@/api/APV/buildManagement.js'
 import { utc2beijing } from '@/utils/util.js'
-import { buildOptions } from './data.js'
+import { buildOptions, downloadFileOptions } from './data.js'
 import ShowTestCase from './components/showTestCase.vue'
 import Termmail from '@/components/Termail.vue'
 
@@ -250,6 +274,8 @@ const groupDialogVisible = ref(false)
 const isShowMore = ref(false)
 const deviceDrawer = ref(false)
 const loadingInstance = ref(false)
+const openDownloadDialog = ref(false)
+const downloadLoading = ref(false)
 const svg = `
   <path class="path" d="
     M 30 15
@@ -266,6 +292,7 @@ const groupTotal = ref(0)
 const buildCurrentPage = ref(1)
 const buildPageSize = ref(10)
 const buildTotal = ref(0)
+const loadingText = ref('上传文件较大，请耐心等待...')
 const direction = ref('rtl')
 const testName = ref('') // 绑定设备时传入的 测试平台名称name
 const state: any = reactive({
@@ -338,6 +365,17 @@ let addGroupForm = reactive({
   build: null
   // buildip: "",
   // status: null,
+})
+
+// 拉取文件弹窗form
+let downloadFileForm = reactive({
+  filetype: '',
+  url: ''
+})
+const downloadFileRuleFormRef = ref<FormInstance>()
+const downloadFileFormRules = reactive<FormRules>({
+  fileType: [{ required: true, message: 'fileType不能为空', trigger: 'blur' }],
+  url: [{ required: true, message: '下载链接不能为空', trigger: 'blur' }]
 })
 let validateIPAddress = (rule, value, callback) => {
   if (value == '') {
@@ -481,6 +519,27 @@ const onAddGroupForm = async (formEl: FormInstance | undefined) => {
   })
 }
 
+// 拉取文件
+const onDownloadFile = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate(async (valid, fields) => {
+    if (valid) {
+      downloadLoading.value = true
+      let res = await downloadBuildFileApi(downloadFileForm)
+      downloadLoading.value = false
+      if (res.code === 1000) {
+        getBuild()
+        ElMessage({
+          message: '文件拉取成功',
+          type: 'success',
+          duration: 1000
+        })
+      }
+      handleClose('downloadFileDialog')
+    }
+  })
+}
+
 // 取消弹窗 - 测试平台管理
 const onResetGroupRuleForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
@@ -495,15 +554,30 @@ const onResetDeviceForm = (formEl: FormInstance | undefined) => {
   dialogVisible.value = false
 }
 
+// 取消弹窗
+const onResetDownloadFileForm = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  openDownloadDialog.value = false
+  downloadLoading.value = false
+}
+
 // 关闭弹窗
 const handleClose = (type) => {
-  if (type === 'deviceDialog') {
-    dialogVisible.value = false
-    isNoServerIp.value = false
-    addDeviceRuleFormRef.value.resetFields()
-  } else {
-    groupDialogVisible.value = false
-    addGroupRuleFormRef.value.resetFields()
+  switch (type) {
+    case 'deviceDialog':
+      dialogVisible.value = false
+      isNoServerIp.value = false
+      addDeviceRuleFormRef.value.resetFields()
+      break
+    case 'groupDialog':
+      groupDialogVisible.value = false
+      addGroupRuleFormRef.value.resetFields()
+      break
+    case 'downloadFileDialog':
+      openDownloadDialog.value = false
+      downloadFileRuleFormRef.value.resetFields()
+      break
   }
 }
 
@@ -922,6 +996,12 @@ const getDeviceInfo = async (data) => {
 .deivce-card,
 .build-card {
   margin-top: 10px;
+}
+
+.build-card {
+  .upload-demo {
+    display: inline-block;
+  }
 }
 
 .deivce-card {
