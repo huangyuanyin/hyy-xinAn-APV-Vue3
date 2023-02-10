@@ -90,6 +90,7 @@ const toLink = (index) => {
 
 const toWork = () => {
   window.location.href = 'http://10.4.150.55:8080/'
+  localStorage.setItem('token', sessionStorage.getItem('token'))
 }
 
 const changeDrawer = (drawer) => {
