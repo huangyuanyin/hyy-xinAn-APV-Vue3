@@ -47,6 +47,8 @@
                     <el-button link type="info" size="small">更多</el-button>
                   </template>
                   <div class="moreButton">
+                    <el-button v-if="scope.row.user === ''" link type="primary" size="small" @click="changePlatformStatus('borrow', scope.row.id)">平台借用 </el-button>
+                    <el-button v-else link type="primary" size="small" @click="changePlatformStatus('return', scope.row.id)">平台归还 </el-button>
                     <el-button link type="primary" size="small" @click="changeStatus(scope.row)">状态变更 </el-button>
                     <el-popconfirm
                       title="确定删除这个测试平台?"
@@ -210,14 +212,7 @@
     </el-drawer>
 
     <!-- 拉取文件弹窗-->
-    <el-dialog
-      v-model="openDownloadDialog"
-      title="拉取文件弹窗"
-      width="35%"
-      @close="handleClose('downloadFileDialog')"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-    >
+    <el-dialog v-model="openDownloadDialog" title="文件拉取" width="35%" @close="handleClose('downloadFileDialog')" :close-on-click-modal="false" :close-on-press-escape="false">
       <span>
         <el-form :inline="false" :model="downloadFileForm" ref="downloadFileRuleFormRef" :rules="downloadFileFormRules" class="downloadFile-form" label-width="100px">
           <el-form-item label="文件类型" prop="build">
@@ -234,6 +229,30 @@
         <span class="dialog-footer">
           <el-button @click="onResetDownloadFileForm(downloadFileRuleFormRef)">取消</el-button>
           <el-button type="primary" :disabled="downloadLoading" @click="onDownloadFile(downloadFileRuleFormRef)">{{ downloadLoading ? '拉取中...' : '拉取' }}</el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <!-- 平台借用弹窗-->
+    <el-dialog
+      v-model="borrowPlatformDialog"
+      title="测试平台借用"
+      width="35%"
+      @close="handleClose('borrowPlatformDialog')"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+    >
+      <span>
+        <el-form :inline="false" :model="borrowPlatformForm" ref="borrowPlatformRuleFormRef" :rules="borrowPlatformFormRules" class="borrowPlatform-form" label-width="100px">
+          <el-form-item label="平台借用人" prop="user">
+            <el-input v-model="borrowPlatformForm.user" placeholder="请输入平台借用人..." />
+          </el-form-item>
+        </el-form>
+      </span>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="onResetBorrowPlatForm(borrowPlatformRuleFormRef)">取消</el-button>
+          <el-button type="primary" @click="onBorrowPlatForm(borrowPlatformRuleFormRef)">确定</el-button>
         </span>
       </template>
     </el-dialog>
@@ -260,7 +279,9 @@ import {
   deleteD_typeApi,
   addD_groupApi,
   editD_groupApi,
-  deleteD_groupApi
+  deleteD_groupApi,
+  borrow_groupApi,
+  return_groupApi
 } from '@/api/APV/index.js'
 import { buildApi, buildUploadApi, deleteBuildApi, downloadBuildFileApi } from '@/api/APV/buildManagement.js'
 import { utc2beijing } from '@/utils/util.js'
@@ -276,6 +297,7 @@ const deviceDrawer = ref(false)
 const loadingInstance = ref(false)
 const openDownloadDialog = ref(false)
 const downloadLoading = ref(false)
+const borrowPlatformDialog = ref(false)
 const svg = `
   <path class="path" d="
     M 30 15
@@ -376,6 +398,14 @@ const downloadFileRuleFormRef = ref<FormInstance>()
 const downloadFileFormRules = reactive<FormRules>({
   fileType: [{ required: true, message: 'fileType不能为空', trigger: 'blur' }],
   url: [{ required: true, message: '下载链接不能为空', trigger: 'blur' }]
+})
+const borrowOrReturnID = ref(null)
+const borrowPlatformForm = reactive({
+  user: ''
+})
+const borrowPlatformRuleFormRef = ref<FormInstance>()
+const borrowPlatformFormRules = reactive<FormRules>({
+  user: [{ required: true, message: '测试平台借用人不能为空', trigger: 'blur' }]
 })
 let validateIPAddress = (rule, value, callback) => {
   if (value == '') {
@@ -540,6 +570,27 @@ const onDownloadFile = async (formEl: FormInstance | undefined) => {
   })
 }
 
+const onBorrowPlatForm = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate(async (valid, fields) => {
+    if (valid) {
+      const params = {
+        id: borrowOrReturnID.value,
+        user: borrowPlatformForm.user
+      }
+      let res = await borrow_groupApi(params)
+      if (res.code === 1000) {
+        ElMessage({
+          message: '测试环境借用成功',
+          type: 'success',
+          duration: 1000
+        })
+      }
+      handleClose('borrowPlatformDialog')
+    }
+  })
+}
+
 // 取消弹窗 - 测试平台管理
 const onResetGroupRuleForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
@@ -562,6 +613,12 @@ const onResetDownloadFileForm = (formEl: FormInstance | undefined) => {
   downloadLoading.value = false
 }
 
+const onResetBorrowPlatForm = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  borrowPlatformDialog.value = false
+}
+
 // 关闭弹窗
 const handleClose = (type) => {
   switch (type) {
@@ -578,6 +635,9 @@ const handleClose = (type) => {
       openDownloadDialog.value = false
       downloadFileRuleFormRef.value.resetFields()
       break
+    case 'borrowPlatformDialog':
+      borrowPlatformDialog.value
+      borrowPlatformRuleFormRef.value.resetFields()
   }
 }
 
@@ -820,6 +880,23 @@ const changeStatus = (data) => {
     type: 'warning',
     duration: 2000
   })
+}
+
+// 平台借用/归还
+const changePlatformStatus = async (status, id) => {
+  const params = {
+    id,
+    user: JSON.parse(localStorage.getItem('userInfo'))?.nickname
+  }
+  let res = status === 'borrow' ? await borrow_groupApi(params) : await return_groupApi({ id })
+  if (res.code === 1000) {
+    ElMessage({
+      message: status === 'borrow' ? '测试环境借用成功' : '测试环境归还成功',
+      type: 'success',
+      duration: 1000
+    })
+    getD_group(1)
+  }
 }
 
 const changeType = (value) => {
