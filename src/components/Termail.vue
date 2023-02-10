@@ -1,5 +1,8 @@
 <template>
-  <div class="console" id="terminal"></div>
+  <div class="console-wrap">
+    <div class="console" id="terminal"></div>
+    <el-button type="primary" link>关闭终端</el-button>
+  </div>
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeMount } from 'vue'
@@ -70,18 +73,27 @@ onBeforeMount(() => {
 </script>
 
 <style lang="scss" scoped>
-.console {
-  margin-top: 20px;
-  height: 500px;
-  :deep(.xterm-text-layer) {
-    width: 100%;
-    height: 100%;
+.console-wrap {
+  display: flex;
+  flex-direction: column;
+  margin-top: 5px;
+  .console {
+    margin-top: 25px;
+    height: 500px;
+    :deep(.xterm-text-layer) {
+      width: 100%;
+      height: 100%;
+    }
+    :deep(.terminal) {
+      height: 100%;
+    }
+    ::-webkit-scrollbar {
+      display: none; /* Chrome Safari */
+    }
   }
-  :deep(.terminal) {
-    height: 100%;
-  }
-  ::-webkit-scrollbar {
-    display: none; /* Chrome Safari */
+  .el-button {
+    right: 0px;
+    position: absolute;
   }
 }
 </style>

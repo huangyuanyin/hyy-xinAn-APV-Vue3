@@ -40,7 +40,7 @@
               <template #default="scope">
                 <el-button link type="primary" size="small" @click="openAddDeviceDrawer(scope.row)">绑定设备 </el-button>
                 <el-button link type="primary" size="small" v-if="scope.row.isShowTermail == false" @click="openConsole(scope.row)"> 在线终端 </el-button>
-                <el-button link type="primary" size="small" v-else @click="cloeConsole(scope.row)">关闭终端</el-button>
+                <el-button link type="warning" size="small" v-else @click="cloeConsole(scope.row)">关闭终端</el-button>
                 <el-button link type="primary" size="small" @click="openAddDialog('group', 'edit', scope.row.id)">编辑 </el-button>
                 <el-popover placement="bottom" :width="10" trigger="click" popper-class="moreGroupPopover">
                   <template #reference>
