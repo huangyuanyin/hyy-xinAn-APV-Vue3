@@ -1189,6 +1189,7 @@ const getDeviceInfo = async (data) => {
 
   .el-button {
     margin-bottom: 5px;
+    margin-left: 0px;
 
     &:last-child {
       margin-bottom: 0px;

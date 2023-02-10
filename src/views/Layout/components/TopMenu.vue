@@ -54,51 +54,49 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { reactive, ref, onMounted } from "vue"
-import logo from "@/assets/logo.png"
-import user from "@/assets/user.png"
-import { useUserStore } from "@/store/modules/user"
-import { HomeFilled, ArrowDown, QuestionFilled, BellFilled, Search, Operation, CloseBold } from "@element-plus/icons-vue"
-import Drawer from "@/components/Drawer.vue"
-import { useRouter } from "vue-router"
-import { ElMessage } from "element-plus"
+import { reactive, ref, onMounted } from 'vue'
+import logo from '@/assets/logo.png'
+import user from '@/assets/user.png'
+import { useUserStore } from '@/store/modules/user'
+import { HomeFilled, ArrowDown, QuestionFilled, BellFilled, Search, Operation, CloseBold } from '@element-plus/icons-vue'
+import Drawer from '@/components/Drawer.vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const store = useUserStore()
-const input = ref("")
+const input = ref('')
 const drawer = ref(false)
 const data = reactive({
-  username: JSON.parse(localStorage.getItem("userInfo"))?.nickname,
-  button: [{ name: "个人中心" }, { name: "退出登录" }]
+  username: JSON.parse(localStorage.getItem('userInfo'))?.nickname,
+  button: [{ name: '个人中心' }, { name: '退出登录' }]
 })
 
 const openDrawer = (val) => {
-  val === "open" ? (drawer.value = true) : (drawer.value = false)
+  val === 'open' ? (drawer.value = true) : (drawer.value = false)
 }
 
 const toLink = (index) => {
   switch (index) {
     case 0:
-      ElMessage.warning("暂不支持")
-      break;
+      ElMessage.warning('暂不支持')
+      break
     case 1:
-      store.LoginOut();
-      router.push("/login");
-      break;
+      store.LoginOut()
+      router.push('/login')
+      break
   }
 }
 
 const toWork = () => {
-  // router.push("/workbench")
+  window.location.href = 'http://10.4.150.55:8080/'
 }
 
 const changeDrawer = (drawer) => {
   openDrawer(drawer)
 }
 
-onMounted(() => {
-})
-
+onMounted(() => {})
 </script>
 
 <style lang="scss" scoped>
