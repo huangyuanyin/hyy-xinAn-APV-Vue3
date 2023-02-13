@@ -896,7 +896,7 @@ const changePlatformStatus = async (status, id) => {
       type: 'success',
       duration: 1000
     })
-    getD_group(1)
+    getD_group(groupCurrentPage.value)
   }
 }
 
