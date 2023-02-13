@@ -312,7 +312,7 @@ const groupCurrentPage = ref(1)
 const groupPageSize = ref(10)
 const groupTotal = ref(0)
 const buildCurrentPage = ref(1)
-const buildPageSize = ref(10)
+const buildPageSize = ref(100)
 const buildTotal = ref(0)
 const loadingText = ref('上传文件较大，请耐心等待...')
 const direction = ref('rtl')
@@ -854,7 +854,8 @@ const getBuild = async () => {
   let res = await buildApi({ filetype: 'apvbuild' })
   state.buildName = res.data
   state.buildData = res.data.map((item) => ({ name: item }))
-  buildTotal.value = res.dada?.total || 0
+  console.log(`output->res.dada`, res.data)
+  buildTotal.value = res.data.length || 0
 }
 
 // build管理 删除接口
