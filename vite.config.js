@@ -8,7 +8,7 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import path from 'path'
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ command, mode }) => {
   // const env = loadEnv(mode, __dirname);
   return {
     resolve: {
@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, 'src')
       }
     },
-    base: '/netapv/',
+    base: mode === 'development' ? '/' : '/netapv/',
     build: {
       chunkSizeWarningLimit: 1500000,
       outDir: 'dist',

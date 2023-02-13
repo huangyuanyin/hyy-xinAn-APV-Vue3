@@ -77,7 +77,7 @@
           />
         </el-card>
         <!-- 终端 -->
-        <Termmail v-if="isShowTermail" :termmailInfo="termmailInfo" />
+        <Termmail v-if="isShowTermail" :termmailInfo="termmailInfo" @closeTermmail="cloeConsole(termmailId)" />
       </el-tab-pane>
       <el-tab-pane label="build管理" name="buildManagement">
         <el-card class="build-card" shadow="never">
@@ -331,6 +331,7 @@ const isShowTermail = ref(false)
 const isNoServerIp = ref(false)
 const remark = ref('')
 const termmailInfo = ref({})
+const termmailId = ref(null)
 const options = ref([
   {
     value: '设备',
@@ -964,6 +965,7 @@ const openConsole = async (row) => {
     return
   }
   await getDeviceInfo(row)
+  termmailId.value = row
 }
 
 const cloeConsole = (row) => {
@@ -1095,7 +1097,7 @@ const getDeviceInfo = async (data) => {
 
 .hhh {
   // border-radius: 100%;
-  webkit-animation: breathe 1500ms ease infinite;
+  -webkit-animation: breathe 1500ms ease infinite;
   -moz-animation: breathe 1500ms ease infinite;
   -o-animation: breathe 1500ms ease infinite;
   animation: breathe 1500ms ease infinite;

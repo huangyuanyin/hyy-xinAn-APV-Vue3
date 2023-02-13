@@ -1430,7 +1430,7 @@ const handleTaskCurrentChange = (val: number) => {
 
 .hhh {
   // border-radius: 100%;
-  webkit-animation: breathe 1500ms ease infinite;
+  -webkit-animation: breathe 1500ms ease infinite;
   -moz-animation: breathe 1500ms ease infinite;
   -o-animation: breathe 1500ms ease infinite;
   animation: breathe 1500ms ease infinite;
