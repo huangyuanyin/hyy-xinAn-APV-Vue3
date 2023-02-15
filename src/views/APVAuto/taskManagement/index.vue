@@ -33,6 +33,7 @@
             <el-button size="large" type="primary" @click="openAddDialog('task', 'add', null)" style="margin-bottom: 20px"> 添加任务 </el-button>
           </div>
           <div>
+            <el-input size="large" clearable v-model="searchTask" placeholder="请输入要搜索的任务名称..." :suffix-icon="Search" @change="getTask(1)" />
             <el-select size="large" clearable v-model="searchBuild" placeholder="请选择要搜索的build版本..." @change="getTask(1)">
               <el-option v-for="(item, index) in state.buildData" :key="'buildData' + index" :label="item.name" :value="item.name" />
             </el-select>
@@ -553,6 +554,7 @@ const searchForm = ref({
 const searchUser = ref('')
 const searchBuild = ref('')
 const searchGroup = ref('')
+const searchTask = ref('')
 
 // 添加测试平台数据
 const addTestPlatForm = reactive({
@@ -900,7 +902,8 @@ const getTask = async (page) => {
   tableLoading.value = true
   let build = searchBuild.value
   let user = searchUser.value
-  let res = await taskApi({ page, build, state: searchGroup.value, user })
+  let name = searchTask.value
+  let res = await taskApi({ page, build, state: searchGroup.value, user, name })
   tableLoading.value = false
   if (res.code == 1000) {
     state.tableData = res.data
