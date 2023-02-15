@@ -2,7 +2,8 @@
   <div id="com-container" class="com-container">
     <h2>cases数据</h2>
     <!-- <div style="100%"> -->
-    <div id="main"></div>
+    <div class="tip" v-if="isRefreshLoding">更新数据中，请稍后...</div>
+    <div id="main" v-else></div>
     <!-- </div> -->
   </div>
 </template>
@@ -23,10 +24,13 @@ const props = defineProps({
 const list = ref(<any>[])
 const versionName = ref(<any>[]) // 版本名称
 const versionNumber = ref(<any>[]) // 版本用例数
+const isRefreshLoding = ref(false)
 
 const handleData = async () => {
   if (props.isRefresh) {
+    isRefreshLoding.value = true
     await getRefreshCasesData().then((res: any) => {
+      isRefreshLoding.value = false
       res.map((it) => {
         versionName.value.push(it.name)
         versionNumber.value.push(it.value)
@@ -257,6 +261,13 @@ onMounted(async () => {
     text-align: center;
     margin: 0;
     line-height: 40px;
+  }
+  .tip {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 </style>
