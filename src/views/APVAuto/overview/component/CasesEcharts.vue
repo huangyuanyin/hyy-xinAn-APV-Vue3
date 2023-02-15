@@ -106,8 +106,8 @@ const change = () => {
     grid: {
       left: 60,
       right: 80,
-      bottom: 40
-      // top: '30%',
+      bottom: 40,
+      top: '5%'
     },
     legend: {
       top: 220,
@@ -133,10 +133,12 @@ const change = () => {
           }
         },
         axisLabel: {
+          interval: 0, // 横轴信息全部展示
+          rotate: 5, // 20度角倾斜显示
           margin: 10,
           color: '#e2e9ff',
           textStyle: {
-            fontSize: 14
+            fontSize: 12
           }
         },
         axisTick: {

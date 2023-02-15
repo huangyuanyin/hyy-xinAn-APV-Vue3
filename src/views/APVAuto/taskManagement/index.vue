@@ -33,7 +33,6 @@
             <el-button size="large" type="primary" @click="openAddDialog('task', 'add', null)" style="margin-bottom: 20px"> 添加任务 </el-button>
           </div>
           <div>
-            <el-input size="large" clearable v-model="searchTask" placeholder="请输入要搜索的任务名称..." :suffix-icon="Search" @change="getTask(1)" />
             <el-select size="large" clearable v-model="searchBuild" placeholder="请选择要搜索的build版本..." @change="getTask(1)">
               <el-option v-for="(item, index) in state.buildData" :key="'buildData' + index" :label="item.name" :value="item.name" />
             </el-select>
@@ -45,6 +44,7 @@
         </div>
 
         <el-table :data="state.tableData" stripe style="width: 100%" v-loading="tableLoading" height="65vh">
+          <el-table-column prop="id" label="任务ID" align="center" width="80" />
           <el-table-column prop="name" label="任务名称" align="center" width="150" />
           <el-table-column prop="build" label="build版本" align="center" width="250" />
           <el-table-column prop="groupAfter" label="测试平台" class-name="testStyle" width="320" header-align="center">
@@ -133,17 +133,17 @@
                 </template>
                 <div class="moreButton">
                   <el-tooltip content="该任务下所有测试平台均停止运行" v-if="scope.row.state === 'running'" placement="top" effect="dark">
-                    <el-button link type="primary" size="small" @click="changeTaskStatus('stop', scope.row)"> 任务终止 </el-button>
+                    <el-button link type="primary" size="small" @click="changeTaskStatus('stop', scope.row)"> 任务暂停 </el-button>
                   </el-tooltip>
-                  <el-button link type="primary" size="small" v-if="['fail', 'create'].includes(scope.row.state)" @click="changeTaskStatus('start', scope.row)">
-                    任务启动
-                  </el-button>
-                  <el-button link type="primary" size="small" v-if="['fail', 'stop', 'running'].includes(scope.row.state)" @click="changeTaskStatus('start', scope.row)">
-                    重新运行
-                  </el-button>
+                  <el-button link type="primary" size="small" v-if="['create'].includes(scope.row.state)" @click="changeTaskStatus('start', scope.row)"> 任务启动 </el-button>
+                  <el-tooltip content="重新运行该任务下所有用例" placement="top" effect="dark">
+                    <el-button link type="primary" size="small" v-if="['fail', 'stop'].includes(scope.row.state)" @click="changeTaskStatus('start', scope.row)">
+                      重新运行
+                    </el-button>
+                  </el-tooltip>
                   <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
                     <span>
-                      <el-button link type="primary" size="small" v-if="['stop', 'complete'].includes(scope.row.state)" @click="changeTaskStatus('restart', scope.row)">
+                      <el-button link type="primary" size="small" v-if="['fail', 'stop', 'complete'].includes(scope.row.state)" @click="changeTaskStatus('restart', scope.row)">
                         继续运行
                       </el-button>
                     </span>
@@ -554,7 +554,6 @@ const searchForm = ref({
 const searchUser = ref('')
 const searchBuild = ref('')
 const searchGroup = ref('')
-const searchTask = ref('')
 
 // 添加测试平台数据
 const addTestPlatForm = reactive({
@@ -902,8 +901,7 @@ const getTask = async (page) => {
   tableLoading.value = true
   let build = searchBuild.value
   let user = searchUser.value
-  let name = searchTask.value
-  let res = await taskApi({ page, build, state: searchGroup.value, user, name })
+  let res = await taskApi({ page, build, state: searchGroup.value, user })
   tableLoading.value = false
   if (res.code == 1000) {
     state.tableData = res.data

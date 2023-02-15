@@ -146,7 +146,7 @@ const handleRefresh = () => {
 
 .screen-container {
   width: 100%;
-  height: calc(100% - 61px);
+  height: calc(100% - 41px);
   // padding: 0 20px;
   background-color: rgba(7, 10, 88, 0.99) !important;
   color: #fff;
