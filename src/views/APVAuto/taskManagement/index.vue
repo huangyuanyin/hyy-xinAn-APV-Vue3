@@ -448,13 +448,26 @@ const physicalItems = ref([])
 const remarksPlace = ref(new Date().toLocaleString())
 const interval = ref(null)
 const taskProgressData = ref(null)
+const physicalItemsChangeData = ref(null)
 
 const handleChange = (val: string[]) => {
   console.log(val)
 }
 const changePhysicalMachine = (val: string) => {
   if (val === '1' && addTaskForm.group.length === 0) {
-    ElMessage.warning('请先选择测试平台！')
+    return ElMessage.warning('请先选择测试平台！')
+  }
+  if (titleDialog.value === '编辑任务' && val === '1') {
+    physicalItems.value = []
+    physicalItemsChangeData.value.groupAfter.map((it) => {
+      physicalItems.value.push({
+        id: it.value,
+        name: it.label,
+        required: false,
+        TipServer: '',
+        TipPort: ''
+      })
+    })
   }
 }
 const casesProps = {
@@ -687,6 +700,7 @@ const openAddDialog = async (type, operation, data) => {
         ? (titleDialog.value = '添加任务') && (buttonText.value = '添加') && (editDisabled.value = false)
         : (titleDialog.value = '编辑任务') && (buttonText.value = '确定') && (editDisabled.value = true)
       casValue.value = []
+      physicalItemsChangeData.value = data
       if (operation == 'add') {
         isPhysicalMachine.value = '0'
       } else {
@@ -694,7 +708,22 @@ const openAddDialog = async (type, operation, data) => {
           isPhysicalMachine.value = '0'
         } else {
           isPhysicalMachine.value = '1'
-          physicalItems.value = data.config
+          physicalItems.value = []
+          data.config.map((item) => {
+            data.groupAfter.map((it) => {
+              if (it.value === item.id) {
+                physicalItems.value.push(item)
+              } else {
+                physicalItems.value.push({
+                  id: it.value,
+                  name: it.label,
+                  required: false,
+                  TipServer: '',
+                  TipPort: ''
+                })
+              }
+            })
+          })
           // addTaskForm.config.TipServer = data.config.TipServer
           // addTaskForm.config.TipPort = data.config.TipPort
           // addTaskForm.config.TestPass = data.config.TestPass
