@@ -445,6 +445,9 @@ const taskTotal = ref(0)
 const activeNames = ref([1])
 const physicalItems = ref([])
 const remarksPlace = ref(new Date().toLocaleString())
+const interval = ref(null)
+const taskProgressData = ref(null)
+
 const handleChange = (val: string[]) => {
   console.log(val)
 }
@@ -1147,6 +1150,7 @@ const reportDetailData = ref({})
 const taskProgress = async (data) => {
   showDetail.value = false
   textarea.value = ''
+  taskProgressData.value = data
   // 获取对应的测试报告失败数/成功数/用例数
   await getReport(data)
 }
@@ -1191,6 +1195,7 @@ const getTaskRun = async (id) => {
 // 测试报告
 const getReport = async (data) => {
   let res = await getReportApi({ id: data.id })
+  textarea.value = ''
   await getTaskRun(data.id)
   showDetail.value = true
   taskProgressDialog.value = true
@@ -1209,6 +1214,19 @@ const getReport = async (data) => {
     }
   }
 }
+
+watch(
+  () => taskProgressDialog.value,
+  () => {
+    if (taskProgressDialog.value) {
+      interval.value = setInterval(async () => {
+        getReport(taskProgressData.value)
+      }, 5000)
+    } else {
+      clearInterval(interval.value)
+    }
+  }
+)
 
 const placeholderTipServer = ref('')
 const placeholderTipPort = ref('')
