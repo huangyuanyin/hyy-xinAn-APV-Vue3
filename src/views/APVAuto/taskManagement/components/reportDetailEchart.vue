@@ -1,16 +1,15 @@
 <template>
-  <div class="reportDetailEchart-wrap" id="reportDetailEchart" style="width: 942px;height:300px;">
-  </div>
+  <div class="reportDetailEchart-wrap" id="reportDetailEchart" style="width: 942px; height: 300px"></div>
 </template>
 
-<script lang='ts' setup>
+<script lang="ts" setup>
 import { onMounted, inject, defineProps } from 'vue'
-let echarts: any = inject("echarts");
+let echarts: any = inject('echarts')
 
 const props = defineProps({
   reportDetailData: {
     type: Object,
-    default: () => { }
+    default: () => {}
   }
 })
 
@@ -19,98 +18,106 @@ onMounted(() => {
 })
 
 const init = () => {
-  const chartBox = echarts.init(document.getElementById('reportDetailEchart'));
-  var seriesdata1 = [{ name: '成功数', value: props.reportDetailData.success || 0 }, { name: '失败数', value: props.reportDetailData.fail_cases }, { name: '完成数', value: props.reportDetailData.counts }];
+  const chartBox = echarts.init(document.getElementById('reportDetailEchart'))
+  var seriesdata1 = [
+    { name: '成功数', value: props.reportDetailData.success || 0 },
+    { name: '失败数', value: props.reportDetailData.fail_cases },
+    { name: '完成数', value: props.reportDetailData.finish }
+  ]
   var colorList = ['#407AFB', '#1791FF', '#36B0FE', '#6635EF', '#73ACFF', '#41CBAB', '#7BDD43', '#FFC653', '#FF6519', '#EE3939', '#FFAFDA', '#00FFFF']
 
   var objData = array2obj(seriesdata1, 'name')
 
   //将合计值转换为数组
-  var h = String(props.reportDetailData.counts || 0);
-  let arr = h.split('');
-  let m = '';
+  var h = String(props.reportDetailData.counts || 0)
+  let arr = h.split('')
+  let m = ''
 
   arr.forEach((item, i) => {
-    m += "{a|" + arr[i] + "}";
-    if (i != arr.length - 1) { m += '  ' }
+    m += '{a|' + arr[i] + '}'
+    if (i != arr.length - 1) {
+      m += '  '
+    }
   })
 
   const option = {
-    backgroundColor: "#051F54",
+    backgroundColor: '#051F54',
     animation: false, // 取消动画
     grid: {
-      "x": "30%",
-      "y": "3%",
-      "x2": "5%",
-      "y2": "5%",
-      "borderWidth": 1,
-      "borderColor": "#f0f0f0"
+      x: '30%',
+      y: '3%',
+      x2: '5%',
+      y2: '5%',
+      borderWidth: 1,
+      borderColor: '#f0f0f0'
     },
-    title: [{
-      "show": true,
-      // text: '{a|}{b|数量}{c|占比}',
-      text: '{a|}{b|数量}',
-      "top": "40%",
-      "left": "60%",
-      textStyle: {
-        rich: {
-          a: {
-            align: 'center',
-            fontSize: 16,
-            color: 'rgba(255,255,255,1)',
-            width: 20,
-            padding: [0, 0, 0, 20]
-          },
-          b: {
-            align: 'center',
-            fontSize: 16,
-            color: 'rgba(255,255,255,1)',
-            width: 5,
-            padding: [0, 0, 0, 70]
-          },
-          c: {
-            align: 'center',
-            fontSize: 16,
-            color: 'rgba(255,255,255,1)',
-            width: 5,
-            padding: [0, 0, 0, 45]
-          }
-        }
-      }
-    }, {
-      text: '{b|用例数：}' + m,
-      left: '70%',
-      top: '10%',
-      textAlign: 'center',
-      textStyle: {
-        fontWeight: 'normal',
-        fontSize: '24',
-        color: '#FFFFFF',
-        textAlign: 'center',
-        rich: {
-          a: {
-            fontSize: '24',
-            fontWeight: 'bold',
-            backgroundColor: 'rgba(56,89,255,0.2)',
-            borderColor: 'rgba(56,211,255,1)',
-            borderWidth: 1,
-            padding: [10, 6, 6, 6],
-            shadowColor: 'rgba(56,211,255,1)',
-            shadowBlur: 3,
-            borderRadius: 3
-          },
-          b: {
-            fontSize: '24',
-            fontWeight: 'bold',
-            padding: [6, 6, 3, 6],
-            color: '#FFFFFF',
+    title: [
+      {
+        show: true,
+        // text: '{a|}{b|数量}{c|占比}',
+        text: '{a|}{b|数量}',
+        top: '40%',
+        left: '60%',
+        textStyle: {
+          rich: {
+            a: {
+              align: 'center',
+              fontSize: 16,
+              color: 'rgba(255,255,255,1)',
+              width: 20,
+              padding: [0, 0, 0, 20]
+            },
+            b: {
+              align: 'center',
+              fontSize: 16,
+              color: 'rgba(255,255,255,1)',
+              width: 5,
+              padding: [0, 0, 0, 70]
+            },
+            c: {
+              align: 'center',
+              fontSize: 16,
+              color: 'rgba(255,255,255,1)',
+              width: 5,
+              padding: [0, 0, 0, 45]
+            }
           }
         }
       },
-    }
+      {
+        text: '{b|用例数：}' + m,
+        left: '70%',
+        top: '10%',
+        textAlign: 'center',
+        textStyle: {
+          fontWeight: 'normal',
+          fontSize: '24',
+          color: '#FFFFFF',
+          textAlign: 'center',
+          rich: {
+            a: {
+              fontSize: '24',
+              fontWeight: 'bold',
+              backgroundColor: 'rgba(56,89,255,0.2)',
+              borderColor: 'rgba(56,211,255,1)',
+              borderWidth: 1,
+              padding: [10, 6, 6, 6],
+              shadowColor: 'rgba(56,211,255,1)',
+              shadowBlur: 3,
+              borderRadius: 3
+            },
+            b: {
+              fontSize: '24',
+              fontWeight: 'bold',
+              padding: [6, 6, 3, 6],
+              color: '#FFFFFF'
+            }
+          }
+        }
+      }
     ],
-    "legend": {
-      "show": true,
+    legend: {
+      show: true,
       //icon: 'circle',
       orient: 'vertical',
       top: '50%',
@@ -124,7 +131,7 @@ const init = () => {
         return '{a|' + name + '}{b|' + objData[name].value.toFixed(0) + '}'
       },
       selected: {
-        '完成数': false,
+        完成数: false
       },
       textStyle: {
         rich: {
@@ -175,7 +182,7 @@ const init = () => {
         position: 'outside',
         formatter: function (data) {
           // return '\n{icon|}\n' + '{name|' + data.name + "}" + " {value|" + data.value.toFixed(0) + " ," + data.percent.toFixed(0) + "%}";
-          return '\n{icon|}\n' + '{name|' + data.name + "}" + " {value|" + data.value.toFixed(0) + "}";
+          return '\n{icon|}\n' + '{name|' + data.name + '}' + ' {value|' + data.value.toFixed(0) + '}'
         },
         //padding: [-40, -90, -20, -80],
         rich: {
@@ -186,7 +193,7 @@ const init = () => {
             //marginBottom: 10,
             padding: [0, -5],
             borderRadius: 5,
-            backgroundColor: 't', // 圆点颜色和饼图块状颜色一致
+            backgroundColor: 't' // 圆点颜色和饼图块状颜色一致
           },
           name: {
             fontSize: 14,
@@ -211,31 +218,30 @@ const init = () => {
           }
         }
       },
-      "data": seriesdata1,
-      "seriesIndex": 0
+      data: seriesdata1,
+      seriesIndex: 0
     }
-  };
+  }
   function array2obj(array, key) {
     var resObj = {}
     for (var i = 0; i < array.length; i++) {
       resObj[array[i][key]] = array[i]
     }
     return resObj
-  };
-  document.getElementById('reportDetailEchart').removeAttribute('_echarts_instance_');
-  chartBox.setOption(option, true);
+  }
+  document.getElementById('reportDetailEchart').removeAttribute('_echarts_instance_')
+  chartBox.setOption(option, true)
   chartBox.on('legendselectchanged', function (params) {
     chartBox.setOption({
-      legend: { selected: { "完成数": false } }
+      legend: { selected: { 完成数: false } }
     })
-    console.log('点击了', params.name);
+    console.log('点击了', params.name)
   })
   // 根据页面大小自动响应图表大小
-  window.addEventListener("resize", function () {
-    chartBox.resize();
-  });
+  window.addEventListener('resize', function () {
+    chartBox.resize()
+  })
 }
-
 </script>
 
 <style scoped>

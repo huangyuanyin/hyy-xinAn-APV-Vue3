@@ -126,18 +126,19 @@
           <el-table-column prop="uptimeAfter" label="更新时间" align="center" width="200" />
           <el-table-column fixed="right" label="操作" align="center">
             <template #default="scope">
-              <el-popover placement="bottom" :width="10" trigger="hover" popper-class="morePopover">
+              <el-popover placement="bottom" trigger="hover" popper-class="morePopover">
                 <template #reference>
                   <el-button link type="primary" size="small" :disabled="scope.row.state === 'ready'">启停</el-button>
                 </template>
                 <div class="moreButton">
                   <el-tooltip content="该任务下所有测试平台均停止运行" v-if="scope.row.state === 'running'" placement="top" effect="dark">
-                    <span>
-                      <el-button link type="primary" size="small" @click="changeTaskStatus('stop', scope.row)"> 任务终止 </el-button>
-                    </span>
+                    <el-button link type="primary" size="small" @click="changeTaskStatus('stop', scope.row)"> 任务终止 </el-button>
                   </el-tooltip>
                   <el-button link type="primary" size="small" v-if="['fail', 'create'].includes(scope.row.state)" @click="changeTaskStatus('start', scope.row)">
                     任务启动
+                  </el-button>
+                  <el-button link type="primary" size="small" v-if="['fail', 'stop', 'running'].includes(scope.row.state)" @click="changeTaskStatus('start', scope.row)">
+                    重新运行
                   </el-button>
                   <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
                     <span>
@@ -214,11 +215,14 @@
               clearable
             />
           </el-form-item>
-          <el-form-item label="备注" prop="remarks">
-            <el-input v-model="addTaskForm.remarks" placeholder="提示信息：可根据测试设备硬件等信息区分同一build的不同测试任务" />
+          <el-form-item label="备注" prop="remarks" style="margin-bottom: 0px">
+            <div class="remarks">
+              <el-input v-model="addTaskForm.remarks" :placeholder="remarksPlace" />
+              <span>注：可根据测试设备硬件等信息区分同一build的不同测试任务</span>
+            </div>
           </el-form-item>
           <el-form-item label="是否含有物理机" prop="config">
-            <el-radio-group v-model="isPhysicalMachine">
+            <el-radio-group v-model="isPhysicalMachine" @change="changePhysicalMachine">
               <el-radio label="1">是</el-radio>
               <el-radio label="0">否</el-radio>
             </el-radio-group>
@@ -229,9 +233,9 @@
             <template #title>
               <span>{{ `【${item.name}】` + `&nbsp` + '的物理机配置项：' }}</span>
               <span v-if="item.requiredTip" class="requiredTip">【待完善】</span>
-              <el-icon class="header-icon">
+              <!-- <el-icon class="header-icon">
                 <info-filled />
-              </el-icon>
+              </el-icon> -->
             </template>
             <el-form :model="item" ref="physicalForms" label-width="160px">
               <el-form-item label="TipServer IP " prop="TipServer" :required="item.required">
@@ -342,7 +346,7 @@
         </div>
         <div class="preview_item">
           <span class="left">备注：</span>
-          <span>{{ addTaskForm.remarks || '无' }} </span>
+          <span>{{ addTaskForm.remarks ? addTaskForm.remarks : remarksPlace || '无' }} </span>
         </div>
         <div class="preview_item">
           <span class="left">是否含有物理机：</span>
@@ -440,8 +444,14 @@ const taskPageSize = ref(10)
 const taskTotal = ref(0)
 const activeNames = ref([1])
 const physicalItems = ref([])
+const remarksPlace = ref(new Date().toLocaleString())
 const handleChange = (val: string[]) => {
   console.log(val)
+}
+const changePhysicalMachine = (val: string) => {
+  if (val === '1' && addTaskForm.group.length === 0) {
+    ElMessage.warning('请先选择测试平台！')
+  }
 }
 const casesProps = {
   multiple: true,
@@ -676,10 +686,11 @@ const openAddDialog = async (type, operation, data) => {
       if (operation == 'add') {
         isPhysicalMachine.value = '0'
       } else {
-        if (JSON.stringify(data.config) === '{}' || data.config == null) {
+        if (data.config.length === 0 || data.config == null) {
           isPhysicalMachine.value = '0'
         } else {
           isPhysicalMachine.value = '1'
+          physicalItems.value = data.config
           // addTaskForm.config.TipServer = data.config.TipServer
           // addTaskForm.config.TipPort = data.config.TipPort
           // addTaskForm.config.TestPass = data.config.TestPass
@@ -802,6 +813,7 @@ const onAddTaskForm = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid, fields) => {
     submitPreviewDialog.value = false
     if (valid) {
+      addTaskForm.remarks !== '' ? '' : (addTaskForm.remarks = String(new Date().getTime()))
       console.log('添加成功...', JSON.parse(JSON.stringify(addTaskForm)))
       // addTaskForm.group = "[" + String(addTaskForm.group) + "]"
       if (isPhysicalMachine.value == '0') {
@@ -1184,12 +1196,14 @@ const getReport = async (data) => {
   taskProgressDialog.value = true
   reportDetailData.value = {
     counts: data.counts,
+    finish: 0,
     success: 0,
     fail_cases: 0
   }
   if (res?.code === 1000) {
     reportDetailData.value = {
       counts: data.counts,
+      finish: res.data.pass + res.data.fail,
       success: res.data.pass,
       fail_cases: res.data.fail
     }
@@ -1293,6 +1307,13 @@ const handleTaskCurrentChange = (val: number) => {
 </script>
 
 <style lang="scss" scoped>
+.remarks {
+  display: flex;
+  flex-direction: column;
+  span {
+    color: #ff6b84;
+  }
+}
 .my-header {
   display: flex;
   align-items: center;
@@ -1384,6 +1405,9 @@ const handleTaskCurrentChange = (val: number) => {
 .moreButton {
   display: flex;
   flex-direction: column;
+  .el-button {
+    margin-left: 0;
+  }
 }
 
 .tagType {
