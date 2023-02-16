@@ -1144,7 +1144,7 @@ const handleCloseTag = (data, id) => {
   })
     .then(() => {
       const params = {
-        id,
+        id: addTestPlatForm.id, // 任务id
         group: data.id
       }
       deleteTestPlat(params)
