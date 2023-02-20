@@ -14,6 +14,7 @@
             </div>
           </div>
           <el-table :data="state.d_groupData" stripe>
+            <el-table-column prop="id" label="测试平台ID" align="center" width="200" />
             <el-table-column prop="name" label="测试平台名称" align="center" width="200" />
             <el-table-column prop="build" label="测试版本" align="center">
               <template #default="scope">

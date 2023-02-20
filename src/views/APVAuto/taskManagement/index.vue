@@ -458,15 +458,19 @@ const changePhysicalMachine = (val: string) => {
     return ElMessage.warning('请先选择测试平台！')
   }
   if (titleDialog.value === '编辑任务' && val === '1') {
-    physicalItems.value = []
-    physicalItemsChangeData.value.groupAfter.map((it) => {
-      physicalItems.value.push({
-        id: it.value,
-        name: it.label,
-        required: false,
-        TipServer: '',
-        TipPort: ''
-      })
+    let arr = physicalItems.value.map((item) => {
+      return item.id
+    })
+    physicalItemsChangeData.value.groupAfter.map((item) => {
+      if (!arr.includes(item.value)) {
+        physicalItems.value.push({
+          id: item.value,
+          name: item.label,
+          required: false,
+          TipServer: '',
+          TipPort: ''
+        })
+      }
     })
   }
 }
@@ -708,21 +712,20 @@ const openAddDialog = async (type, operation, data) => {
           isPhysicalMachine.value = '0'
         } else {
           isPhysicalMachine.value = '1'
-          physicalItems.value = []
-          data.config.map((item) => {
-            data.groupAfter.map((it) => {
-              if (it.value === item.id) {
-                physicalItems.value.push(item)
-              } else {
-                physicalItems.value.push({
-                  id: it.value,
-                  name: it.label,
-                  required: false,
-                  TipServer: '',
-                  TipPort: ''
-                })
-              }
-            })
+          physicalItems.value = data.config
+          let arr = data.config.map((item) => {
+            return item.id
+          })
+          data.groupAfter.map((item) => {
+            if (!arr.includes(item.value)) {
+              physicalItems.value.push({
+                id: item.value,
+                name: item.label,
+                required: false,
+                TipServer: '',
+                TipPort: ''
+              })
+            }
           })
           // addTaskForm.config.TipServer = data.config.TipServer
           // addTaskForm.config.TipPort = data.config.TipPort
