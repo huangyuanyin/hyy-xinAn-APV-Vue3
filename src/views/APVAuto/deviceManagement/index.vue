@@ -86,9 +86,9 @@
             <el-button type="primary" style="margin-bottom: 20px" :auto-upload="false"> 上传文件 </el-button>
           </el-upload>
           <el-button type="primary" @click="openDownloadDialog = true" style="margin-left: 20px" :auto-upload="false"> 拉取文件 </el-button>
-          <el-table :data="state.buildData" border stripe height="62vh">
+          <el-table :data="state.buildData" border stripe>
             <el-table-column prop="name" label="版本名称" align="center" />
-            <el-table-column fixed="right" label="Operations" align="center">
+            <el-table-column fixed="right" label="操作" align="center">
               <template #default="scope">
                 <el-popconfirm title="确定删除这个文件?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消" @confirm="handleDelete('build', scope.row.name)">
                   <template #reference>
@@ -313,7 +313,7 @@ const groupCurrentPage = ref(1)
 const groupPageSize = ref(10)
 const groupTotal = ref(0)
 const buildCurrentPage = ref(1)
-const buildPageSize = ref(100)
+const buildPageSize = ref(10)
 const buildTotal = ref(0)
 const loadingText = ref('上传文件较大，请耐心等待...')
 const direction = ref('rtl')
@@ -351,6 +351,7 @@ const options = ref([
   }
 ])
 const titleDialog = ref('')
+const totalBuildData = ref([])
 const statusOptions = [
   {
     value: 'fail',
@@ -854,9 +855,18 @@ const deleteD_type = async (id) => {
 const getBuild = async () => {
   let res = await buildApi({ filetype: 'apvbuild' })
   state.buildName = res.data
-  state.buildData = res.data.map((item) => ({ name: item }))
-  console.log(`output->res.dada`, res.data)
+  totalBuildData.value = res.data.map((item) => ({ name: item }))
+  state.buildData = queryByPage(totalBuildData.value)
   buildTotal.value = res.data.length || 0
+}
+
+// 处理build - 实现分页
+const queryByPage = (totalData) => {
+  // 起始位置 = (当前页 - 1) x 每页的大小
+  const start = (buildCurrentPage.value - 1) * buildPageSize.value
+  // 结束位置 = 当前页 x 每页的大小
+  const end = buildCurrentPage.value * buildPageSize.value
+  return totalData.slice(start, end)
 }
 
 // build管理 删除接口
@@ -987,8 +997,8 @@ const handleBuildSizeChange = (val: number) => {
   console.log(`${val} items per page`)
 }
 const handleBuildCurrentChange = (val: number) => {
-  // groupCurrentPage.value = val
-  // getD_group(groupCurrentPage.value)
+  buildCurrentPage.value = val
+  state.buildData = queryByPage(totalBuildData.value)
 }
 
 // 设备管理 获取终端用户名密码
