@@ -153,7 +153,7 @@
               <el-tooltip content="可查看当前任务的进度详情" placement="top" effect="dark">
                 <el-button link type="primary" size="small" @click="taskProgress(scope.row)"> 任务进度 </el-button>
               </el-tooltip>
-              <el-popover placement="bottom" :width="10" trigger="click" popper-class="morePopover">
+              <el-popover placement="bottom" :width="10" trigger="hover" popper-class="morePopover">
                 <template #reference>
                   <el-button link type="info" size="small">更多</el-button>
                 </template>
