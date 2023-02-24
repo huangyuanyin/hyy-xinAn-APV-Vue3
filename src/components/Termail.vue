@@ -1,11 +1,11 @@
 <template>
   <div class="console-wrap">
-    <div class="console" id="terminal"></div>
+    <div class="console" id="terminal" v-if="refreshTer"></div>
     <el-button type="primary" link @click="closeTermmail">关闭终端</el-button>
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeMount } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import Terminal from '../config/Xterm'
 
 const emit = defineEmits(['closeTermmail'])
@@ -27,6 +27,7 @@ const props = defineProps({
 
 const term = ref(null)
 const terminalSocket = ref(null)
+const refreshTer = ref(true)
 
 const runRealTerminal = () => {
   console.log('webSocket is finished')
@@ -39,10 +40,12 @@ const closeRealTerminal = () => {
 }
 
 const closeTermmail = () => {
+  refreshTer.value = false
   emit('closeTermmail')
 }
 
 onMounted(() => {
+  refreshTer.value = true
   const { uname, passw, ip } = props.termmailInfo
   console.log('pid : ' + props.terminal.pid + ' is on ready')
   let terminalContainer = document.getElementById('terminal')
@@ -71,7 +74,7 @@ onMounted(() => {
   console.log('mounted is going on')
 })
 // name: 'Console',
-onBeforeMount(() => {
+onBeforeUnmount(() => {
   terminalSocket.value = null
   term.value = null
 })
