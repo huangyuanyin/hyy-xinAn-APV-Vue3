@@ -47,10 +47,11 @@
                   <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
                   <el-input v-model="case_log" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无脚本执行日志" />
                 </el-tab-pane>
-                <el-tab-pane label="APV交互日志" name="three">
-                  <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
-                  <el-input v-model="shell_log" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无APV交互日志" />
-                </el-tab-pane>
+                <template v-for="(item, index) in shell_log" :key="'shell_log' + index">
+                  <el-tab-pane label="交互日志" :name="item.value">
+                    <el-input v-model="item.value" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无交互日志" />
+                  </el-tab-pane>
+                </template>
               </el-tabs>
             </template>
           </el-table-column>
@@ -137,7 +138,7 @@ let obj = {
 const jsonData = reactive(obj)
 const case_script = ref('')
 const case_log = ref('')
-const shell_log = ref('')
+const shell_log = ref([])
 const logData = ref(
   '20 | 400 | slb_rr_100.pl | Thursday, September 08, 2022 AM02:30:04 CST \n20 | 200 |  TIP all 10015100161000710008 \n20 | 200 |  TIP  10015:10016 \n20 | 200 |  2:30:4-172.16.26.215-ttyS0 :  user sunyb pass click1 \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : script dir /home/sunyb/sunyb.ws/src_apv/result/log//2022-09-08-02:29:22--Beta_APV_10_5_0_42.array/smoke_test//result/mnet_env//T_0001/shell-ttyS0.txt \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : Test Machine ip 172.16.26.215 \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : login user root \n20 | 200 |   \n20 | 200 |  the last prompt \n20 | 200 |  command timed-out at ../../util/cli/ca.pm line 159 \n20 | 200 |   \n 50 | 255 | Unkonw | FAIL | Unkonw Exit Code 255 \n20 | 500 | slb_rr_100.pl | Thursday, September 08, 2022 AM02:30:54 CST \nunable to update smoke test result'
 )
@@ -575,7 +576,7 @@ const getLog = (row, expandedRows) => {
   }
   activeName.value = 'first'
   let LogList = []
-  LogList.push(row.case_script, row.case_log, row.shell_log)
+  LogList.push(row.case_script, row.case_log)
   LogList.map(async (item, index) => {
     await getLogApi({ url: String(item) }).then((res) => {
       switch (index) {
@@ -585,12 +586,16 @@ const getLog = (row, expandedRows) => {
         case 1:
           case_log.value = res.data || '请求错误'
           break
-        case 2:
-          shell_log.value = res.data || '请求错误'
-          break
         default:
           break
       }
+    })
+  })
+  row.shell_log.map(async (item, index) => {
+    await getLogApi({ url: String(item) }).then((res) => {
+      shell_log.value.push({
+        value: res.data || '请求错误'
+      })
     })
   })
 }
