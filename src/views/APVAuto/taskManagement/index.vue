@@ -198,7 +198,7 @@
           </el-form-item>
           <el-form-item label="测试平台" prop="group">
             <el-select multiple clearable v-model="addTaskForm.group" placeholder="请选择..." @change="getGroupDataId" @remove-tag="deleteGroupDataId">
-              <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name" :value="item.id" />
+              <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name" :value="item.name" />
             </el-select>
           </el-form-item>
           <el-form-item label="负责人" prop="user">
@@ -293,7 +293,7 @@
       <el-form :inline="false" :model="addTestPlatForm" ref="addTestPlatFormRef" class="addDevice-form" label-width="130px">
         <el-form-item label="添加测试平台：">
           <el-select clearable v-model="addTestPlatForm.group" placeholder="请选择要添加的测试平台..." @change="getTestPlatDataId">
-            <el-option v-for="(item, index) in state.d_groupDataAfter" :key="'d_groupDataAfter' + index" :label="item.name" :value="item.id" :disabled="item.disabled" />
+            <el-option v-for="(item, index) in state.d_groupDataAfter" :key="'d_groupDataAfter' + index" :label="item.name" :value="item.name" :disabled="item.disabled" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -322,7 +322,7 @@
         </div>
         <div class="preview_item" style="display: flex">
           <span class="left" style="display: block">测试平台：</span>
-          <div v-for="(item, index) in physicalNames" :key="'physicalNames' + index">
+          <div v-for="(item, index) in addTaskForm.group" :key="'physicalNames' + index">
             <el-tag style="margin-right: 10px">{{ item }}</el-tag>
           </div>
         </div>
@@ -778,8 +778,8 @@ const handleSelectData = (data) => {
   let arr = []
   data.forEach((item) => {
     state.d_groupData.map((it) => {
-      if (it.id == item) {
-        arr.push(it.id)
+      if (it.name == item) {
+        arr.push(it.name)
       }
     })
   })
@@ -906,7 +906,7 @@ const handle = () => {
     item.failGroupAfter = [] // 失败的测试平台回显展示
     item.group.map((it) => {
       state.d_groupData.forEach((d_item, index) => {
-        if (it == d_item.id) {
+        if (it == d_item.name) {
           item.groupAfter.push({
             value: d_item.id,
             label: d_item.name
@@ -916,7 +916,7 @@ const handle = () => {
     })
     item.fail_group.map((it) => {
       state.d_groupData.forEach((d_item, index) => {
-        if (it == d_item.id) {
+        if (it == d_item.name) {
           item.failGroupAfter.push({
             value: d_item.id,
             label: d_item.name
@@ -1013,7 +1013,7 @@ const getGroupDataId = (value) => {
   addTaskForm.group = value
   addTaskForm.group.map((item) => {
     state.d_groupData.map((it) => {
-      if (item === it.id) {
+      if (item === it.name) {
         items.push(it)
       }
     })
@@ -1048,8 +1048,8 @@ const getGroupDataId = (value) => {
       }
     })
   }
-  activeNames.value = [physicalItems.value[physicalItems.value.length - 1].name]
-  console.log('physicalItems.value', items, physicalItems.value[physicalItems.value.length - 1].name)
+  // console.log('physicalItems.value', items, physicalItems.value[physicalItems.value.length - 1])
+  // activeNames.value = [physicalItems.value[physicalItems.value.length - 1].name]
   physicalNames.value = []
   physicalItems.value.map((item) => {
     physicalNames.value.push(item.name)
@@ -1057,7 +1057,7 @@ const getGroupDataId = (value) => {
 }
 
 const deleteGroupDataId = (value) => {
-  physicalItems.value = physicalItems.value.filter((item) => item.id !== value)
+  physicalItems.value = physicalItems.value.filter((item) => item.name !== value)
   console.log('删一个', value, physicalItems.value)
 }
 
@@ -1068,13 +1068,13 @@ const getTestPlatDataId = (value) => {
 
 // 打开添加测试平台弹窗
 const openTestPlatformDialog = (data) => {
-  if (data.state === 'fail') {
-    return ElMessage({
-      message: '任务已失败，禁止修改测试平台！',
-      type: 'warning',
-      duration: 1000
-    })
-  }
+  // if (data.state === 'fail') {
+  //   return ElMessage({
+  //     message: '任务已失败，禁止修改测试平台！',
+  //     type: 'warning',
+  //     duration: 1000
+  //   })
+  // }
   let group = []
   testPlatList.value = []
   addTestPlatForm.id = data.id
@@ -1087,11 +1087,11 @@ const openTestPlatformDialog = (data) => {
   state.d_groupDataAfter = JSON.parse(JSON.stringify(state.d_groupData))
   group.map((item) => {
     state.d_groupDataAfter.map((it) => {
-      if (it.id == item) {
+      if (it.name == item) {
         it.disabled = true
         testPlatList.value.push({
           label: it.name,
-          id: it.id
+          id: it.name
         })
       }
     })
@@ -1148,7 +1148,7 @@ const handleCloseTag = (data, id) => {
     .then(() => {
       const params = {
         id: addTestPlatForm.id, // 任务id
-        group: data.id
+        group: data.label
       }
       deleteTestPlat(params)
     })
