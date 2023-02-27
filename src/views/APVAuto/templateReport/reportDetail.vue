@@ -591,6 +591,7 @@ const getLog = (row, expandedRows) => {
       }
     })
   })
+  shell_log.value = []
   row.shell_log.map(async (item, index) => {
     await getLogApi({ url: String(item) }).then((res) => {
       shell_log.value.push({

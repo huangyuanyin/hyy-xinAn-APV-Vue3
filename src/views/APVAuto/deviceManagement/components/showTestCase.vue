@@ -1,7 +1,7 @@
 <template>
   <el-card shadow="never" style="margin-top: 10px">
     <el-button type="primary" style="margin-bottom: 10px" @click="refresh">刷新用例清单</el-button>
-    <el-table :data="casesTableData" :border="false" style="width: 100%" stripe>
+    <el-table :data="casesTableData" :border="false" style="width: 100%" stripe v-loading="isRefreshLoading" element-loading-text="更新用例集中，请稍等哦...">
       <el-table-column type="expand">
         <template #default="props">
           <div m="4">
@@ -43,6 +43,18 @@
                   <el-table-column prop="value" label="数量"></el-table-column>
                 </el-table>
               </el-card>
+              <el-card v-if="props.row.children.length > 72">
+                <el-table style="margin: 10px" :data="props.row.children.slice(72, 84)" :border="childBorder" :show-header="true">
+                  <el-table-column prop="name" label="模块名"></el-table-column>
+                  <el-table-column prop="value" label="数量"></el-table-column>
+                </el-table>
+              </el-card>
+              <el-card v-if="props.row.children.length > 84">
+                <el-table style="margin: 10px" :data="props.row.children.slice(84, 96)" :border="childBorder" :show-header="true">
+                  <el-table-column prop="name" label="模块名"></el-table-column>
+                  <el-table-column prop="value" label="数量"></el-table-column>
+                </el-table>
+              </el-card>
             </div>
           </div>
         </template>
@@ -56,9 +68,10 @@
 
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue'
-import { getCaseApi } from '@/api/APV/taskManagement.js'
+import { getCaseApi, getCaseRefreshApi } from '@/api/APV/taskManagement.js'
 
 const childBorder = ref(false)
+const isRefreshLoading = ref(false)
 const casesTableData = ref([])
 
 const optionsProps = {
@@ -66,8 +79,10 @@ const optionsProps = {
   value: 'name'
 }
 // 调用 获取用例集接口
-const getCase = async () => {
-  let res = await getCaseApi()
+const getCase = async (isTrue) => {
+  isRefreshLoading.value = true
+  let res = isTrue ? await getCaseRefreshApi() : await getCaseApi()
+  isRefreshLoading.value = false
   res.data.map((item) => {
     ;(item.headList = []), (item.valueList = []), (item.moduleLength = item.children.length)
   })
@@ -97,11 +112,11 @@ const handleData = (data) => {
 }
 
 const refresh = () => {
-  getCase()
+  getCase(true)
 }
 
 onMounted(() => {
-  getCase()
+  getCase(false)
 })
 </script>
 
