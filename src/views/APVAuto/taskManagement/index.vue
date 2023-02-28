@@ -32,7 +32,7 @@
           <div>
             <el-button size="large" type="primary" @click="openAddDialog('task', 'add', null)" style="margin-bottom: 20px"> 添加任务 </el-button>
           </div>
-          <div>
+          <div class="ignore-select-wrap">
             <el-select size="large" clearable v-model="searchBuild" placeholder="请选择要搜索的build版本..." @change="getTask(1)">
               <el-option v-for="(item, index) in state.buildData" :key="'buildData' + index" :label="item.name" :value="item.name" />
             </el-select>
@@ -125,7 +125,7 @@
           </el-table-column>
           <el-table-column prop="user" label="负责人" align="center" width="120" />
           <el-table-column prop="uptimeAfter" label="更新时间" align="center" width="200" />
-          <el-table-column fixed="right" label="操作" align="center">
+          <el-table-column fixed="right" label="操作" align="center" width="200">
             <template #default="scope">
               <el-popover placement="bottom" trigger="hover" popper-class="morePopover">
                 <template #reference>
@@ -185,7 +185,7 @@
       <!-- </el-tab-pane> -->
     </el-tabs>
     <!--添加任务弹窗-->
-    <el-dialog v-model="dialogVisible" :title="titleDialog" width="40%" :before-close="handleClose" :close-on-click-modal="false">
+    <el-dialog v-model="dialogVisible" :title="titleDialog" width="46%" :before-close="handleClose" :close-on-click-modal="false">
       <span>
         <el-form :inline="false" :model="addTaskForm" ref="addTaskRuleFormRef" :rules="addTaskFormRules" class="addDevice-form" label-width="160px">
           <el-form-item label="任务名称" prop="name">
@@ -210,7 +210,7 @@
               :options="casesOptions"
               :props="casesProps"
               @change="getCasesOptions"
-              popper-class="casesProps-tree"
+              class="ignore-casesProps-tree"
               collapse-tags
               collapse-tags-tooltip
               clearable
@@ -281,8 +281,8 @@
     </el-dialog>
     <!--平台弹窗-->
     <el-dialog v-model="platformDialog" title="修改测试平台" custom-class="platformDialog" width="50%" :before-close="handleTestPlatClose">
-      <div class="tagList">
-        <span class="title">已有测试平台：</span>
+      <div class="tagList ignore-tagList">
+        <span class="ignore-title">已有测试平台：</span>
         <el-tag v-if="testPlatList.length == 0" class="ml-2" type="info">暂无测试平台</el-tag>
         <div>
           <el-tag class="tagType" v-for="(item, index) in testPlatList" :key="'testPlatList' + index" closable @close="handleCloseTag(item, item.id)">
@@ -350,7 +350,7 @@
           <span>{{ addTaskForm.remarks ? addTaskForm.remarks : remarksPlace || '无' }} </span>
         </div>
         <div class="preview_item">
-          <span class="left">是否含有物理机：</span>
+          <span class="left left-after">是否含有物理机：</span>
           <span v-if="isPhysicalMachine == '1'">是</span><span v-else>否</span>
         </div>
         <template v-if="isPhysicalMachine == '1'">
@@ -1481,14 +1481,15 @@ const handleTaskCurrentChange = (val: number) => {
 }
 
 .platformDialog {
+  .ignore-tagList {
+    margin-left: 20px;
+  }
   .tagList {
     display: flex;
     align-items: center;
     height: 80px;
     font-size: 14px;
-    margin-left: 20px;
-
-    .title {
+    .ignore-title {
       width: 98px;
       margin-right: 12px;
     }
@@ -1591,14 +1592,18 @@ const handleTaskCurrentChange = (val: number) => {
   margin-bottom: 20px;
   display: flex;
   justify-content: space-between;
-
-  .el-select {
-    margin: 0 10px;
-    width: 220px;
-  }
-
-  .el-input {
-    width: 220px;
+  .ignore-select-wrap {
+    flex: 1;
+    display: flex;
+    justify-content: end;
+    .el-select {
+      margin: 0 10px;
+      width: 220px;
+    }
+    .el-input {
+      height: 40px;
+      width: 220px;
+    }
   }
 }
 
@@ -1626,6 +1631,9 @@ const handleTaskCurrentChange = (val: number) => {
     width: 140px;
     font-size: 16px;
     font-weight: 600;
+  }
+  .left-after {
+    width: 150px !important;
   }
 
   .phy-items {
@@ -1665,13 +1673,12 @@ const handleTaskCurrentChange = (val: number) => {
 .addDevice-form {
   .el-cascader {
     width: 450px;
+  }
 
+  .ignore-casesProps-tree {
     .el-input {
       height: 32px;
     }
-  }
-
-  .casesProps-tree {
     .el-checkbox {
       margin-right: 5px !important;
     }

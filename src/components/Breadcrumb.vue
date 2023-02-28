@@ -8,8 +8,7 @@
     </el-icon>
     <el-breadcrumb separator="/">
       <el-breadcrumb-item v-for="(item, index) in matchedList" :key="'matchedList' + index">
-        <span v-if="item.redirect==='noRedirect'||index==matchedList.length-1" class="no-redirect">
-          {{ item.meta.title}}</span>
+        <span v-if="item.redirect === 'noRedirect' || index == matchedList.length - 1" class="no-redirect"> {{ item.meta.title }}</span>
         <a v-else @click.self.prevent="handleLink(item)">{{ item.meta.title }}</a>
       </el-breadcrumb-item>
     </el-breadcrumb>
@@ -17,25 +16,25 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, watch } from "vue";
-import { Expand, Fold } from "@element-plus/icons-vue";
-import { ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import pathToRegexp from "path-to-regexp";
-import { useAppStore } from "../store/modules/app/index";
+import { defineComponent, watch } from 'vue'
+import { Expand, Fold } from '@element-plus/icons-vue'
+import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import pathToRegexp from 'path-to-regexp'
+import { useAppStore } from '../store/modules/app/index'
 export default defineComponent({
   components: {
     Expand,
-    Fold,
+    Fold
   },
   setup() {
-    const route = useRoute();
+    const route = useRoute()
     const router = useRouter()
-    const store = useAppStore();
-    const matchedList = ref([]);
+    const store = useAppStore()
+    const matchedList = ref([])
     const handleClick = (val) => {
-      store.handleCollapse(val);
-    };
+      store.handleCollapse(val)
+    }
     function pathCompile(path) {
       // To solve this problem https://github.com/PanJiaChen/vue-element-admin/issues/561
       const { params } = route
@@ -49,10 +48,10 @@ export default defineComponent({
     watch(
       () => route.path,
       (newPath, oldPath) => {
-        matchedList.value = route.matched.filter(item => item.meta && item.meta.title && item.meta.breadcrumb !== false);
+        matchedList.value = route.matched.filter((item) => item.meta && item.meta.title && item.meta.breadcrumb !== false)
       },
       { immediate: true }
-    );
+    )
     return {
       route,
       store,
@@ -61,13 +60,15 @@ export default defineComponent({
       Expand,
       Fold,
       handleLink
-    };
-  },
-});
+    }
+  }
+})
 </script>
 
 <style lang="scss" scoped>
 .breadcrumb {
+  display: flex;
+  align-items: center;
   padding-bottom: 20px;
   cursor: pointer;
 

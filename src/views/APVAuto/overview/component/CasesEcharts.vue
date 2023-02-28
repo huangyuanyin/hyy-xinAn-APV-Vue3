@@ -138,7 +138,7 @@ const change = () => {
         },
         axisLabel: {
           interval: 0, // 横轴信息全部展示
-          rotate: 5, // 20度角倾斜显示
+          rotate: 15, // 15度角倾斜显示
           margin: 10,
           color: '#e2e9ff',
           textStyle: {

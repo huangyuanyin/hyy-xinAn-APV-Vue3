@@ -84,9 +84,9 @@ onBeforeUnmount(() => {
 .console-wrap {
   display: flex;
   flex-direction: column;
-  margin-top: 5px;
+  margin-top: 20px;
   .console {
-    margin-top: 25px;
+    // margin-top: 45px;
     height: 500px;
     :deep(.xterm-text-layer) {
       width: 100%;
@@ -100,7 +100,7 @@ onBeforeUnmount(() => {
     }
   }
   .el-button {
-    right: 0px;
+    right: 5px;
     position: absolute;
   }
 }

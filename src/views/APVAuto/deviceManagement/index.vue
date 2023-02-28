@@ -7,16 +7,16 @@
             <div>
               <el-button type="primary" @click="openAddDialog('group', 'add', null)" style="margin-bottom: 20px"> 添加测试平台 </el-button>
             </div>
-            <div>
+            <div class="ignore-select-wrap">
               <el-select size="large" clearable v-model="searchForm.status" placeholder="请选择设备状态...">
                 <el-option v-for="(item, index) in statusOptions" :key="'buildData' + index" :label="item.label" :value="item.value" />
               </el-select>
             </div>
           </div>
           <el-table :data="state.d_groupData" stripe>
-            <el-table-column prop="id" label="测试平台ID" align="center" width="200" />
-            <el-table-column prop="name" label="测试平台名称" align="center" width="200" />
-            <el-table-column prop="build" label="测试版本" align="center">
+            <el-table-column prop="ip" label="物理机IP" align="center" width="200" />
+            <el-table-column prop="name" label="测试平台名称" align="center" width="180" />
+            <el-table-column prop="build" label="测试版本" align="center" width="300">
               <template #default="scope">
                 <el-tag class="tagType" v-for="(item, index) in scope.row.build" :key="'build' + index">
                   {{ item }}
@@ -35,9 +35,9 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column prop="user" label="使用人" align="center" width="200" />
-            <el-table-column prop="uptime" label="更新时间" align="center" width="180" />
-            <el-table-column fixed="right" label="操作" align="center">
+            <el-table-column prop="user" label="使用人" align="center" />
+            <el-table-column prop="uptime" label="更新时间" align="center" width="200" />
+            <el-table-column fixed="right" label="操作" align="center" width="220">
               <template #default="scope">
                 <el-button link type="primary" size="small" @click="openAddDeviceDrawer(scope.row)">绑定设备 </el-button>
                 <el-button link type="primary" size="small" v-if="scope.row.isShowTermail == false" @click="openConsole(scope.row)"> 在线终端 </el-button>
@@ -222,7 +222,7 @@
             </el-select>
           </el-form-item>
           <el-form-item label="下载链接" prop="url">
-            <el-input v-model="downloadFileForm.url" placeholder="请输入下载链接..." />
+            <el-input v-model="downloadFileForm.url" placeholder="请输入下载链接..." style="width: 214px" />
           </el-form-item>
         </el-form>
       </span>
@@ -1041,14 +1041,9 @@ const getDeviceInfo = async (data) => {
   margin-bottom: 20px;
   display: flex;
   justify-content: space-between;
-
-  .el-select {
+  .ignore-select-wrap {
+    width: 220px;
     margin: 0 10px;
-    width: 220px;
-  }
-
-  .el-input {
-    width: 220px;
   }
 }
 

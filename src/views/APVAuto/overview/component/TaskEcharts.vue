@@ -4,7 +4,6 @@
     <el-table
       :data="tableData"
       border
-      style="width: 100%"
       class="taskTable"
       :header-cell-style="{ background: 'rgba(7, 10, 88, 0.99) ', color: '#fff' }"
       :row-style="{ background: 'rgba(3, 14, 70, 0.5)', color: '#fff' }"
@@ -49,7 +48,7 @@ onMounted(async () => {
 .com-container {
   background-color: rgba(3, 14, 70, 0.5) !important;
   height: 100%;
-  padding: 0 20px;
+  // padding: 0 20px;
 
   h2 {
     color: #007bff !important;

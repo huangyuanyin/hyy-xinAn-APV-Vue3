@@ -51,7 +51,7 @@
             </el-menu-item>
           </el-menu>
         </el-col>
-        <el-col :span="20">
+        <el-col :span="20" class="server-wrap">
           <el-card body-style="{ padding: '60px' }" :style="{ height: height }">
             <template #header>
               <el-input v-model="filter" style="width: 80%" placeholder="请输入服务名称"></el-input>
@@ -251,6 +251,9 @@ const handleClose = () => {
   }
 
   :deep(.el-drawer__body) {
+    ul {
+      height: 100vh;
+    }
     padding: 0px;
   }
 
@@ -277,6 +280,14 @@ const handleClose = () => {
 
   .closeStyle:hover {
     cursor: pointer;
+  }
+}
+</style>
+
+<style lang="scss">
+.server-wrap {
+  .el-card {
+    height: 99vh !important;
   }
 }
 </style>
