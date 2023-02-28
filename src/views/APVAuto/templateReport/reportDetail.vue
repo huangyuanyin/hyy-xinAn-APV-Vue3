@@ -48,7 +48,7 @@
                   <el-input v-model="case_log" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无脚本执行日志" />
                 </el-tab-pane>
                 <template v-for="(item, index) in shell_log" :key="'shell_log' + index">
-                  <el-tab-pane label="交互日志" :name="item.value">
+                  <el-tab-pane :label="'交互日志' + (index + 1)" :name="item.value">
                     <el-input v-model="item.value" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无交互日志" />
                   </el-tab-pane>
                 </template>

@@ -1,6 +1,6 @@
 <template>
   <el-card shadow="never" style="margin-top: 10px">
-    <el-button type="primary" style="margin-bottom: 10px" @click="refresh">刷新用例清单</el-button>
+    <el-button type="primary" style="margin-bottom: 10px" @click="refresh">更新用例清单</el-button>
     <el-table :data="casesTableData" :border="false" style="width: 100%" stripe v-loading="isRefreshLoading" element-loading-text="更新用例集中，请稍等哦...">
       <el-table-column type="expand">
         <template #default="props">
