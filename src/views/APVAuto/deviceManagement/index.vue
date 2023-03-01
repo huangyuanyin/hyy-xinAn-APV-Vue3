@@ -8,7 +8,7 @@
               <el-button type="primary" @click="openAddDialog('group', 'add', null)" style="margin-bottom: 20px"> 添加测试平台 </el-button>
             </div>
             <div class="ignore-select-wrap">
-              <el-select size="large" clearable v-model="searchForm.status" placeholder="请选择设备状态...">
+              <el-select size="large" clearable v-model="searchForm.status" placeholder="请选择设备状态..." @change="searchDevice">
                 <el-option v-for="(item, index) in statusOptions" :key="'buildData' + index" :label="item.label" :value="item.value" />
               </el-select>
             </div>
@@ -158,9 +158,9 @@
     <el-dialog v-model="groupDialogVisible" :title="titleDialog" width="35%" @close="handleClose('groupDialog')">
       <span>
         <el-form :inline="false" :model="addGroupForm" ref="addGroupRuleFormRef" :rules="addGroupFormRules" class="addDevice-form" label-width="100px">
-          <!-- <el-form-item label="平台IP" prop="ip">
+          <el-form-item label="物理机IP" prop="ip">
             <el-input v-model="addGroupForm.ip" placeholder="请输入..." />
-          </el-form-item> -->
+          </el-form-item>
           <el-form-item label="平台名称" prop="name">
             <el-input v-model="addGroupForm.name" placeholder="请输入..." />
           </el-form-item>
@@ -354,11 +354,11 @@ const titleDialog = ref('')
 const totalBuildData = ref([])
 const statusOptions = [
   {
-    value: 'fail',
+    value: 'True',
     label: '使用中'
   },
   {
-    value: 'stop',
+    value: 'False',
     label: '空闲中'
   }
 ]
@@ -386,7 +386,7 @@ const addDeviceFormRules = reactive<FormRules>({
 let addGroupForm = reactive({
   id: '',
   name: '',
-  // ip: "",
+  ip: '',
   build: null
   // buildip: "",
   // status: null,
@@ -433,7 +433,7 @@ let validateIPAddress = (rule, value, callback) => {
 const addGroupRuleFormRef = ref<FormInstance>()
 const addGroupFormRules = reactive<FormRules>({
   name: [{ required: true, message: '平台名称不能为空', trigger: 'blur' }],
-  ip: [{ required: true, validator: validateIPAddress, trigger: 'blur' }],
+  // ip: [{ required: true, validator: validateIPAddress, trigger: 'blur' }],
   build: [{ required: true, message: '支持测试版本不能为空', trigger: 'blur' }],
   buildip: [{ required: true, validator: validateIPAddress, trigger: 'blur' }]
   // status: [{ required: true, message: "请选择状态", trigger: "blur" }],
@@ -457,6 +457,10 @@ const openAddDialog = (type, operation, id) => {
         getOneData(type, id)
         if (titleDialog.value == '编辑' && addDeviceForm.type !== 'buildservice') {
           isNoServerIp.value = true
+        } else if (titleDialog.value == '新增') {
+          addDeviceForm.username = ''
+          addDeviceForm.password = ''
+          isNoServerIp.value = false
         } else {
           isNoServerIp.value = false
         }
@@ -502,7 +506,7 @@ const getOneData = (type, id) => {
       state.d_groupData.map((item) => {
         if (item.id === id) {
           addGroupForm.id = item.id
-          // addGroupForm.ip = item.ip
+          addGroupForm.ip = item.ip
           addGroupForm.name = item.name
           addGroupForm.build = item.build
           // addGroupForm.buildip = item.buildip
@@ -524,7 +528,6 @@ const onAddDeviceForm = async (formEl: FormInstance | undefined) => {
         delete addDeviceForm.id
         addDevice(addDeviceForm)
       } else {
-        console.log('da', addDeviceForm)
         editDevice(addDeviceForm)
       }
       addDeviceRuleFormRef.value.resetFields()
@@ -664,16 +667,23 @@ const handleDelete = (type, id) => {
   }
 }
 
+const searchDevice = (val) => {
+  searchForm.value.status = val
+  getD_group(1, searchForm.value.status)
+}
+
 onMounted(() => {
   getDevice()
   getD_typeApi()
-  getD_group(1)
+  getD_group(1, '')
   getBuild()
 })
 
 // 分组管理 接口
-const getD_group = async (page) => {
-  let group = await d_groupApi({ page })
+const getD_group = async (...args) => {
+  const page = args[0]
+  const status = (args && args[1]) || ''
+  const group = args[1] === '' ? await d_groupApi({ page }) : await d_groupApi({ page, status })
   group.data.data.forEach((item, index) => {
     item.isShowTermail = false
   })
@@ -688,7 +698,7 @@ const getD_group = async (page) => {
 const addD_group = async (params) => {
   let res = await addD_groupApi(params)
   if (res?.code === 1000) {
-    getD_group(1)
+    getD_group(1, searchForm.value.status)
     ElMessage({
       message: '添加成功',
       type: 'success',
@@ -707,7 +717,7 @@ const addD_group = async (params) => {
 const editD_group = async (params) => {
   let res = await editD_groupApi(params)
   if (res.code === 1000) {
-    getD_group(1)
+    getD_group(1, searchForm.value.status)
     ElMessage({
       message: res?.msg || '编辑成功',
       type: 'success',
@@ -729,7 +739,7 @@ const deleteD_group = async (id) => {
   }
   let res = await deleteD_groupApi(params)
   if (res.code === 1000) {
-    getD_group(1)
+    getD_group(1, searchForm.value.status)
     ElMessage({
       message: res?.msg || '删除成功',
       type: 'success',
@@ -908,7 +918,7 @@ const changePlatformStatus = async (status, id) => {
       type: 'success',
       duration: 1000
     })
-    getD_group(groupCurrentPage.value)
+    getD_group(groupCurrentPage.value, searchForm.value.status)
   }
 }
 
@@ -990,7 +1000,7 @@ const handleGroupSizeChange = (val: number) => {
 }
 const handleGroupCurrentChange = (val: number) => {
   groupCurrentPage.value = val
-  getD_group(groupCurrentPage.value)
+  getD_group(groupCurrentPage.value, searchForm.value.status)
 }
 
 const handleBuildSizeChange = (val: number) => {
