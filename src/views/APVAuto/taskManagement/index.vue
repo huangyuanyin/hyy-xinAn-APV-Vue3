@@ -44,15 +44,14 @@
         </div>
 
         <el-table :data="state.tableData" stripe style="width: 100%" v-loading="tableLoading" height="65vh">
-          <el-table-column prop="id" label="任务ID" align="center" width="80" />
-          <el-table-column prop="name" label="任务名称" align="center" width="150" />
+          <el-table-column prop="id" label="任务ID" align="center" width="60" />
+          <el-table-column prop="name" label="任务名称" align="center" width="100" />
           <el-table-column prop="build" label="build版本" align="center" width="250" />
-          <el-table-column prop="groupAfter" label="测试平台" class-name="testStyle" width="320" header-align="center">
+          <!-- <el-table-column prop="groupAfter" label="测试平台" class-name="testStyle" width="320" header-align="center">
             <template #default="scope">
               <el-tag v-if="scope.row.groupAfter == 0 && scope.row.failGroupAfter == 0" type="info"> 暂无测试平台 </el-tag>
               <el-popover placement="top" width="auto" trigger="hover" v-if="scope.row.groupAfter != 0">
                 <template #reference>
-                  <!-- <el-tag class="tagType">成功的测试平台集合</el-tag> -->
                   <div class="wrapper">
                     <div class="circle">
                       <div class="small-circle"></div>
@@ -64,6 +63,41 @@
                 </el-tag>
               </el-popover>
               <el-popover placement="top" width="auto" trigger="hover" v-if="scope.row.failGroupAfter != 0">
+                <template #reference>
+                  <div class="wrapper">
+                    <div class="circle">
+                      <div class="small-circle" style="background-color: #ff6600"></div>
+                    </div>
+                  </div>
+                </template>
+                <el-table :data="scope.row.failGroupAfter" stripe style="width: 100%">
+                  <el-table-column prop="label" label="测试平台名称" align="center" width="200" />
+                  <el-table-column fixed="right" label="操作" align="center">
+                    <template #default="item">
+                      <el-button link type="primary" size="small" @click="runAgain(item.row.value, scope.row)"> 重新运行 </el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </el-popover>
+            </template>
+          </el-table-column> -->
+          <el-table-column prop="group" label="测试平台" class-name="testStyle" header-align="center">
+            <template #default="scope">
+              <el-tag v-if="scope.row.group.length == 0 && scope.row.fail_group.length == 0" type="info"> 暂无测试平台 </el-tag>
+              <el-popover placement="top" width="auto" trigger="hover" v-if="scope.row.group.length != 0">
+                <template #reference>
+                  <!-- <el-tag class="tagType">成功的测试平台集合</el-tag> -->
+                  <div class="wrapper">
+                    <div class="circle">
+                      <div class="small-circle"></div>
+                    </div>
+                  </div>
+                </template>
+                <el-tag class="tagType" v-for="(item, index) in scope.row.group" :key="'group' + index">
+                  {{ item }}
+                </el-tag>
+              </el-popover>
+              <el-popover placement="top" width="auto" trigger="hover" v-if="scope.row.fail_group.length != 0">
                 <template #reference>
                   <!-- <el-tag class="tagType errorTagType" type="danger">失败的测试平台集合</el-tag> -->
                   <div class="wrapper">
@@ -83,7 +117,7 @@
               </el-popover>
             </template>
           </el-table-column>
-          <el-table-column prop="number" label="总用例数 / 执行数 / 失败用例数" align="center" width="200">
+          <el-table-column prop="number" label="总用例数 / 执行数 / 失败用例数" align="center" width="220">
             <template #default="scope">
               <span v-if="scope.row.number">{{ scope.row.number[0] }}</span>
               <span style="margin: 0 5px">/</span>
@@ -95,7 +129,7 @@
           </el-table-column>
           <!-- <el-table-column prop="counts" label="总用例数" align="center" width="120" />
           <el-table-column prop="fail_cases" label="失败用例数" align="center" width="120" /> -->
-          <el-table-column prop="state" label="任务状态" align="center" width="170">
+          <el-table-column prop="state" label="任务状态" align="center" width="120">
             <template #default="scope">
               <div class="stateStyle" v-if="scope.row.state === 'stop'">
                 <div class="status-point" style="background-color: #909399"></div>
@@ -123,7 +157,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="user" label="负责人" align="center" width="120" />
+          <el-table-column prop="user" label="负责人" align="center" width="100" />
           <el-table-column prop="uptimeAfter" label="更新时间" align="center" width="200" />
           <el-table-column fixed="right" label="操作" align="center" width="200">
             <template #default="scope">
@@ -849,7 +883,7 @@ const onAddTaskForm = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid, fields) => {
     submitPreviewDialog.value = false
     if (valid) {
-      addTaskForm.remarks !== '' ? '' : (addTaskForm.remarks = String(new Date().getTime()))
+      addTaskForm.remarks !== '' ? '' : (addTaskForm.remarks = String(new Date().toLocaleString()))
       console.log('添加成功...', JSON.parse(JSON.stringify(addTaskForm)))
       // addTaskForm.group = "[" + String(addTaskForm.group) + "]"
       if (isPhysicalMachine.value == '0') {
@@ -918,7 +952,7 @@ const handle = () => {
       state.d_groupData.forEach((d_item, index) => {
         if (it == d_item.name) {
           item.failGroupAfter.push({
-            value: d_item.id,
+            value: d_item.name,
             label: d_item.name
           })
         }
@@ -997,8 +1031,8 @@ const deleteTask = async (id) => {
 
 // 分组管理 获取接口
 const getD_group = async () => {
-  let group = await d_groupApi()
-  state.d_groupData = group.data?.data
+  let group = await d_groupApi({ name: 'all' })
+  state.d_groupData = group.data
 }
 
 // 压测版本 获取接口
