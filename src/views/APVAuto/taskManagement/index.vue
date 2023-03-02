@@ -195,7 +195,17 @@
                   <el-tooltip content="可修改当前任务下所有的测试平台" placement="top" effect="dark">
                     <el-button link type="primary" size="small" @click="openTestPlatformDialog(scope.row)" style="margin-left: 0px"> 测试平台 </el-button>
                   </el-tooltip>
-                  <el-button style="margin-left: 0px" link type="primary" size="small" @click="openAddDialog('task', 'edit', scope.row)"> 编辑 </el-button>
+                  <el-button
+                    style="margin-left: 0px"
+                    v-if="['running', 'ready'].includes(scope.row.state)"
+                    link
+                    type="primary"
+                    size="small"
+                    @click="openAddDialog('task', 'detail', scope.row)"
+                  >
+                    详情
+                  </el-button>
+                  <el-button v-else style="margin-left: 0px" link type="primary" size="small" @click="openAddDialog('task', 'edit', scope.row)"> 编辑 </el-button>
                   <el-popconfirm title="确定删除此项任务?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消" @confirm="handleDelete('task', scope.row)">
                     <template #reference>
                       <el-button link type="danger" size="small">删除</el-button>
@@ -231,12 +241,20 @@
             </el-select>
           </el-form-item>
           <el-form-item label="测试平台" prop="group">
-            <el-select multiple clearable v-model="addTaskForm.group" placeholder="请选择..." @change="getGroupDataId" @remove-tag="deleteGroupDataId">
+            <el-select
+              multiple
+              clearable
+              v-model="addTaskForm.group"
+              placeholder="请选择..."
+              @change="getGroupDataId"
+              @remove-tag="deleteGroupDataId"
+              :disabled="titleDialog === '任务详情'"
+            >
               <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name" :value="item.name" />
             </el-select>
           </el-form-item>
           <el-form-item label="负责人" prop="user">
-            <el-input v-model="addTaskForm.user" placeholder="请输入..." />
+            <el-input v-model="addTaskForm.user" placeholder="请输入..." :disabled="titleDialog === '任务详情'" />
           </el-form-item>
           <el-form-item label="用例集" prop="cases">
             <el-cascader
@@ -248,16 +266,17 @@
               collapse-tags
               collapse-tags-tooltip
               clearable
+              :disabled="titleDialog === '任务详情'"
             />
           </el-form-item>
           <el-form-item label="备注" prop="remarks" style="margin-bottom: 0px">
             <div class="remarks">
-              <el-input v-model="addTaskForm.remarks" :placeholder="remarksPlace" />
+              <el-input v-model="addTaskForm.remarks" :placeholder="remarksPlace" :disabled="titleDialog === '任务详情'" />
               <span>注：可根据测试设备硬件等信息区分同一build的不同测试任务</span>
             </div>
           </el-form-item>
           <el-form-item label="是否含有物理机" prop="config">
-            <el-radio-group v-model="isPhysicalMachine" @change="changePhysicalMachine">
+            <el-radio-group v-model="isPhysicalMachine" @change="changePhysicalMachine" :disabled="titleDialog === '任务详情'">
               <el-radio label="1">是</el-radio>
               <el-radio label="0">否</el-radio>
             </el-radio-group>
@@ -290,7 +309,7 @@
           </el-collapse-item>
         </el-collapse>
       </span>
-      <template #footer>
+      <template #footer v-if="titleDialog !== '任务详情'">
         <span class="dialog-footer">
           <el-button @click="onResetTaskForm(addTaskRuleFormRef)">取消</el-button>
           <el-button type="primary" @click="toShowPreviewDialog(addTaskRuleFormRef)">{{ buttonText }}</el-button>
@@ -734,9 +753,18 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
 const openAddDialog = async (type, operation, data) => {
   switch (type) {
     case 'task':
-      operation == 'add'
-        ? (titleDialog.value = '添加任务') && (buttonText.value = '添加') && (editDisabled.value = false)
-        : (titleDialog.value = '编辑任务') && (buttonText.value = '确定') && (editDisabled.value = true)
+      if (operation == 'add') {
+        titleDialog.value = '添加任务'
+        buttonText.value = '添加'
+        editDisabled.value = false
+      } else if (operation == 'edit') {
+        titleDialog.value = '编辑任务'
+        buttonText.value = '确定'
+        editDisabled.value = true
+      } else if (operation == 'detail') {
+        titleDialog.value = '任务详情'
+        editDisabled.value = true
+      }
       casValue.value = []
       physicalItemsChangeData.value = data
       if (operation == 'add') {
@@ -767,13 +795,13 @@ const openAddDialog = async (type, operation, data) => {
           // addTaskForm.config.model = data.config.model
         }
       }
-      if (data && data.state === 'running') {
-        return ElMessage({
-          message: '任务运行中，禁止编辑！',
-          type: 'warning',
-          duration: 1000
-        })
-      }
+      // if (data && data.state === 'running') {
+      //   return ElMessage({
+      //     message: '任务运行中，禁止编辑！',
+      //     type: 'warning',
+      //     duration: 1000
+      //   })
+      // }
       nextTick(() => {
         getOneData(type, data?.id)
       })
@@ -1213,13 +1241,15 @@ const deleteTestPlat = async (params) => {
 }
 
 const reportDetailData = ref({})
+const runningState = ref('')
 // 任务进度
 const taskProgress = async (data) => {
   showDetail.value = false
   textarea.value = ''
   taskProgressData.value = data
   // 获取对应的测试报告失败数/成功数/用例数
-  await getReport(data)
+  runningState.value = data.state
+  await getReport(data, false)
 }
 
 // 任务启动/终止
@@ -1254,15 +1284,14 @@ const getTaskStatus = async (params, name) => {
 // 任务进度 接口
 const getTaskRun = async (id) => {
   let res = await taskRunApi({ id })
-  if (res?.code == 1000) {
-    textarea.value += res.data.log || ''
+  if (res?.code == 1000 && res.data.log.length !== textarea.value) {
+    textarea.value = res.data.log || ''
   }
 }
 
 // 测试报告
-const getReport = async (data) => {
-  let res = await getReportApi({ id: data.id })
-  textarea.value = ''
+const getReport = async (data, isRefresh) => {
+  let res = isRefresh && runningState.value === 'ready' ? ' ' : await getReportApi({ id: data.id })
   await getTaskRun(data.id)
   showDetail.value = true
   taskProgressDialog.value = true
@@ -1286,9 +1315,13 @@ watch(
   () => taskProgressDialog.value,
   () => {
     if (taskProgressDialog.value) {
+      // 运行状态下：日志进行更新;数据进行更新
+      // 准备状态下，日志进行更新；数据不更新
+      // 其他状态下，日志、数据不进行更新
+      if (['complete', 'create', 'fail', 'stop'].includes(runningState.value)) return
       interval.value = setInterval(async () => {
-        getReport(taskProgressData.value)
-      }, 5000)
+        getReport(taskProgressData.value, true)
+      }, 15000)
     } else {
       clearInterval(interval.value)
     }
@@ -1710,6 +1743,7 @@ const handleTaskCurrentChange = (val: number) => {
   }
 
   .ignore-casesProps-tree {
+    z-index: 999;
     .el-input {
       height: 32px;
     }
