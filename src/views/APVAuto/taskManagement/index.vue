@@ -117,7 +117,7 @@
               </el-popover>
             </template>
           </el-table-column>
-          <el-table-column prop="number" label="总用例数 / 执行数 / 失败用例数" align="center" width="220">
+          <el-table-column prop="number" label="总数 / 执行 / 失败" align="center" width="180">
             <template #default="scope">
               <span v-if="scope.row.number">{{ scope.row.number[0] }}</span>
               <span style="margin: 0 5px">/</span>
@@ -129,7 +129,7 @@
           </el-table-column>
           <!-- <el-table-column prop="counts" label="总用例数" align="center" width="120" />
           <el-table-column prop="fail_cases" label="失败用例数" align="center" width="120" /> -->
-          <el-table-column prop="state" label="任务状态" align="center" width="120">
+          <el-table-column prop="state" label="任务状态" align="center" width="100">
             <template #default="scope">
               <div class="stateStyle" v-if="scope.row.state === 'stop'">
                 <div class="status-point" style="background-color: #909399"></div>
@@ -252,9 +252,6 @@
             >
               <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name" :value="item.name" />
             </el-select>
-          </el-form-item>
-          <el-form-item label="负责人" prop="user">
-            <el-input v-model="addTaskForm.user" placeholder="请输入..." :disabled="titleDialog === '任务详情'" />
           </el-form-item>
           <el-form-item label="用例集" prop="cases">
             <el-cascader
@@ -472,7 +469,7 @@ import {
 } from '@/api/APV/taskManagement.js'
 import { getReportApi } from '@/api/APV/testReport.js'
 import { buildApi } from '@/api/APV/buildManagement.js'
-import { utc2beijing } from '@/utils/util.js'
+import { utc2beijing, getSpecialNowDate } from '@/utils/util.js'
 import reportDetailVue from './components/reportDetailEchart.vue'
 import { useRouter } from 'vue-router'
 
@@ -498,7 +495,7 @@ const taskPageSize = ref(10)
 const taskTotal = ref(0)
 const activeNames = ref([1])
 const physicalItems = ref([])
-const remarksPlace = ref(new Date().toLocaleString())
+const remarksPlace = ref(getSpecialNowDate())
 const interval = ref(null)
 const taskProgressData = ref(null)
 const physicalItemsChangeData = ref(null)
@@ -637,7 +634,7 @@ const titleDialog = ref('')
 const addTaskForm = reactive({
   id: '',
   name: '',
-  user: '',
+  user: JSON.parse(localStorage.getItem('userInfo'))?.nickname,
   build: '',
   group: [],
   cases: null,
@@ -711,7 +708,6 @@ const validateModel = (rule: any, value: any, callback: any) => {
 }
 const addTaskFormRules = reactive<FormRules>({
   name: [{ required: true, message: '任务名称不能为空', trigger: 'blur' }],
-  user: [{ required: true, message: '负责人不能为空', trigger: 'blur' }],
   build: [{ required: true, message: '请选择测build版本', trigger: 'blur' }],
   group: [{ required: true, message: '请选择测试平台', trigger: 'blur' }],
   cases: [{ required: true, message: '请选择用例集', trigger: 'blur' }],
@@ -757,6 +753,7 @@ const openAddDialog = async (type, operation, data) => {
         titleDialog.value = '添加任务'
         buttonText.value = '添加'
         editDisabled.value = false
+        addTaskForm.user = JSON.parse(localStorage.getItem('userInfo'))?.nickname
       } else if (operation == 'edit') {
         titleDialog.value = '编辑任务'
         buttonText.value = '确定'
@@ -911,7 +908,7 @@ const onAddTaskForm = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid, fields) => {
     submitPreviewDialog.value = false
     if (valid) {
-      addTaskForm.remarks !== '' ? '' : (addTaskForm.remarks = String(new Date().toLocaleString()))
+      addTaskForm.remarks !== '' ? '' : (addTaskForm.remarks = String(getSpecialNowDate()))
       console.log('添加成功...', JSON.parse(JSON.stringify(addTaskForm)))
       // addTaskForm.group = "[" + String(addTaskForm.group) + "]"
       if (isPhysicalMachine.value == '0') {
