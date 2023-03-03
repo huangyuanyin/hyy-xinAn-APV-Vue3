@@ -9,53 +9,42 @@
     <!-- <router-view></router-view> -->
     <router-view v-slot="{ Component }">
       <keep-alive>
-        <component :is="Component" :key="$route.matched[2].path" v-if="shouldCache && $route.meta.keepAlive" keepAlive
-          :rootKey="$route.matched[2].path" />
+        <component :is="Component" :key="$route.matched[2].path" v-if="shouldCache && $route.meta.keepAlive" keepAlive :rootKey="$route.matched[2].path" />
       </keep-alive>
       <component :is="Component" :key="$route.matched[2].path" v-if="!keepAlive && !$route.meta.keepAlive" />
     </router-view>
   </el-main>
 </template>
 
-<script lang="ts">
-import { defineComponent, reactive, ref } from "vue";
-import { useRouter } from "vue-router";
+<script lang="ts" setup>
+import { ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 // import TestMenuVue from "../../components/CollapseMenu.vue";
-import CollapseMenu from "../../components/CollapseMenu.vue";
-import Breadcrumb from "../../components/Breadcrumb.vue";
-import { APVAutoMenuData } from "@/data/menu";
-export default defineComponent({
-  components: {
-    // TestMenuVue,
-    CollapseMenu,
-    Breadcrumb,
+import CollapseMenu from '../../components/CollapseMenu.vue'
+import Breadcrumb from '../../components/Breadcrumb.vue'
+import { APVAutoMenuData } from '@/data/menu'
+const props = defineProps({
+  keepAlive: {
+    type: Boolean,
+    default: false
   },
-  props: {
-    keepAlive: {
-      type: Boolean,
-      default: false,
-    },
-    rootKey: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  computed: {
-    shouldCache() {
-      return this.$route.matched[1].path === this.rootKey
-    }
-  },
-  setup() {
-    const router = useRouter();
-    const menuList = ref(APVAutoMenuData);
-    return {
-      router,
-      menuList,
-    };
-  },
-});
+  rootKey: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const router = useRouter()
+const route = useRoute()
+const menuList = ref(APVAutoMenuData)
+// computed: {
+//   shouldCache() {
+//     return this.$route.matched[1].path === this.rootKey
+//   }
+// }
+const shouldCache = computed(() => {
+  return route.matched[1].path === props.rootKey
+})
 </script>
 
-<style lang="scss" scoped>
-
-</style>
+<style lang="scss" scoped></style>

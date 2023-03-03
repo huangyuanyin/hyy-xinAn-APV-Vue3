@@ -7,6 +7,7 @@
       class="taskTable"
       :header-cell-style="{ background: 'rgba(7, 10, 88, 0.99) ', color: '#fff' }"
       :row-style="{ background: 'rgba(3, 14, 70, 0.5)', color: '#fff' }"
+      height="75vh"
     >
       <el-table-column prop="name" label="任务名称" align="center" />
       <el-table-column prop="counts" label="总用例数" align="center" />
@@ -69,9 +70,11 @@ onMounted(async () => {
 :deep(.el-table--enable-row-hover .el-table__body tr:hover > td) {
   background-color: rgba(3, 14, 70, 0.5);
 }
-
+:deep(.el-scrollbar__view) {
+  height: 100%;
+}
 :deep(.el-table__body) {
-  height: 65vh;
+  height: 100%;
 }
 </style>
 
