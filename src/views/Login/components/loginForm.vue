@@ -71,7 +71,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .form-style {
-  width: 250px;
+  width: 100%;
 
   .submit-style {
     width: 100%;

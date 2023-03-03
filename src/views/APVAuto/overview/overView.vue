@@ -326,7 +326,7 @@ const handleRefresh = () => {
   }
 
   .screen-right {
-    height: 100%;
+    overflow-y: scroll;
     width: 27.6%;
     background-color: rgba(3, 14, 70, 0.5) !important;
 

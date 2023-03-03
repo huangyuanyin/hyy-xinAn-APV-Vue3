@@ -7,7 +7,6 @@
       class="taskTable"
       :header-cell-style="{ background: 'rgba(7, 10, 88, 0.99) ', color: '#fff' }"
       :row-style="{ background: 'rgba(3, 14, 70, 0.5)', color: '#fff' }"
-      height="75vh"
     >
       <el-table-column prop="name" label="任务名称" align="center" />
       <el-table-column prop="counts" label="总用例数" align="center" />
