@@ -21,19 +21,19 @@
   </div>
 </template>
 <script>
-import { defineComponent, ref } from "vue";
-import working from "@/assets/working.png";
-import Login from "./components/loginForm.vue";
+import { defineComponent, ref } from 'vue'
+import working from '@/assets/working.png'
+import Login from './components/loginForm.vue'
 export default defineComponent({
   components: {
-    Login,
+    Login
   },
   setup() {
     return {
-      working,
-    };
-  },
-});
+      working
+    }
+  }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -46,10 +46,6 @@ export default defineComponent({
   align-items: center;
 
   .login-container {
-    width: 874px;
-    min-width: 874px;
-    height: 78%;
-    min-height: 600px;
     flex-direction: row;
     display: flex;
     justify-content: space-evenly;

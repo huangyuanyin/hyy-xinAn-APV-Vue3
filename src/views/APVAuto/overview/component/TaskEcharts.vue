@@ -69,9 +69,11 @@ onMounted(async () => {
 :deep(.el-table--enable-row-hover .el-table__body tr:hover > td) {
   background-color: rgba(3, 14, 70, 0.5);
 }
-
+:deep(.el-scrollbar__view) {
+  height: 100%;
+}
 :deep(.el-table__body) {
-  height: 65vh;
+  height: 100%;
 }
 </style>
 
