@@ -47,4 +47,8 @@ const shouldCache = computed(() => {
 })
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.el-main::-webkit-scrollbar {
+  display: none;
+}
+</style>

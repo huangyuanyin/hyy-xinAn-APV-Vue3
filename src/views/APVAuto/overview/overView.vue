@@ -146,7 +146,8 @@ const handleRefresh = () => {
 
 .screen-container {
   width: 100%;
-  height: calc(100% - 41px);
+  height: calc(100% - 35px);
+  overflow: hidden;
   // padding: 0 20px;
   background-color: rgba(7, 10, 88, 0.99) !important;
   color: #fff;
@@ -326,12 +327,12 @@ const handleRefresh = () => {
   }
 
   .screen-right {
-    overflow-y: scroll;
+    // overflow-y: scroll;
     width: 27.6%;
     background-color: rgba(3, 14, 70, 0.5) !important;
 
     #right-top {
-      height: 46%;
+      // height: 46%;
       position: relative;
     }
 

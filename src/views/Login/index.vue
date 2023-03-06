@@ -46,6 +46,8 @@ export default defineComponent({
   align-items: center;
 
   .login-container {
+    width: 80vw;
+    height: 80vh;
     flex-direction: row;
     display: flex;
     justify-content: space-evenly;
