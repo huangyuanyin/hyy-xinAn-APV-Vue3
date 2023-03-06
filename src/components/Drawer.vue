@@ -111,6 +111,7 @@ import { defineProps, ref, computed, defineEmits } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Grid, Monitor, ArrowRight, Close, Suitcase, Platform, Notebook, Position, TrendCharts } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
+import { getToken } from '@/utils/auth'
 // import { useAppStore } from "@/store/modules/app";
 
 const props = defineProps({
@@ -221,7 +222,7 @@ const goTo = (value) => {
 const handleSelect = (value) => {
   let url = ''
   let console_url = import.meta.env.VITE_APP_CONSOLE_URL
-  localStorage.setItem('token', sessionStorage.getItem('token'))
+  sessionStorage.setItem('token', getToken())
   url = console_url + '/' + value
   window.location.href = url
 }
