@@ -167,17 +167,25 @@
                 </template>
                 <div class="moreButton">
                   <el-tooltip content="该任务下所有测试平台均停止运行" v-if="scope.row.state === 'running'" placement="top" effect="dark">
-                    <el-button link type="primary" size="small" @click="changeTaskStatus('stop', scope.row)"> 任务暂停 </el-button>
+                    <el-button link type="primary" size="small" @click="changeTaskStatus('stop', scope.row, false)"> 任务暂停 </el-button>
                   </el-tooltip>
-                  <el-button link type="primary" size="small" v-if="['create'].includes(scope.row.state)" @click="changeTaskStatus('start', scope.row)"> 任务启动 </el-button>
+                  <el-button link type="primary" size="small" v-if="['create'].includes(scope.row.state)" @click="changeTaskStatus('start', scope.row, false)">
+                    任务启动
+                  </el-button>
                   <el-tooltip content="重新运行该任务下所有用例" placement="top" effect="dark">
-                    <el-button link type="primary" size="small" v-if="['fail', 'stop'].includes(scope.row.state)" @click="changeTaskStatus('start', scope.row)">
+                    <el-button link type="primary" size="small" v-if="['fail', 'stop'].includes(scope.row.state)" @click="changeTaskStatus('start', scope.row, true)">
                       重新运行
                     </el-button>
                   </el-tooltip>
                   <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
                     <span>
-                      <el-button link type="primary" size="small" v-if="['fail', 'stop', 'complete'].includes(scope.row.state)" @click="changeTaskStatus('restart', scope.row)">
+                      <el-button
+                        link
+                        type="primary"
+                        size="small"
+                        v-if="['fail', 'stop', 'complete'].includes(scope.row.state)"
+                        @click="changeTaskStatus('restart', scope.row, false)"
+                      >
                         继续运行
                       </el-button>
                     </span>
@@ -250,7 +258,9 @@
               @remove-tag="deleteGroupDataId"
               :disabled="titleDialog === '任务详情'"
             >
-              <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name" :value="item.name" />
+              <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name" :value="item.name">
+                <span style="float: left">{{ item.ip }} -- {{ item.name }}</span>
+              </el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="用例集" prop="cases">
@@ -343,7 +353,9 @@
       <el-form :inline="false" :model="addTestPlatForm" ref="addTestPlatFormRef" class="addDevice-form" label-width="130px">
         <el-form-item label="添加测试平台：">
           <el-select clearable v-model="addTestPlatForm.group" placeholder="请选择要添加的测试平台..." @change="getTestPlatDataId">
-            <el-option v-for="(item, index) in state.d_groupDataAfter" :key="'d_groupDataAfter' + index" :label="item.name" :value="item.name" :disabled="item.disabled" />
+            <el-option v-for="(item, index) in state.d_groupDataAfter" :key="'d_groupDataAfter' + index" :label="item.name" :value="item.name" :disabled="item.disabled">
+              <span style="float: left">{{ item.ip }} -- {{ item.name }}</span>
+            </el-option>
           </el-select>
         </el-form-item>
       </el-form>
@@ -430,11 +442,21 @@
         </span>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="continueDialogVisible" title="是否继续运行" width="50%" :before-close="handleClose">
+      <span>重新执行所有测试用例，并删除上次的测试结果</span>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="continueDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="confirmContinue"> 确定 </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, nextTick, watch } from 'vue'
+import { onMounted, nextTick, watch, watchEffect } from 'vue'
 import { ref, reactive } from 'vue'
 import type { TabsPaneContext } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -476,6 +498,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const activeName = ref('taskManagement')
 const dialogVisible = ref(false)
+const continueDialogVisible = ref(false)
 const deviceTypeDialogVisible = ref(false)
 const groupDialogVisible = ref(false)
 const taskProgressDialog = ref(false)
@@ -649,52 +672,52 @@ const addTaskForm = reactive({
 })
 
 const addTaskRuleFormRef = ref<FormInstance>()
-const validateTipServer = (rule: any, value: any, callback: any) => {
-  if (isPhysicalMachine.value == '0') {
-    return callback()
-  } else {
-    physicalItems.value.forEach((item) => {
-      if (item.TipServer === '') {
-        return callback(new Error('请输入物理机ip'))
-      } else {
-        callback()
-      }
-    })
-  }
-}
-const validateTipPort = (rule: any, value: any, callback: any) => {
-  if (isPhysicalMachine.value == '0') {
-    return callback()
-  } else {
-    let _arr = []
-    physicalItems.value.forEach((item) => {
-      _arr.push(item.TipPort)
-      // if (item.TipPort === '') {
-      //   return callback(new Error('请输入物理机port'))
-      // } else {
-      //   callback()
-      // }
-    })
-    if (_arr.some((val) => val === '')) {
-      callback(new Error('请输入物理机port'))
-    } else {
-      callback()
-    }
-  }
-}
-const validateTestPass = (rule: any, value: any, callback: any) => {
-  if (isPhysicalMachine.value == '0') {
-    return callback()
-  } else {
-    physicalItems.value.forEach((item) => {
-      if (item.TestPass === '') {
-        return callback(new Error('请输入物理机PassWord'))
-      } else {
-        callback()
-      }
-    })
-  }
-}
+// const validateTipServer = (rule: any, value: any, callback: any) => {
+//   if (isPhysicalMachine.value == '0') {
+//     return callback()
+//   } else {
+//     physicalItems.value.forEach((item) => {
+//       if (item.TipServer === '') {
+//         return callback(new Error('请输入物理机ip'))
+//       } else {
+//         callback()
+//       }
+//     })
+//   }
+// }
+// const validateTipPort = (rule: any, value: any, callback: any) => {
+//   if (isPhysicalMachine.value == '0') {
+//     return callback()
+//   } else {
+//     let _arr = []
+//     physicalItems.value.forEach((item) => {
+//       _arr.push(item.TipPort)
+//       // if (item.TipPort === '') {
+//       //   return callback(new Error('请输入物理机port'))
+//       // } else {
+//       //   callback()
+//       // }
+//     })
+//     if (_arr.some((val) => val === '')) {
+//       callback(new Error('请输入物理机port'))
+//     } else {
+//       callback()
+//     }
+//   }
+// }
+// const validateTestPass = (rule: any, value: any, callback: any) => {
+//   if (isPhysicalMachine.value == '0') {
+//     return callback()
+//   } else {
+//     physicalItems.value.forEach((item) => {
+//       if (item.TestPass === '') {
+//         return callback(new Error('请输入物理机PassWord'))
+//       } else {
+//         callback()
+//       }
+//     })
+//   }
+// }
 const validateModel = (rule: any, value: any, callback: any) => {
   // if (isPhysicalMachine.value == '0') {
   //   return callback()
@@ -820,7 +843,7 @@ const getOneData = (type, id) => {
           addTaskForm.user = item.user
           addTaskForm.remarks = item.remarks
           addTaskForm.build = item.build
-          addTaskForm.group = item.group
+          addTaskForm.group = [...item.group, ...item.fail_group]
           addTaskForm.cases = item.cases
           handleSelectData(addTaskForm.group)
           handleCaseValue(item.cases)
@@ -842,7 +865,6 @@ const handleSelectData = (data) => {
       }
     })
   })
-  addTaskForm.group = arr
 }
 
 // 处理 编辑弹窗 - 用例集字段回显数据
@@ -1246,16 +1268,32 @@ const taskProgress = async (data) => {
   taskProgressData.value = data
   // 获取对应的测试报告失败数/成功数/用例数
   runningState.value = data.state
-  await getReport(data, false)
+  await getReport(data)
 }
 
+const contuineId = ref('')
+const contuineName = ref('')
 // 任务启动/终止
-const changeTaskStatus = (val, row) => {
-  const params = {
-    id: row.id,
-    state: val
+const changeTaskStatus = (val, row, isShowDialog) => {
+  if (!isShowDialog) {
+    const params = {
+      id: row.id,
+      state: val
+    }
+    getTaskStatus(params, row.name)
+  } else {
+    continueDialogVisible.value = true
+    contuineId.value = row.id
+    contuineName.value = row.name
   }
-  getTaskStatus(params, row.name)
+}
+const confirmContinue = () => {
+  const params = {
+    id: contuineId.value,
+    state: 'start'
+  }
+  getTaskStatus(params, contuineName.value)
+  continueDialogVisible.value = false
 }
 
 // 任务start or stop api
@@ -1287,8 +1325,8 @@ const getTaskRun = async (id) => {
 }
 
 // 测试报告
-const getReport = async (data, isRefresh) => {
-  let res = isRefresh && runningState.value === 'ready' ? ' ' : await getReportApi({ id: data.id })
+const getReport = async (data) => {
+  let res = ['ready', 'create'].includes(runningState.value) ? ' ' : await getReportApi({ id: data.id })
   await getTaskRun(data.id)
   showDetail.value = true
   taskProgressDialog.value = true
@@ -1317,10 +1355,59 @@ watch(
       // 其他状态下，日志、数据不进行更新
       if (['complete', 'create', 'fail', 'stop'].includes(runningState.value)) return
       interval.value = setInterval(async () => {
-        getReport(taskProgressData.value, true)
+        getReport(taskProgressData.value)
       }, 15000)
     } else {
       clearInterval(interval.value)
+    }
+  }
+)
+
+watchEffect(() => {})
+
+watch(
+  () => addTaskForm.group,
+  () => {
+    if (titleDialog.value === '添加任务') {
+      physicalItems.value = addTaskForm.group.map((item) => {
+        return {
+          name: item,
+          value: item,
+          required: false,
+          TipServer: '',
+          TipPort: ''
+        }
+      })
+    } else {
+      var result = []
+      for (var i = 0; i < addTaskForm.group.length; i++) {
+        var obj = addTaskForm.group[i]
+        var isExist = false
+        for (var j = 0; j < physicalItems.value.length; j++) {
+          var aj = physicalItems.value[j]
+          var n = aj.name
+          console.log(`output->`, n, obj)
+          if (String(n) == String(obj)) {
+            isExist = true
+            break
+          }
+        }
+        if (!isExist) {
+          result.push(obj)
+        }
+      }
+      console.log(`output->result`, result)
+      result.map((it) => {
+        physicalItems.value.push({
+          name: it,
+          value: it,
+          required: false,
+          TipServer: '',
+          TipPort: ''
+        })
+      })
+      console.log(`output->addTaskForm.group`, addTaskForm.group)
+      console.log(`output->physicalItems.value`, physicalItems.value)
     }
   }
 )
@@ -1390,6 +1477,7 @@ const handleClose = (done: () => void) => {
   deviceTypeDialogVisible.value = false
   groupDialogVisible.value = false
   taskProgressDialog.value = false
+  continueDialogVisible.value = false
   addTaskRuleFormRef.value.resetFields()
   physicalItems.value = []
 }
