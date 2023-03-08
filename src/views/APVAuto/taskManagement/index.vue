@@ -44,8 +44,10 @@
         </div>
 
         <el-table :data="state.tableData" stripe style="width: 100%" v-loading="tableLoading" height="65vh">
-          <el-table-column prop="id" label="任务ID" align="center" width="60" />
-          <el-table-column prop="name" label="任务名称" align="center" width="100" />
+          <!-- <el-table-column prop="id" label="任务ID" align="center" width="60" /> -->
+          <el-table-column prop="name" label="任务名称" align="center" width="150" />
+          <el-table-column prop="user" label="负责人" align="center" width="100" />
+          <el-table-column prop="uptimeAfter" label="开始时间" align="center" width="200" />
           <el-table-column prop="build" label="build版本" align="center" width="250" />
           <!-- <el-table-column prop="groupAfter" label="测试平台" class-name="testStyle" width="320" header-align="center">
             <template #default="scope">
@@ -145,7 +147,7 @@
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'create'">
                 <div class="status-point" style="background-color: #e6a23c"></div>
-                <span style="color: #e6a23c">已创建</span>
+                <span style="color: #e6a23c">待启动</span>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'complete'">
                 <div class="status-point" style="background-color: #409eff"></div>
@@ -157,11 +159,49 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="user" label="负责人" align="center" width="100" />
-          <el-table-column prop="uptimeAfter" label="更新时间" align="center" width="200" />
+          <el-table-column prop="state" label="任务启停" align="center" width="150">
+            <template #default="scope">
+              <div class="stateStyle" v-if="scope.row.state === 'stop'">
+                <el-tooltip content="重新执行所有测试用例，并删除上次的测试结果" placement="top" effect="dark">
+                  <el-icon :size="30" style="color: #909399" @click="changeTaskStatus('start', scope.row, true)"><RefreshRight /></el-icon>
+                </el-tooltip>
+                <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
+                  <el-icon :size="30" style="color: #409eff; margin-left: 10px" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
+                </el-tooltip>
+              </div>
+              <div class="stateStyle fail" v-if="scope.row.state === 'fail'">
+                <el-tooltip content="重新执行所有测试用例，并删除上次的测试结果" placement="top" effect="dark">
+                  <el-icon :size="30" style="color: #909399" @click="changeTaskStatus('start', scope.row, true)"><RefreshRight /></el-icon>
+                </el-tooltip>
+                <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
+                  <el-icon :size="30" style="color: #409eff; margin-left: 10px" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
+                </el-tooltip>
+              </div>
+              <div class="stateStyle" v-if="scope.row.state === 'running'">
+                <el-tooltip content="任务暂停" placement="top" effect="dark">
+                  <el-icon :size="30" style="color: #e6a23c" @click="changeTaskStatus('stop', scope.row, false)"><VideoPause /></el-icon>
+                </el-tooltip>
+              </div>
+              <div class="stateStyle" v-if="scope.row.state === 'create'">
+                <el-tooltip content="任务启动" placement="top" effect="dark">
+                  <el-icon :size="30" style="color: #67c23a" @click="changeTaskStatus('start', scope.row, false)"><SwitchButton /></el-icon>
+                </el-tooltip>
+              </div>
+              <div class="stateStyle" v-if="scope.row.state === 'complete'">
+                <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
+                  <el-icon :size="30" style="color: #409eff" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
+                </el-tooltip>
+              </div>
+              <div class="stateStyle" v-if="scope.row.state === 'ready'">
+                <el-tooltip content="任务准备中，禁止操作" placement="top" effect="dark">
+                  <el-icon :size="30" style="color: #f56c6c; cursor: no-drop"><CircleClose /></el-icon>
+                </el-tooltip>
+              </div>
+            </template>
+          </el-table-column>
           <el-table-column fixed="right" label="操作" align="center" width="200">
             <template #default="scope">
-              <el-popover placement="bottom" trigger="hover" popper-class="morePopover">
+              <!-- <el-popover placement="bottom" trigger="hover" popper-class="morePopover">
                 <template #reference>
                   <el-button link type="primary" size="small" :disabled="scope.row.state === 'ready'">启停</el-button>
                 </template>
@@ -191,7 +231,7 @@
                     </span>
                   </el-tooltip>
                 </div>
-              </el-popover>
+              </el-popover> -->
               <el-tooltip content="可查看当前任务的进度详情" placement="top" effect="dark">
                 <el-button link type="primary" size="small" @click="taskProgress(scope.row)"> 任务进度 </el-button>
               </el-tooltip>
@@ -461,7 +501,7 @@ import { ref, reactive } from 'vue'
 import type { TabsPaneContext } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { Calendar, Search } from '@element-plus/icons-vue'
+import { Calendar, Search, SwitchButton, CircleClose, VideoPlay, RefreshRight, VideoPause } from '@element-plus/icons-vue'
 import { ElInput } from 'element-plus'
 import {
   deviceApi,
@@ -1018,6 +1058,9 @@ const getTask = async (page) => {
   tableLoading.value = false
   if (res.code == 1000) {
     state.tableData = res.data
+    state.tableData.forEach((item, index) => {
+      item.build = item.build.split('-')[1].split('.')[0]
+    })
     taskTotal.value = res.total || 0
     handle()
   } else {
@@ -1515,6 +1558,16 @@ const handleTaskCurrentChange = (val: number) => {
   flex-direction: column;
   span {
     color: #ff6b84;
+  }
+}
+.stateStyle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .el-icon {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
   }
 }
 .my-header {
