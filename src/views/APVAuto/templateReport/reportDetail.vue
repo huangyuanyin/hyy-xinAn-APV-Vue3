@@ -189,7 +189,7 @@ const getReportDetail = async (id) => {
         item.value = res.data['time(min)'] + '分'
       }
       if (item.label === 'start_time') {
-        item.value = utc2beijing(item.value)
+        item.value = item.value === null ? '无' : utc2beijing(item.value)
       }
     })
     res.data && res.data['pass'] ? (contentItemList.value[1].value = res.data['pass']) : (contentItemList.value[1].value = '0')

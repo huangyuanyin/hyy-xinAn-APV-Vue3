@@ -1028,7 +1028,7 @@ onMounted(async () => {
 const handle = () => {
   state.tableData.map((item, index) => {
     item.number = [].concat(item.counts, item.fail_cases)
-    item.uptimeAfter = utc2beijing(item.uptime) // '2022-09-16T17:44:08Z' => '2022/9/16 16:43:40'
+    item.uptimeAfter = utc2beijing(item.start_time) // '2022-09-16T17:44:08Z' => '2022/9/16 16:43:40'
     // let groupData = item.group.replace(/\[|]/g, '').split(",") // 将 '[21,22,23]' => [21,22,23]
     item.groupAfter = [] // 成功的测试平台回显展示
     item.failGroupAfter = [] // 失败的测试平台回显展示
