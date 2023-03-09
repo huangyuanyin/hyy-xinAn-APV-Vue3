@@ -290,7 +290,7 @@ import { buildOptions, downloadFileOptions } from './data.js'
 import ShowTestCase from './components/showTestCase.vue'
 import Termmail from '@/components/Termail.vue'
 
-const activeName = ref('testbedManagement')
+const activeName = ref(sessionStorage.getItem('activeName') || 'testbedManagement')
 const dialogVisible = ref(false)
 const groupDialogVisible = ref(false)
 const isShowMore = ref(false)
@@ -441,7 +441,8 @@ const addGroupFormRules = reactive<FormRules>({
 
 // 切换Tab
 const handleClick = (tab: TabsPaneContext, event: Event) => {
-  console.log(tab, event)
+  activeName.value = String(tab.props.name)
+  sessionStorage.setItem('activeName', activeName.value)
 }
 
 const getBuildName = (value) => {}

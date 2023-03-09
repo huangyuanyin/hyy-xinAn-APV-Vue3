@@ -48,7 +48,11 @@
           <el-table-column prop="name" label="任务名称" align="center" width="150" />
           <el-table-column prop="user" label="负责人" align="center" width="100" />
           <el-table-column prop="uptimeAfter" label="开始时间" align="center" width="200" />
-          <el-table-column prop="build" label="build版本" align="center" width="250" />
+          <el-table-column prop="build" label="build版本" align="center" width="250">
+            <template #default="scope">
+              <span> {{ scope.row.build.split('-')[1].split('.')[0] }} </span>
+            </template>
+          </el-table-column>
           <!-- <el-table-column prop="groupAfter" label="测试平台" class-name="testStyle" width="320" header-align="center">
             <template #default="scope">
               <el-tag v-if="scope.row.groupAfter == 0 && scope.row.failGroupAfter == 0" type="info"> 暂无测试平台 </el-tag>
@@ -137,7 +141,7 @@
               <div class="stateStyle" v-if="scope.row.state === 'stop'">
                 <!-- <div class="status-point" style="background-color: #909399"></div>
                 <span style="color: #909399">已停止</span> -->
-                <el-tooltip content="已停止" placement="top" effect="dark"><svg-icon iconName="icon-tingzhi"></svg-icon></el-tooltip>
+                <el-tooltip content="已停止" placement="top" effect="dark"><svg-icon iconName="icon-stop"></svg-icon></el-tooltip>
               </div>
               <div class="stateStyle fail" v-if="scope.row.state === 'fail'">
                 <!-- <div class="status-point" style="background-color: #f56c6c"></div>
@@ -1065,9 +1069,6 @@ const getTask = async (page) => {
   tableLoading.value = false
   if (res.code == 1000) {
     state.tableData = res.data
-    state.tableData.forEach((item, index) => {
-      item.build = item.build.split('-')[1].split('.')[0]
-    })
     taskTotal.value = res.total || 0
     handle()
   } else {
