@@ -90,9 +90,10 @@
                 <template #reference>
                   <!-- <el-tag class="tagType">成功的测试平台集合</el-tag> -->
                   <div class="wrapper">
-                    <div class="circle">
+                    <!-- <div class="circle">
                       <div class="small-circle"></div>
-                    </div>
+                    </div> -->
+                    <svg-icon style="height: 23px" iconName="icon-jisuanjijifanghuanjingshebeiqiangzhipinggushenqing-copy"></svg-icon>
                   </div>
                 </template>
                 <el-tag class="tagType" v-for="(item, index) in scope.row.group" :key="'group' + index">
@@ -134,28 +135,34 @@
           <el-table-column prop="state" label="任务状态" align="center" width="100">
             <template #default="scope">
               <div class="stateStyle" v-if="scope.row.state === 'stop'">
-                <div class="status-point" style="background-color: #909399"></div>
-                <span style="color: #909399">已停止</span>
+                <!-- <div class="status-point" style="background-color: #909399"></div>
+                <span style="color: #909399">已停止</span> -->
+                <el-tooltip content="已停止" placement="top" effect="dark"><svg-icon iconName="icon-tingzhi"></svg-icon></el-tooltip>
               </div>
               <div class="stateStyle fail" v-if="scope.row.state === 'fail'">
-                <div class="status-point" style="background-color: #f56c6c"></div>
-                <span style="color: #f56c6c">已失败</span>
+                <!-- <div class="status-point" style="background-color: #f56c6c"></div>
+                <span style="color: #f56c6c">已失败</span> -->
+                <el-tooltip content="已失败" placement="top" effect="dark"><svg-icon iconName="icon-yishibai"></svg-icon></el-tooltip>
               </div>
               <div class="stateStyle hhh" v-if="scope.row.state === 'running'">
-                <div class="status-point hhh" style="background-color: #67c23a"></div>
-                <span style="color: #67c23a">运行中</span>
+                <!-- <div class="status-point hhh" style="background-color: #67c23a"></div>
+                <span style="color: #67c23a">运行中</span> -->
+                <el-tooltip content="运行中" placement="top" effect="dark"><svg-icon iconName="icon-shebeidongtai-copy"></svg-icon></el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'create'">
                 <div class="status-point" style="background-color: #e6a23c"></div>
                 <span style="color: #e6a23c">待启动</span>
+                <el-tooltip content="待启动" placement="top" effect="dark"><svg-icon iconName="icon-shebeidongtai"></svg-icon></el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'complete'">
-                <div class="status-point" style="background-color: #409eff"></div>
-                <span style="color: #409eff">已完成</span>
+                <!-- <div class="status-point" style="background-color: #409eff"></div>
+                <span style="color: #409eff">已完成</span> -->
+                <el-tooltip content="已完成" placement="top" effect="dark"><svg-icon iconName="icon-wancheng"></svg-icon></el-tooltip>
               </div>
               <div class="stateStyle hhh" v-if="scope.row.state === 'ready'">
-                <div class="status-point hhh" style="background-color: #666666"></div>
-                <span style="color: #666666">准备中</span>
+                <!-- <div class="status-point hhh" style="background-color: #666666"></div>
+                <span style="color: #666666">准备中</span> -->
+                <el-tooltip content="准备中" placement="top" effect="dark"><svg-icon iconName="icon-shuqianzhunbeizhong"></svg-icon></el-tooltip>
               </div>
             </template>
           </el-table-column>
@@ -1564,6 +1571,10 @@ const handleTaskCurrentChange = (val: number) => {
   display: flex;
   justify-content: center;
   align-items: center;
+  .svg-icon {
+    width: 40px;
+    height: 40px;
+  }
   .el-icon {
     width: 25px;
     height: 25px;
@@ -1594,6 +1605,11 @@ const handleTaskCurrentChange = (val: number) => {
   height: 35px;
   display: flex;
   justify-content: center;
+  align-items: center;
+  .svg-icon {
+    width: 50px;
+    height: 50px;
+  }
 
   .circle {
     width: 30px;
