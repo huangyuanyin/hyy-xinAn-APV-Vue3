@@ -36,15 +36,13 @@
           </el-form-item>
         </el-form>
         <el-table :data="detailTableData" border style="width: 100%" height="45vh" @expand-change="getLog" :expand-row-keys="expands" :row-key="getRowKeys">
-          <el-table-column type="expand">
+          <!-- <el-table-column type="expand">
             <template #default="props">
               <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
                 <el-tab-pane label="用例脚本" name="first">
-                  <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
                   <el-input v-model="case_script" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无用例脚本" />
                 </el-tab-pane>
                 <el-tab-pane label="脚本执行日志" name="second">
-                  <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
                   <el-input v-model="case_log" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无脚本执行日志" />
                 </el-tab-pane>
                 <template v-for="(item, index) in shell_log" :key="'shell_log' + index">
@@ -54,7 +52,7 @@
                 </template>
               </el-tabs>
             </template>
-          </el-table-column>
+          </el-table-column> -->
           <el-table-column label="case_ID" prop="case_id" />
           <el-table-column label="模块" prop="module" />
           <!-- <el-table-column label="用例脚本" prop="case_script">
@@ -75,6 +73,11 @@
           <el-table-column label="响应时间" prop="use_time" />
           <el-table-column label="Comment" prop="comment" />
           <el-table-column label="结果" prop="result" />
+          <el-table-column label="操作" fixed="right">
+            <template #default="scope">
+              <el-button link type="primary" size="small" @click="toSeeLog(scope.row)">查看</el-button>
+            </template>
+          </el-table-column>
         </el-table>
         <el-pagination
           v-model:currentPage="currentPage"
@@ -97,6 +100,25 @@
     </div>
   </el-dialog>
   <DataTemplateDialog :dialogData="dialogData" :isShowDialog="isShowDialog" @closeDialog="closeDialog" />
+  <el-dialog :model-value="isShowLogDialog" custom-class="caseScriptDialog" :title="logTitle" @close="isShowLogDialog = false">
+    <div class="detailCaseScript">
+      <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
+        <el-tab-pane label="用例脚本" name="first">
+          <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
+          <el-input v-model="case_script" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无用例脚本" />
+        </el-tab-pane>
+        <el-tab-pane label="脚本执行日志" name="second">
+          <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
+          <el-input v-model="case_log" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无脚本执行日志" />
+        </el-tab-pane>
+        <template v-for="(item, index) in shell_log" :key="'shell_log' + index">
+          <el-tab-pane :label="'交互日志' + (index + 1)" :name="item.value">
+            <el-input v-model="item.value" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无交互日志" />
+          </el-tab-pane>
+        </template>
+      </el-tabs>
+    </div>
+  </el-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -117,6 +139,8 @@ const isHistory = route.query.resultid ? false : true
 const isShowDialog = ref(false)
 const tableData = ref([]) // 详情数据
 const detailTableData = ref([])
+const isShowLogDialog = ref(false) // 日志详情弹窗
+const logTitle = ref('') // 日志详情弹窗标题
 const contentItemList = ref([
   { name: '报告名称', label: 'name', value: '' },
   { name: '成功', label: 'pass', value: '' },
@@ -617,6 +641,36 @@ const handleSizeChange = (val: number) => {
 const handleCurrentChange = (val: number) => {
   currentPage.value = val
   selectSearch(currentPage.value)
+}
+
+const toSeeLog = (row) => {
+  logTitle.value = `【 ${row.case_id}】的日志详情`
+  activeName.value = 'first'
+  let LogList = []
+  LogList.push(row.case_script, row.case_log)
+  LogList.map(async (item, index) => {
+    await getLogApi({ url: String(item) }).then((res) => {
+      switch (index) {
+        case 0:
+          case_script.value = res.data || '请求错误'
+          break
+        case 1:
+          case_log.value = res.data || '请求错误'
+          break
+        default:
+          break
+      }
+    })
+  })
+  shell_log.value = []
+  row.shell_log.map(async (item, index) => {
+    await getLogApi({ url: String(item) }).then((res) => {
+      shell_log.value.push({
+        value: res.data || '请求错误'
+      })
+    })
+  })
+  isShowLogDialog.value = true
 }
 
 onMounted(async () => {
