@@ -24,7 +24,11 @@
     <el-table-column label="模块" prop="module" />
     <el-table-column label="响应时间" prop="use_time" />
     <el-table-column label="Comment" prop="comment" />
-    <el-table-column label="结果" prop="result" />
+    <el-table-column label="操作" fixed="right">
+      <template #default="scope">
+        <el-button link type="primary" size="small" @click="toSeeLog(scope.row)">查看</el-button>
+      </template>
+    </el-table-column>
   </el-table>
   <el-pagination
     v-model:currentPage="currentPage"
@@ -43,6 +47,26 @@
       <monacoEditor v-model="caseScriptValue" :language="language" width="800px" height="500px" theme="vs-dark" @editor-mounted="editorMounted"></monacoEditor>
     </div>
   </el-dialog>
+
+  <el-dialog :model-value="isShowLogDialog" custom-class="caseScriptDialog" :title="logTitle" @close="isShowLogDialog = false">
+    <div class="detailCaseScript">
+      <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
+        <el-tab-pane label="用例脚本" name="first">
+          <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
+          <el-input v-model="case_script" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无用例脚本" />
+        </el-tab-pane>
+        <el-tab-pane label="脚本执行日志" name="second">
+          <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
+          <el-input v-model="case_log" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无脚本执行日志" />
+        </el-tab-pane>
+        <template v-for="(item, index) in shell_log" :key="'shell_log' + index">
+          <el-tab-pane :label="'交互日志' + (index + 1)" :name="item.value">
+            <el-input v-model="item.value" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无交互日志" />
+          </el-tab-pane>
+        </template>
+      </el-tabs>
+    </div>
+  </el-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -54,6 +78,8 @@ import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
+const logTitle = ref('')
+const isShowLogDialog = ref(false)
 const failId = route.query.historyResultid || route.params.reportId || route.query.reportId || ''
 const isHistoty = route.query.historyResultid ? true : route.params.reportId || route.query.reportId ? false : true
 const detailTableData = ref([])
@@ -77,6 +103,36 @@ const total = ref(0)
 
 const toDetailCase = () => {
   isShowCaseScriptDialog.value = true
+}
+
+const toSeeLog = (row) => {
+  logTitle.value = `【 ${row.case_id}】的日志详情`
+  activeName.value = 'first'
+  let LogList = []
+  LogList.push(row.case_script, row.case_log)
+  LogList.map(async (item, index) => {
+    await getLogApi({ url: String(item) }).then((res) => {
+      switch (index) {
+        case 0:
+          case_script.value = res.data || '请求错误'
+          break
+        case 1:
+          case_log.value = res.data || '请求错误'
+          break
+        default:
+          break
+      }
+    })
+  })
+  shell_log.value = []
+  row.shell_log.map(async (item, index) => {
+    await getLogApi({ url: String(item) }).then((res) => {
+      shell_log.value.push({
+        value: res.data || '请求错误'
+      })
+    })
+  })
+  isShowLogDialog.value = true
 }
 
 const handleClick = (tab: TabsPaneContext, event: Event) => {
