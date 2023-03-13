@@ -186,7 +186,7 @@ const getReportDetail = async (id) => {
         item.value = res.data['fail'] + res.data['issue'] + res.data['pass']
       }
       if (item.label === 'time') {
-        item.value = res.data['time(min)'] + '分'
+        item.value = (res.data['time(min)'] / 60).toFixed(1) + '小时'
       }
       if (item.label === 'start_time') {
         item.value = item.value === null ? '无' : utc2beijing(item.value)
@@ -214,7 +214,7 @@ const getHistoryReportDetail = async (id) => {
         item.value = res.data['fail'] + res.data['issue'] + res.data['pass']
       }
       if (item.label === 'time') {
-        item.value = res.data['time(min)'] + '分'
+        item.value = (res.data['time(min)'] / 60).toFixed(1) + '小时'
       }
       if (item.label === 'start_time') {
         item.value = utc2beijing(item.value)
