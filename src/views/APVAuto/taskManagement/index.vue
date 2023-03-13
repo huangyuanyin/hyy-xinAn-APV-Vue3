@@ -108,9 +108,7 @@
                 <template #reference>
                   <!-- <el-tag class="tagType errorTagType" type="danger">失败的测试平台集合</el-tag> -->
                   <div class="wrapper">
-                    <div class="circle">
-                      <div class="small-circle" style="background-color: #ff6600"></div>
-                    </div>
+                    <svg-icon style="height: 23px" iconName="icon-jisuanjijifanghuanjingshebeiqiangzhipinggushenqing-copy-copy"></svg-icon>
                   </div>
                 </template>
                 <el-table :data="scope.row.failGroupAfter" stripe style="width: 100%">
