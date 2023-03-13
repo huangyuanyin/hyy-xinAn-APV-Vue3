@@ -1,15 +1,13 @@
 <template>
   <!-- <el-button type="primary" class="backButton" @click="router.go(-1)">返回</el-button> -->
   <el-table :data="detailTableData" border style="width: 100%" height="80vh" v-loading="loading" @expand-change="getLog" :expand-row-keys="expands" :row-key="getRowKeys">
-    <el-table-column type="expand">
+    <!-- <el-table-column type="expand">
       <template #default="props">
         <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
           <el-tab-pane label="用例脚本" name="first">
-            <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
             <el-input v-model="case_script" :autosize="{ minRows: 12, maxRows: 22 }" type="textarea" placeholder="Please input" />
           </el-tab-pane>
           <el-tab-pane label="脚本执行日志" name="second">
-            <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
             <el-input v-model="case_log" :autosize="{ minRows: 12, maxRows: 22 }" type="textarea" placeholder="Please input" />
           </el-tab-pane>
           <template v-for="(item, index) in shell_log" :key="'shell_log' + index">
@@ -19,7 +17,7 @@
           </template>
         </el-tabs>
       </template>
-    </el-table-column>
+    </el-table-column> -->
     <el-table-column label="case_ID" prop="case_id" />
     <el-table-column label="模块" prop="module" />
     <el-table-column label="响应时间" prop="use_time" />
