@@ -394,7 +394,7 @@ let addGroupForm = reactive({
 
 // 拉取文件弹窗form
 let downloadFileForm = reactive({
-  filetype: '',
+  filetype: 'apvbuild',
   url: ''
 })
 const downloadFileRuleFormRef = ref<FormInstance>()

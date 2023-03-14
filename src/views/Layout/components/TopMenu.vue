@@ -62,6 +62,7 @@ import { HomeFilled, ArrowDown, QuestionFilled, BellFilled, Search, Operation, C
 import Drawer from '@/components/Drawer.vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { getToken } from '@/utils/auth'
 
 const router = useRouter()
 const store = useUserStore()
@@ -90,7 +91,8 @@ const toLink = (index) => {
 
 const toWork = () => {
   window.location.href = 'http://10.4.150.55:8080'
-  localStorage.setItem('token', sessionStorage.getItem('token'))
+  localStorage.setItem('token', getToken())
+  localStorage.setItem('jwtToken', getToken())
 }
 
 const changeDrawer = (drawer) => {

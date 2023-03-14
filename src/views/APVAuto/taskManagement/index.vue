@@ -139,32 +139,32 @@
               <div class="stateStyle" v-if="scope.row.state === 'stop'">
                 <!-- <div class="status-point" style="background-color: #909399"></div>
                 <span style="color: #909399">已停止</span> -->
-                <el-tooltip content="已停止" placement="top" effect="dark"><svg-icon iconName="icon-stop"></svg-icon></el-tooltip>
+                <el-tooltip content="已停止" placement="top" effect="dark"><svg-icon style="width: 30px" iconName="icon-stop"></svg-icon></el-tooltip>
               </div>
               <div class="stateStyle fail" v-if="scope.row.state === 'fail'">
                 <!-- <div class="status-point" style="background-color: #f56c6c"></div>
                 <span style="color: #f56c6c">已失败</span> -->
-                <el-tooltip content="已失败" placement="top" effect="dark"><svg-icon iconName="icon-yishibai"></svg-icon></el-tooltip>
+                <el-tooltip content="已失败" placement="top" effect="dark"><svg-icon style="width: 30px" iconName="icon-yishibai"></svg-icon></el-tooltip>
               </div>
               <div class="stateStyle hhh" v-if="scope.row.state === 'running'">
                 <!-- <div class="status-point hhh" style="background-color: #67c23a"></div>
                 <span style="color: #67c23a">运行中</span> -->
-                <el-tooltip content="运行中" placement="top" effect="dark"><svg-icon iconName="icon-shebeidongtai-copy"></svg-icon></el-tooltip>
+                <el-tooltip content="运行中" placement="top" effect="dark"><svg-icon style="width: 30px" iconName="icon-shebeidongtai-copy"></svg-icon></el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'create'">
-                <div class="status-point" style="background-color: #e6a23c"></div>
-                <span style="color: #e6a23c">待启动</span>
-                <el-tooltip content="待启动" placement="top" effect="dark"><svg-icon iconName="icon-shebeidongtai"></svg-icon></el-tooltip>
+                <!-- <div class="status-point" style="background-color: #e6a23c"></div>
+                <span style="color: #e6a23c">待启动</span> -->
+                <el-tooltip content="待启动" placement="top" effect="dark"><svg-icon style="width: 30px" iconName="icon-shebeidongtai"></svg-icon></el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'complete'">
                 <!-- <div class="status-point" style="background-color: #409eff"></div>
                 <span style="color: #409eff">已完成</span> -->
-                <el-tooltip content="已完成" placement="top" effect="dark"><svg-icon iconName="icon-wancheng"></svg-icon></el-tooltip>
+                <el-tooltip content="已完成" placement="top" effect="dark"><svg-icon style="width: 30px" iconName="icon-wancheng"></svg-icon></el-tooltip>
               </div>
               <div class="stateStyle hhh" v-if="scope.row.state === 'ready'">
                 <!-- <div class="status-point hhh" style="background-color: #666666"></div>
                 <span style="color: #666666">准备中</span> -->
-                <el-tooltip content="准备中" placement="top" effect="dark"><svg-icon iconName="icon-shuqianzhunbeizhong"></svg-icon></el-tooltip>
+                <el-tooltip content="准备中" placement="top" effect="dark"><svg-icon style="width: 30px" iconName="icon-shuqianzhunbeizhong"></svg-icon></el-tooltip>
               </div>
             </template>
           </el-table-column>
