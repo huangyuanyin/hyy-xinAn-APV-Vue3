@@ -14,6 +14,7 @@ import JsonViewer from 'vue3-json-viewer'
 import 'vue3-json-viewer/dist/index.css'
 
 import SvgIcon from './components/SvgIcon.vue'
+import './assets/iconfont/inconfont_ops.js'
 import './assets/iconfont/iconfont.js'
 
 // createApp(App).mount('#app')

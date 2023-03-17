@@ -91,8 +91,8 @@ const toLink = (index) => {
 
 const toWork = () => {
   window.location.href = 'http://10.4.150.55:8080/#/center/mine'
-  localStorage.setItem('token', getToken())
-  localStorage.setItem('jwtToken', getToken())
+  localStorage.setItem('token', getToken().replace("'", ''))
+  localStorage.setItem('jwtToken', getToken().replace("'", ''))
 }
 
 const changeDrawer = (drawer) => {

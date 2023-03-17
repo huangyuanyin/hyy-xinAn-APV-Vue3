@@ -27,6 +27,8 @@ service.interceptors.request.use((config) => {
     case 'APV':
       config.url = baseUrl.Base_APV_URL + config.url
       break
+    case 'NetDevOps':
+      config.url = baseUrl.Base_NetDevOps_URL + config.url
   }
   return config
 })

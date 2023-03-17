@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { login } from '@/api/user.ts'
+import { login } from '@/api/user'
 import jwt_decode from 'jwt-decode'
 import { removeToken, setToken } from '../../../utils/auth'
 
@@ -30,7 +30,7 @@ export const useUserStore = defineStore({
     },
     async LoginOut() {
       await removeToken()
-      localStorage.removeItem('userInfo')
+      localStorage.clear()
     }
   }
 })

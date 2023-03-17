@@ -70,7 +70,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineProps, nextTick, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { getThemeValue } from '@/utils/theme_utils'
 import { useAppStore } from '@/store/modules/app'
 import TaskEcharts from './component/TaskEcharts.vue'

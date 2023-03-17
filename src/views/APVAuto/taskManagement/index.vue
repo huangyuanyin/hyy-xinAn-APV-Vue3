@@ -958,7 +958,7 @@ const toShowPreviewDialog = async (formEl: FormInstance | undefined) => {
     }
   })
   // 选择含有物理机，未填写配置项提醒
-  if (addTaskForm.config.length == 0 && isPhysicalMachine.value === '1') {
+  if (addTaskForm.config?.length == 0 && isPhysicalMachine.value === '1') {
     return ElMessage.error('至少填写一个物理机配置项')
   }
   console.log('forms', addTaskForm)
@@ -991,8 +991,6 @@ const onAddTaskForm = async (formEl: FormInstance | undefined) => {
       } else {
         editTask(addTaskForm)
       }
-      addTaskRuleFormRef.value.resetFields()
-      dialogVisible.value = false
     } else {
       console.log('error submit!', fields)
     }
@@ -1089,6 +1087,8 @@ const addTask = async (params) => {
       type: 'success',
       duration: 1000
     })
+    addTaskRuleFormRef.value.resetFields()
+    dialogVisible.value = false
   }
   physicalItems.value = []
 }
@@ -1104,6 +1104,8 @@ const editTask = async (params) => {
       type: 'success',
       duration: 1000
     })
+    addTaskRuleFormRef.value.resetFields()
+    dialogVisible.value = false
   }
   physicalItems.value = []
 }
@@ -1214,7 +1216,7 @@ const openTestPlatformDialog = (data) => {
       group = item.group
     }
   })
-  state.d_groupDataAfter = JSON.parse(JSON.stringify(state.d_groupData))
+  state.d_groupDataAfter = JSON.parse(JSON.stringify(state.d_groupData)).filter((item) => item.status != true)
   group.map((item) => {
     state.d_groupDataAfter.map((it) => {
       if (it.name == item) {
