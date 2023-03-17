@@ -1,6 +1,6 @@
 <template>
   <div class="drawer-wrapper">
-    <el-drawer v-model="isDrawer" :direction="direction" :append-to-body="false" :z-index="10 ** 10000" :with-header="false" size="60%">
+    <el-drawer v-model="isDrawer" :direction="direction" :append-to-body="false" :z-index="10 ** 10000" :with-header="false" size="65%">
       <el-row>
         <el-col :span="4">
           <el-menu class="elMenu-wrap" default-active="" style="width: 200px">

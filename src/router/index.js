@@ -186,6 +186,8 @@ const routes = [
   }
 ]
 
+// 路由守卫
+
 const router = createRouter({
   history: createWebHashHistory('/netapv/'),
   routes

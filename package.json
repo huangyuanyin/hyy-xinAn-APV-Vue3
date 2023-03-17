@@ -4,9 +4,10 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
+    "stage": "vite serve --mode staging",
+    "prod": "vite serve --mode production",
     "build": "vite build",
     "build:stage": "vite build --mode staging",
-    "prod": "vite serve --mode production",
     "build:prod": "vite build --mode production",
     "preview": "vite preview"
   },

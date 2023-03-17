@@ -62,7 +62,7 @@ import { HomeFilled, ArrowDown, QuestionFilled, BellFilled, Search, Operation, C
 import Drawer from '@/components/Drawer.vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getToken } from '@/utils/auth'
+import { getToken, removeToken } from '@/utils/auth'
 
 const router = useRouter()
 const store = useUserStore()
@@ -77,14 +77,16 @@ const openDrawer = (val) => {
   val === 'open' ? (drawer.value = true) : (drawer.value = false)
 }
 
-const toLink = (index) => {
+const toLink = async (index) => {
   switch (index) {
     case 0:
       ElMessage.warning('暂不支持')
       break
     case 1:
-      store.LoginOut()
       router.push('/login')
+      // removeToken()
+      await store.LoginOut()
+      // localStorage.clear()
       break
   }
 }
