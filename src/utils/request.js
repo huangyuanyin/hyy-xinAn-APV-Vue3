@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 // import { useCookies } from '@vueuse/integrations/useCookies'
-import { getToken } from './auth'
+// import { getToken } from './auth'
 import baseUrl from '@/config/api'
 const service = axios.create({
   // baseURL: "http://10.20.70.89:8082", // 登录
@@ -12,7 +12,8 @@ const service = axios.create({
 service.interceptors.request.use((config) => {
   // 在发送请求之前做些什么
   // 往header头中自动添加token
-  const hastoken = getToken()
+  // const hastoken = getToken()
+  const hastoken = localStorage.getItem('token')
   config.headers['Authorization'] = hastoken
   switch (config.urlType) {
     case 'POC':
