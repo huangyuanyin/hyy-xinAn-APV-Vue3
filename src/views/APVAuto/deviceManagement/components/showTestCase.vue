@@ -7,50 +7,8 @@
           <div m="4">
             <h3>模块数详情：</h3>
             <div class="card-wrap">
-              <el-card v-if="props.row.children.length >= 0">
-                <el-table style="margin: 10px" :data="props.row.children.slice(0, 12)" :border="childBorder" :show-header="true">
-                  <el-table-column prop="name" label="模块名"></el-table-column>
-                  <el-table-column prop="value" label="数量"></el-table-column>
-                </el-table>
-              </el-card>
-              <el-card v-if="props.row.children.length >= 12">
-                <el-table style="margin: 10px" :data="props.row.children.slice(12, 24)" :border="childBorder" :show-header="true">
-                  <el-table-column prop="name" label="模块名"></el-table-column>
-                  <el-table-column prop="value" label="数量"></el-table-column>
-                </el-table>
-              </el-card>
-              <el-card v-if="props.row.children.length >= 24">
-                <el-table style="margin: 10px" :data="props.row.children.slice(24, 36)" :border="childBorder" :show-header="true">
-                  <el-table-column prop="name" label="模块名"></el-table-column>
-                  <el-table-column prop="value" label="数量"></el-table-column>
-                </el-table>
-              </el-card>
-              <el-card v-if="props.row.children.length >= 36">
-                <el-table style="margin: 10px" :data="props.row.children.slice(36, 48)" :border="childBorder" :show-header="true">
-                  <el-table-column prop="name" label="模块名"></el-table-column>
-                  <el-table-column prop="value" label="数量"></el-table-column>
-                </el-table>
-              </el-card>
-              <el-card v-if="props.row.children.length > 48">
-                <el-table style="margin: 10px" :data="props.row.children.slice(48, 60)" :border="childBorder" :show-header="true">
-                  <el-table-column prop="name" label="模块名"></el-table-column>
-                  <el-table-column prop="value" label="数量"></el-table-column>
-                </el-table>
-              </el-card>
-              <el-card v-if="props.row.children.length > 60">
-                <el-table style="margin: 10px" :data="props.row.children.slice(60, 72)" :border="childBorder" :show-header="true">
-                  <el-table-column prop="name" label="模块名"></el-table-column>
-                  <el-table-column prop="value" label="数量"></el-table-column>
-                </el-table>
-              </el-card>
-              <el-card v-if="props.row.children.length > 72">
-                <el-table style="margin: 10px" :data="props.row.children.slice(72, 84)" :border="childBorder" :show-header="true">
-                  <el-table-column prop="name" label="模块名"></el-table-column>
-                  <el-table-column prop="value" label="数量"></el-table-column>
-                </el-table>
-              </el-card>
-              <el-card v-if="props.row.children.length > 84">
-                <el-table style="margin: 10px" :data="props.row.children.slice(84, 96)" :border="childBorder" :show-header="true">
+              <el-card v-for="index in Math.ceil(props.row.children.length / 12)" :key="index">
+                <el-table style="margin: 10px" :data="props.row.children.slice((index - 1) * 12, index * 12)" :border="childBorder" :show-header="true">
                   <el-table-column prop="name" label="模块名"></el-table-column>
                   <el-table-column prop="value" label="数量"></el-table-column>
                 </el-table>
