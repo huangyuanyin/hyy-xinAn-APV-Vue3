@@ -110,6 +110,9 @@
       <el-tab-pane label="测试用例清单" name="showTestCase">
         <ShowTestCase />
       </el-tab-pane>
+      <el-tab-pane label="串口服务器管理" name="serialServer">
+        <SerialServer />
+      </el-tab-pane>
       <el-tab-pane v-for="(item, index) in consoleTabs" :key="'consoleTabs' + index" :label="item.name" :name="String(item.name)" :lazy="true" closable>
         <keep-alive>
           <component
@@ -296,7 +299,8 @@ import {
 import { buildApi, buildUploadApi, deleteBuildApi, downloadBuildFileApi } from '@/api/APV/buildManagement.js'
 import { utc2beijing } from '@/utils/util.js'
 import { buildOptions, downloadFileOptions } from './data.js'
-import ShowTestCase from './components/showTestCase.vue'
+import ShowTestCase from './components/ShowTestCase.vue'
+import SerialServer from './components/SerialServer.vue'
 import Termmail from '@/components/Termail.vue'
 
 const activeName = ref(sessionStorage.getItem('activeName') || 'testbedManagement')
@@ -703,7 +707,7 @@ const searchDevice = (val) => {
 }
 
 onMounted(() => {
-  ;['testbedManagement', 'buildManagement', 'showTestCase'].includes(activeName.value) == true ? '' : (activeName.value = 'testbedManagement')
+  ;['testbedManagement', 'buildManagement', 'showTestCase', 'serialServer'].includes(activeName.value) == true ? '' : (activeName.value = 'testbedManagement')
   getDevice()
   getD_typeApi()
   getD_group(1, '')
