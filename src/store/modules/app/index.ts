@@ -13,7 +13,7 @@ export const useAppStore = defineStore({
   },
   actions: {
     handleCollapse(status) {
-      status == false ? this.isCollapse = false : this.isCollapse = true
+      status == false ? (this.isCollapse = false) : (this.isCollapse = true)
       return this.isCollapse
     }
   }

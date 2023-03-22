@@ -1,6 +1,6 @@
 <template>
   <div class="performanceManagement" v-loading="loadingInstance" :element-loading-text="loadingText" :element-loading-spinner="svg" element-loading-svg-view-box="-10, -10, 50, 50">
-    <el-tabs v-model="activeName" class="tabs" @tab-click="handleClick">
+    <el-tabs v-model="activeName" class="tabs" @tab-click="handleClick" @tab-remove="handleRemoveClick">
       <el-tab-pane label="测试平台管理" name="testbedManagement">
         <el-card class="group-card" shadow="never">
           <div class="search-wrap">
@@ -77,8 +77,6 @@
             @current-change="handleGroupCurrentChange"
           />
         </el-card>
-        <!-- 终端 -->
-        <Termmail v-if="isShowTermail" :termmailInfo="termmailInfo" @closeTermmail="cloeConsole(termmailId)" />
       </el-tab-pane>
       <el-tab-pane label="build管理" name="buildManagement">
         <el-card class="build-card" shadow="never">
@@ -111,6 +109,17 @@
       </el-tab-pane>
       <el-tab-pane label="测试用例清单" name="showTestCase">
         <ShowTestCase />
+      </el-tab-pane>
+      <el-tab-pane v-for="(item, index) in consoleTabs" :key="'consoleTabs' + index" :label="item.name" :name="String(item.name)" :lazy="true" closable>
+        <keep-alive>
+          <component
+            :is="item.component"
+            v-if="item.component != null && activeName == String(item.name)"
+            :key="activeName"
+            :termmailInfo="termmailInfo"
+            @closeTermmail="cloeConsole(termmailId)"
+          ></component>
+        </keep-alive>
       </el-tab-pane>
     </el-tabs>
     <!--添加设备弹窗-->
@@ -261,7 +270,7 @@
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onMounted, toRefs } from 'vue'
+import { nextTick, onMounted, onBeforeUnmount, markRaw } from 'vue'
 import { ref, reactive } from 'vue'
 import type { TabsPaneContext } from 'element-plus'
 import { ElMessage } from 'element-plus'
@@ -293,12 +302,12 @@ import Termmail from '@/components/Termail.vue'
 const activeName = ref(sessionStorage.getItem('activeName') || 'testbedManagement')
 const dialogVisible = ref(false)
 const groupDialogVisible = ref(false)
-const isShowMore = ref(false)
 const deviceDrawer = ref(false)
 const loadingInstance = ref(false)
 const openDownloadDialog = ref(false)
 const downloadLoading = ref(false)
 const borrowPlatformDialog = ref(false)
+const consoleTabs = ref([]) // 控制台tabs
 const svg = `
   <path class="path" d="
     M 30 15
@@ -388,8 +397,6 @@ let addGroupForm = reactive({
   name: '',
   ip: '',
   build: null
-  // buildip: "",
-  // status: null,
 })
 
 // 拉取文件弹窗form
@@ -433,16 +440,38 @@ let validateIPAddress = (rule, value, callback) => {
 const addGroupRuleFormRef = ref<FormInstance>()
 const addGroupFormRules = reactive<FormRules>({
   name: [{ required: true, message: '平台名称不能为空', trigger: 'blur' }],
-  // ip: [{ required: true, validator: validateIPAddress, trigger: 'blur' }],
   build: [{ required: true, message: '支持测试版本不能为空', trigger: 'blur' }],
   buildip: [{ required: true, validator: validateIPAddress, trigger: 'blur' }]
-  // status: [{ required: true, message: "请选择状态", trigger: "blur" }],
 })
 
 // 切换Tab
 const handleClick = (tab: TabsPaneContext, event: Event) => {
   activeName.value = String(tab.props.name)
   sessionStorage.setItem('activeName', activeName.value)
+}
+
+// 移除标签
+const handleRemoveClick = (targetName: string) => {
+  consoleTabs.value.map((item) => {
+    if (item.name === targetName) {
+      item.component = null
+    } else {
+      item.component = markRaw(Termmail)
+    }
+  })
+  let index = consoleTabs.value.findIndex((tab) => tab.name === targetName)
+  consoleTabs.value = consoleTabs.value.filter((tab) => String(tab.name) != targetName)
+  state.d_groupData.map((item) => {
+    if (item.name === activeName.value) {
+      item.isShowTermail = false
+    }
+  })
+  if (consoleTabs.value.length != 0 && index != consoleTabs.value.length && activeName.value != 'testbedManagement') {
+    activeName.value = consoleTabs.value[index].name
+  } else {
+    activeName.value = 'testbedManagement'
+  }
+  sessionStorage.setItem('activeName', 'testbedManagement')
 }
 
 const getBuildName = (value) => {}
@@ -674,6 +703,7 @@ const searchDevice = (val) => {
 }
 
 onMounted(() => {
+  ;['testbedManagement', 'buildManagement', 'showTestCase'].includes(activeName.value) == true ? '' : (activeName.value = 'testbedManagement')
   getDevice()
   getD_typeApi()
   getD_group(1, '')
@@ -980,13 +1010,13 @@ const optionsPushType = (arr) => {
 }
 
 const openConsole = async (row) => {
-  if (isShowTermail.value) {
-    ElMessage({
-      message: '已有打开的终端,请先关闭!',
-      type: 'warning'
-    })
-    return
-  }
+  // if (isShowTermail.value) {
+  //   ElMessage({
+  //     message: '已有打开的终端,请先关闭!',
+  //     type: 'warning'
+  //   })
+  //   return
+  // }
   await getDeviceInfo(row)
   termmailId.value = row
 }
@@ -994,6 +1024,8 @@ const openConsole = async (row) => {
 const cloeConsole = (row) => {
   row.isShowTermail = false
   isShowTermail.value = false
+  handleRemoveClick(row.name)
+  sessionStorage.setItem('activeName', 'testbedManagement')
 }
 
 const handleGroupSizeChange = (val: number) => {
@@ -1024,8 +1056,14 @@ const getDeviceInfo = async (data) => {
       })
     } else {
       termmailInfo.value = res.data[0]
+      await (activeName.value = String(data.name))
+      await consoleTabs.value.push(data)
+      consoleTabs.value.map((item) => {
+        item.component = markRaw(Termmail)
+      })
       data.isShowTermail = true
       isShowTermail.value = true
+      console.log(`output->data`, consoleTabs.value)
     }
   }
   console.log('设备管理...', termmailInfo.value)
