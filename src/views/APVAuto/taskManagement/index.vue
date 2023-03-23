@@ -43,7 +43,7 @@
           </div>
         </div>
 
-        <el-table :data="state.tableData" stripe style="width: 100%" v-loading="tableLoading" height="65vh">
+        <el-table :data="state.tableData" stripe style="width: 100%" v-loading="tableLoading" height="65vh" :element-loading-text="loadingText">
           <!-- <el-table-column prop="id" label="任务ID" align="center" width="60" /> -->
           <el-table-column prop="name" label="任务名称" align="center" width="150" />
           <el-table-column prop="user" label="负责人" align="center" width="100" />
@@ -525,7 +525,7 @@ import type { TabsPaneContext } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Calendar, Search, SwitchButton, CircleClose, VideoPlay, Promotion, RefreshRight, Warning, VideoPause } from '@element-plus/icons-vue'
-import { ElInput } from 'element-plus'
+import { ElInput, ElNotification } from 'element-plus'
 import {
   deviceApi,
   addDeviceApi,
@@ -569,6 +569,7 @@ const groupDialogVisible = ref(false)
 const taskProgressDialog = ref(false)
 const platformDialog = ref(false)
 const tableLoading = ref(false)
+const loadingText = ref('')
 const editDisabled = ref(false)
 const showDetail = ref(false)
 const submitPreviewDialog = ref(false)
@@ -1364,12 +1365,18 @@ const confirmContinue = () => {
 }
 
 const checkAPV = async (id) => {
+  tableLoading.value = true
+  loadingText.value = 'APV环境检测中...'
   const res = await getCheckAPVApi({ id })
   if (res.code === 1000) {
-    ElMessage({
-      message: res?.data || 'APV环境检测成功',
-      type: 'success',
-      duration: 1500
+    tableLoading.value = false
+    loadingText.value = ''
+    ElNotification.success({
+      title: 'APV环境检测成功！',
+      message: res?.data.replaceAll('\n', '<br>'),
+      offset: 200,
+      duration: 20000,
+      dangerouslyUseHTMLString: true
     })
   }
 }
@@ -1954,5 +1961,8 @@ const handleTaskCurrentChange = (val: number) => {
     display: flex !important;
     justify-content: center !important;
   }
+}
+.el-notification {
+  width: 30vw !important;
 }
 </style>
