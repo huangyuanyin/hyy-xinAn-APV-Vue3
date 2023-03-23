@@ -164,12 +164,23 @@
               <div class="stateStyle hhh" v-if="scope.row.state === 'ready'">
                 <!-- <div class="status-point hhh" style="background-color: #666666"></div>
                 <span style="color: #666666">准备中</span> -->
-                <el-tooltip content="准备中" placement="top" effect="dark"><svg-icon style="width: 30px" iconName="icon-shuqianzhunbeizhong"></svg-icon></el-tooltip>
+                <el-tooltip content="准备中" placement="top" effect="dark"><svg-icon style="width: 30px" iconName="icon-dengdaizhong"></svg-icon></el-tooltip>
+              </div>
+              <div class="stateStyle" v-if="scope.row.state === 'waitcheck'">
+                <el-tooltip content="测试环境待检" placement="top" effect="dark"><svg-icon style="width: 30px" iconName="icon-shuqianzhunbeizhong"></svg-icon></el-tooltip>
               </div>
             </template>
           </el-table-column>
           <el-table-column prop="state" label="任务启停" align="center" width="150">
             <template #default="scope">
+              <div class="stateStyle" v-if="scope.row.state === 'waitcheck'">
+                <el-tooltip content="APV环境检测" placement="top" effect="dark">
+                  <el-icon :size="30" style="color: #f56c6c" @click="checkAPV(scope.row.id)"><Warning /></el-icon>
+                </el-tooltip>
+                <el-tooltip content="测试环境释放" placement="top" effect="dark">
+                  <el-icon :size="30" style="color: #000; margin-left: 10px" @click="releaseAPV(scope.row.id)"><Promotion /></el-icon>
+                </el-tooltip>
+              </div>
               <div class="stateStyle" v-if="scope.row.state === 'stop'">
                 <el-tooltip content="重新执行所有测试用例，并删除上次的测试结果" placement="top" effect="dark">
                   <el-icon :size="30" style="color: #909399" @click="changeTaskStatus('start', scope.row, true)"><RefreshRight /></el-icon>
@@ -307,7 +318,7 @@
               @remove-tag="deleteGroupDataId"
               :disabled="titleDialog === '任务详情'"
             >
-              <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name" :value="item.name">
+              <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name" :value="item.name" :disabled="item.status">
                 <span style="float: left">{{ item.ip }} -- {{ item.name }}</span>
               </el-option>
             </el-select>
@@ -510,7 +521,7 @@ import { ref, reactive } from 'vue'
 import type { TabsPaneContext } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { Calendar, Search, SwitchButton, CircleClose, VideoPlay, RefreshRight, VideoPause } from '@element-plus/icons-vue'
+import { Calendar, Search, SwitchButton, CircleClose, VideoPlay, Promotion, RefreshRight, Warning, VideoPause } from '@element-plus/icons-vue'
 import { ElInput } from 'element-plus'
 import {
   deviceApi,
@@ -536,7 +547,9 @@ import {
   deleteTestPlatApi,
   putTestPlatApi,
   getCaseApi,
-  getTaskConfigApi
+  getTaskConfigApi,
+  getCheckAPVApi,
+  getReleaseAPVApi
 } from '@/api/APV/taskManagement.js'
 import { getReportApi } from '@/api/APV/testReport.js'
 import { buildApi } from '@/api/APV/buildManagement.js'
@@ -1347,6 +1360,28 @@ const confirmContinue = () => {
   continueDialogVisible.value = false
 }
 
+const checkAPV = async (id) => {
+  const res = await getCheckAPVApi({ id })
+  if (res.code === 1000) {
+    ElMessage({
+      message: res?.data || 'APV环境检测成功',
+      type: 'success',
+      duration: 1500
+    })
+  }
+}
+
+const releaseAPV = async (id) => {
+  const res = await getReleaseAPVApi({ id })
+  if (res.code === 1000) {
+    ElMessage({
+      message: res?.msg || '测试环境释放成功',
+      type: 'success',
+      duration: 1500
+    })
+  }
+}
+
 // 任务start or stop api
 const getTaskStatus = async (params, name) => {
   if (params.state === 'stop') {
@@ -1580,6 +1615,9 @@ const handleTaskCurrentChange = (val: number) => {
     width: 25px;
     height: 25px;
     cursor: pointer;
+    &:hover {
+      background-color: #eeeeee;
+    }
   }
 }
 .my-header {
