@@ -35,10 +35,10 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref } from 'vue'
-import { Document, Menu as IconMenu, Location, School, DataLine, House } from '@element-plus/icons-vue'
+import { Document, Menu as IconMenu, Location, School, DataLine, House, Monitor } from '@element-plus/icons-vue'
 import { useAppStore } from '../store/modules/app/index'
 export default defineComponent({
-  components: { Document, IconMenu, Location, School, House, DataLine },
+  components: { Document, IconMenu, Location, School, House, DataLine, Monitor },
   props: {
     menuList: {
       type: Array,

@@ -153,6 +153,14 @@ const routes = [
               title: '数据分析'
             },
             component: () => import('@/views/APVAuto/templateReport/dataAnalysis.vue')
+          },
+          {
+            path: '/APVAuto/debugMode',
+            name: 'DebugMode',
+            meta: {
+              title: '调试模式'
+            },
+            component: () => import('@/views/APVAuto/debugMode/index.vue')
           }
         ]
       },

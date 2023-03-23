@@ -18,7 +18,7 @@
       <el-table-column fixed="right" label="操作" align="center" width="220">
         <template #default="scope">
           <el-button link type="primary" size="small" @click="openAddDialog('edit', scope.row.id)">编辑 </el-button>
-          <el-popconfirm title="确定删除这个串口服务器?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消" @confirm="handleDelete('group', scope.row.id)">
+          <el-popconfirm title="确定删除这个串口服务器?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消" @confirm="handleDelete(scope.row.id)">
             <template #reference>
               <el-button link type="danger" size="small">删除</el-button>
             </template>
@@ -175,6 +175,10 @@ const openAddDialog = (type, id) => {
 const handleClose = () => {
   addSerialServerRuleFormRef.value.resetFields()
   serialServerDialog.value = false
+}
+
+const handleDelete = (id) => {
+  console.log(id)
 }
 
 const onReseSerialServerRuleForm = (formEl: FormInstance | undefined) => {

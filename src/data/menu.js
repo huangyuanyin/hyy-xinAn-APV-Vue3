@@ -1,67 +1,67 @@
 export const cheshiMenuData = [
   {
-    id: "01",
-    title: "测试",
+    id: '01',
+    title: '测试',
     path: null,
     isDisabled: true,
     type: 1,
-    children: [],
+    children: []
   },
   {
-    id: "02",
-    title: "概览",
-    path: "/test/overview",
+    id: '02',
+    title: '概览',
+    path: '/test/overview',
     isDisabled: false,
-    children: [],
+    children: []
   },
   {
-    id: "03",
-    title: "测试管理",
+    id: '03',
+    title: '测试管理',
     path: null,
     isDisabled: false,
     children: [
       {
-        id: "0301",
-        title: "测试一",
-        path: "/ceshiOne",
+        id: '0301',
+        title: '测试一',
+        path: '/ceshiOne',
         isDisabled: false,
-        children: [],
-      },
-    ],
-  },
-];
+        children: []
+      }
+    ]
+  }
+]
 
 export const APVAutoMenuData = [
   {
-    id: "01",
-    title: "APV自动化",
+    id: '01',
+    title: 'APV自动化',
     path: null,
     isDisabled: true,
-    children: [],
+    children: []
   },
   {
-    id: "02",
-    title: "概览",
-    path: "/APVAuto/overview",
-    icon: "House",
+    id: '02',
+    title: '概览',
+    path: '/APVAuto/overview',
+    icon: 'House',
     isDisabled: false,
-    children: [],
+    children: []
   },
   {
-    id: "0301",
-    title: "资源管理",
-    path: "/APVAuto/deviceManagement",
-    icon: "School",
+    id: '0301',
+    title: '资源管理',
+    path: '/APVAuto/deviceManagement',
+    icon: 'School',
     isDisabled: false,
-    children: [],
+    children: []
   },
   {
-    id: "0304",
-    title: "任务管理",
-    path: "/APVAuto/taskManagement",
-    icon: "DataLine",
+    id: '0304',
+    title: '任务管理',
+    path: '/APVAuto/taskManagement',
+    icon: 'DataLine',
     isDisabled: false,
-    children: [],
+    children: []
   },
   // {
   //   id: "0302",
@@ -71,11 +71,19 @@ export const APVAutoMenuData = [
   //   children: [],
   // },
   {
-    id: "0303",
-    title: "测试报告",
-    path: "/APVAuto/templateReport",
-    icon: "Document",
+    id: '0303',
+    title: '测试报告',
+    path: '/APVAuto/templateReport',
+    icon: 'Document',
     isDisabled: false,
-    children: [],
+    children: []
   },
-];
+  {
+    id: '0304',
+    title: '调试模式',
+    path: '/APVAuto/debugMode',
+    icon: 'Monitor',
+    isDisabled: false,
+    children: []
+  }
+]

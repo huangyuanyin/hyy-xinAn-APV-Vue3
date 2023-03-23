@@ -213,6 +213,9 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
+.el-card {
+  margin-top: 15px;
+}
 .exportForm {
   display: flex;
   justify-content: end;
