@@ -174,8 +174,11 @@
           <el-table-column prop="state" label="任务启停" align="center" width="150">
             <template #default="scope">
               <div class="stateStyle" v-if="scope.row.state === 'waitcheck'">
+                <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
+                  <el-icon :size="30" style="color: #409eff" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
+                </el-tooltip>
                 <el-tooltip content="APV环境检测" placement="top" effect="dark">
-                  <el-icon :size="30" style="color: #f56c6c" @click="checkAPV(scope.row.id)"><Warning /></el-icon>
+                  <el-icon :size="30" style="color: #f56c6c; margin-left: 10px" @click="checkAPV(scope.row.id)"><Warning /></el-icon>
                 </el-tooltip>
                 <el-tooltip content="测试环境释放" placement="top" effect="dark">
                   <el-icon :size="30" style="color: #000; margin-left: 10px" @click="releaseAPV(scope.row.id)"><Promotion /></el-icon>
