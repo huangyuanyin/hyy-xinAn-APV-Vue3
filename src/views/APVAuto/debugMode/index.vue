@@ -1,5 +1,5 @@
 <template>
-  <el-card shadow="never">
+  <el-card shadow="never" v-if="!isDebugMode">
     <div class="debugMode-wrap">
       <el-button type="primary" size="large" @click="openDebugMode('add')">新增</el-button>
       <div class="ignore-select-wrap">
@@ -15,7 +15,7 @@
         <template #default="scope">
           <el-button link type="primary" size="small" @click="openDebugMode('edit', scope.row.id)">编辑</el-button>
           <el-button link type="primary" size="small" @click="toMark(scope.row.id)">一键升降</el-button>
-          <el-button link type="primary" size="small" @click="toDetail(scope.row.id, 'history')">Debug</el-button>
+          <el-button link type="primary" size="small" @click="toDebug(scope.row.id)">Debug</el-button>
           <el-popconfirm title="确定删除这个平台?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消" @confirm="handleDelete(scope.row.id)">
             <template #reference>
               <el-button link type="danger" size="small">删除</el-button>
@@ -57,20 +57,39 @@
       </span>
     </template>
   </el-dialog>
+  <div class="debugMode-ing" v-if="isDebugMode">
+    <div class="tip">
+      <span class="tip-title" style="margin-right: 30px">您已进入【设备1】调试模式....</span>
+      <el-button type="danger" size="large" @click="closeDebugMode">退出调试</el-button>
+    </div>
+    <Termail :termmailInfo="termmailInfo" :isShowClose="false" :TerminalCols="43" @closeTermmail="cloeConsole(termmailId)"></Termail>
+  </div>
+  <el-dialog> </el-dialog>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, reactive } from 'vue'
+import { onMounted, onBeforeUnmount, ref, reactive } from 'vue'
 import { getReportApi } from '@/api/APV/testReport.js'
-import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { utc2beijing } from '@/utils/util.js'
 import { Search } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
+import Termail from '@/components/Termail.vue'
 
 const route = useRoute()
 const router = useRouter()
 const debugModeTableRef = ref()
+const isDebugMode = ref(false)
+const termmailInfo = ref({
+  id: 141,
+  ip: '10.4.127.140',
+  uname: 'sunyb',
+  gid__name: '140',
+  passw: 'click1',
+  type: 'console'
+})
+const termmailId = ref('')
 const tableData = ref([
   { name: '平台一', model: '型号一', user: '管理员', uptime: '2023/3/8 14:25:23' },
   { name: '平台一', model: '型号一', user: '管理员', uptime: '2023/3/8 14:25:23' },
@@ -132,31 +151,31 @@ const openDebugMode = (type, id?) => {
   }
 }
 
-// 跳转详情
-const toDetail = (id, type) => {
-  switch (type) {
-    case 'detail': {
-      router.push({
-        path: '/APVAuto/reportDetail',
-        query: {
-          resultid: id
-        }
+const toDebug = (id) => {
+  isDebugMode.value = true
+}
+
+const cloeConsole = (row) => {
+  termmailId.value = ''
+  isDebugMode.value = true
+}
+
+const closeDebugMode = () => {
+  ElMessageBox.confirm('该操作会退出调试模式?', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(() => {
+      termmailId.value = ''
+      isDebugMode.value = false
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: '取消操作'
       })
-      break
-    }
-    case 'history':
-      router.push(`/APVAuto/historyReport/${id}`)
-      break
-    case 'FailNumDetail':
-      router.push({
-        path: `/APVAuto/templateReport/failNumDetail`,
-        query: {
-          reportId: id
-        }
-      })
-    default:
-      break
-  }
+    })
 }
 
 const dateFormatter = (row, column) => {
@@ -195,10 +214,50 @@ const handleCurrentChange = (val: number) => {
   getReport(currentPage.value)
 }
 
-onMounted(async () => {})
+onMounted(async () => {
+  window.addEventListener('beforeunload', handleRefresh)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeunload', handleRefresh)
+})
+
+function handleRefresh() {
+  event.preventDefault()
+  event.returnValue = ''
+}
+
+onBeforeRouteLeave((to, from, next) => {
+  if (!isDebugMode.value) {
+    next()
+  } else {
+    ElMessageBox.confirm('该操作会退出调试模式！', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+      .then(() => {
+        termmailId.value = ''
+        isDebugMode.value = false
+        next()
+      })
+      .catch(() => {
+        ElMessage({
+          type: 'info',
+          message: '取消操作'
+        })
+      })
+  }
+})
 </script>
 
 <style lang="scss" scoped>
+.debugMode-ing {
+  .tip {
+    .tip-title {
+    }
+  }
+}
 .el-card {
   margin-top: 15px;
 }
