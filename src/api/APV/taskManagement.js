@@ -127,6 +127,6 @@ export function getReleaseAPVApi(params) {
     url: `/autoapv/task_group/`,
     method: 'put',
     urlType: 'APV',
-    data: params
+    params
   })
 }

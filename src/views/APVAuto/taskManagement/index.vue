@@ -175,49 +175,49 @@
             <template #default="scope">
               <div class="stateStyle" v-if="scope.row.state === 'waitcheck'">
                 <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
-                  <el-icon :size="30" style="color: #409eff" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
+                  <el-icon :size="22" style="color: #409eff" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
                 </el-tooltip>
                 <el-tooltip content="APV环境检测" placement="top" effect="dark">
-                  <el-icon :size="30" style="color: #f56c6c; margin-left: 10px" @click="checkAPV(scope.row.id)"><Warning /></el-icon>
+                  <el-icon :size="22" style="color: #f56c6c; margin-left: 10px" @click="checkAPV(scope.row.id)"><Warning /></el-icon>
                 </el-tooltip>
                 <el-tooltip content="测试环境释放" placement="top" effect="dark">
-                  <el-icon :size="30" style="color: #000; margin-left: 10px" @click="releaseAPV(scope.row.id)"><Promotion /></el-icon>
+                  <el-icon :size="22" style="color: #000; margin-left: 10px" @click="releaseAPV(scope.row.id)"><Promotion /></el-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'stop'">
                 <el-tooltip content="重新执行所有测试用例，并删除上次的测试结果" placement="top" effect="dark">
-                  <el-icon :size="30" style="color: #909399" @click="changeTaskStatus('start', scope.row, true)"><RefreshRight /></el-icon>
+                  <el-icon :size="22" style="color: #909399" @click="changeTaskStatus('start', scope.row, true)"><RefreshRight /></el-icon>
                 </el-tooltip>
                 <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
-                  <el-icon :size="30" style="color: #409eff; margin-left: 10px" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
+                  <el-icon :size="22" style="color: #409eff; margin-left: 10px" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle fail" v-if="scope.row.state === 'fail'">
                 <el-tooltip content="重新执行所有测试用例，并删除上次的测试结果" placement="top" effect="dark">
-                  <el-icon :size="30" style="color: #909399" @click="changeTaskStatus('start', scope.row, true)"><RefreshRight /></el-icon>
+                  <el-icon :size="22" style="color: #909399" @click="changeTaskStatus('start', scope.row, true)"><RefreshRight /></el-icon>
                 </el-tooltip>
                 <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
-                  <el-icon :size="30" style="color: #409eff; margin-left: 10px" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
+                  <el-icon :size="22" style="color: #409eff; margin-left: 10px" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'running'">
                 <el-tooltip content="任务暂停" placement="top" effect="dark">
-                  <el-icon :size="30" style="color: #e6a23c" @click="changeTaskStatus('stop', scope.row, false)"><VideoPause /></el-icon>
+                  <el-icon :size="22" style="color: #e6a23c" @click="changeTaskStatus('stop', scope.row, false)"><VideoPause /></el-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'create'">
                 <el-tooltip content="任务启动" placement="top" effect="dark">
-                  <el-icon :size="30" style="color: #67c23a" @click="changeTaskStatus('start', scope.row, false)"><SwitchButton /></el-icon>
+                  <el-icon :size="22" style="color: #67c23a" @click="changeTaskStatus('start', scope.row, false)"><SwitchButton /></el-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'complete'">
                 <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
-                  <el-icon :size="30" style="color: #409eff" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
+                  <el-icon :size="22" style="color: #409eff" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'ready'">
                 <el-tooltip content="任务准备中，禁止操作" placement="top" effect="dark">
-                  <el-icon :size="30" style="color: #f56c6c; cursor: no-drop"><CircleClose /></el-icon>
+                  <el-icon :size="22" style="color: #f56c6c; cursor: no-drop"><CircleClose /></el-icon>
                 </el-tooltip>
               </div>
             </template>
@@ -1045,7 +1045,7 @@ onMounted(async () => {
 const handle = () => {
   state.tableData.map((item, index) => {
     item.number = [].concat(item.counts, item.fail_cases)
-    item.uptimeAfter = utc2beijing(item.start_time) // '2022-09-16T17:44:08Z' => '2022/9/16 16:43:40'
+    item.uptimeAfter = utc2beijing(item.start_time) // '2022-09-16T17:44:08Z' => '2022/9/22 22:43:40'
     // let groupData = item.group.replace(/\[|]/g, '').split(",") // 将 '[21,22,23]' => [21,22,23]
     item.groupAfter = [] // 成功的测试平台回显展示
     item.failGroupAfter = [] // 失败的测试平台回显展示
