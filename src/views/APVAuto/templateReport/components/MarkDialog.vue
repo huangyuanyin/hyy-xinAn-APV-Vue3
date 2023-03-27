@@ -14,9 +14,9 @@
   </el-dialog>
 </template>
 
-<script lang='ts' setup>
-import { ref, reactive, defineProps, defineEmits, toRefs } from 'vue'
-import type { FormInstance, FormRules } from "element-plus";
+<script lang="ts" setup>
+import { ref, reactive, toRefs } from 'vue'
+import type { FormInstance, FormRules } from 'element-plus'
 
 const props = defineProps({
   isShowDialog: {
@@ -31,32 +31,27 @@ const props = defineProps({
 
 const { isShowDialog } = toRefs(props)
 const emits = defineEmits(['closeMarkDialog'])
-const markData = ref({ name: "" })
-const addMarkRuleFormRef = ref<FormInstance>();
+const markData = ref({ name: '' })
+const addMarkRuleFormRef = ref<FormInstance>()
 const addMarkFormRules = reactive<FormRules>({
-  name: [
-    { required: true, message: "标记名称不能为空", trigger: "blur" },
-  ],
-});
+  name: [{ required: true, message: '标记名称不能为空', trigger: 'blur' }]
+})
 
 const closeDialog = () => {
   emits('closeMarkDialog', false)
 }
 
 const submitDialog = async (formEl: FormInstance | undefined) => {
-  if (!formEl) return;
+  if (!formEl) return
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       markData.value.name = ''
       closeDialog()
     } else {
-      console.log("error submit!", fields);
+      console.log('error submit!', fields)
     }
-  });
+  })
 }
-
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

@@ -61,7 +61,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, reactive, toRef, toRefs, defineProps } from 'vue'
+import { onMounted, ref, reactive, toRef, toRefs } from 'vue'
 import { getReportApi } from '@/api/APV/testReport.js'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'

@@ -259,7 +259,8 @@ const handleCloseDrawer = (done: () => void) => {
 }
 
 const handleClose = () => {
-  addDebugModeRuleFormRef.value.resetFields()
+  addDebugModeRuleFormRef.value?.resetFields()
+  addBuildFormRuleFormRef.value?.resetFields()
   debugModeDialog.value = false
   buildDialog.value = false
 }
