@@ -51,7 +51,7 @@ const routes = [
             name: 'DeviceManagement',
             meta: {
               title: '资源管理',
-              keepAlive: false
+              keepAlive: true
             },
             component: () => import('@/views/APVAuto/deviceManagement/index.vue')
           },

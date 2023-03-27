@@ -1,5 +1,5 @@
 <template>
-  <el-card shadow="never" v-if="!isDebugMode">
+  <el-card shadow="never">
     <div class="debugMode-wrap">
       <el-button type="primary" size="large" @click="openDebugMode('add')">新增</el-button>
       <div class="ignore-select-wrap">
@@ -57,22 +57,48 @@
       </span>
     </template>
   </el-dialog>
-  <div class="debugMode-ing" v-if="isDebugMode">
-    <div class="tip">
-      <span class="tip-title" style="margin-right: 30px">您已进入【设备1】调试模式....</span>
-      <el-button type="danger" size="large" @click="closeDebugMode">退出调试</el-button>
-    </div>
-    <Termail :termmailInfo="termmailInfo" :isShowClose="false" :TerminalCols="43" @closeTermmail="cloeConsole(termmailId)"></Termail>
-  </div>
-  <el-dialog> </el-dialog>
+  <el-dialog v-model="buildDialog" title="一键升降" width="35%" @close="handleClose">
+    <span>
+      <el-form :inline="false" :model="buildForm" ref="addBuildFormRuleFormRef" :rules="addBuildFormRules" class="build-form" label-width="150px">
+        <el-form-item label="升降方式" prop="name">
+          <el-radio-group v-model="buildForm.name">
+            <el-radio label="现有版本" />
+            <el-radio label="下载链接" />
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="选择版本" prop="model" v-if="buildForm.name === '现有版本'">
+          <el-select v-model="buildForm.model" placeholder="请选择版本">
+            <el-option label="版本一" value="shanghai" />
+            <el-option label="版本二" value="beijing" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="下载链接" prop="user" v-if="buildForm.name === '下载链接'">
+          <el-input v-model="buildForm.user" placeholder="请输入版本下载链接..." />
+        </el-form-item>
+      </el-form>
+    </span>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="onReseBuildRuleForm(addBuildFormRuleFormRef)">取消</el-button>
+        <el-button type="primary" @click="onSubmitBuildForm(addBuildFormRuleFormRef)">确定</el-button>
+      </span>
+    </template>
+  </el-dialog>
+  <el-drawer v-model="drawer" direction="rtl" :before-close="handleCloseDrawer" :show-close="false" size="80%" custom-class="consoleDrawer" :destroy-on-close="true">
+    <template #header="{ close, titleId, titleClass }">
+      <h4 :class="titleClass" id="typing-text"></h4>
+      <el-button type="danger" @click="handleCloseDrawer"> 退出调试 </el-button>
+    </template>
+    <Termail v-if="showTermail" :termmailInfo="termmailInfo" :isShowClose="false" :TerminalCols="47" @closeTermmail="cloeConsole(termmailId)"></Termail>
+  </el-drawer>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onBeforeUnmount, ref, reactive } from 'vue'
+import { onMounted, onBeforeUnmount, ref, reactive, nextTick } from 'vue'
 import { getReportApi } from '@/api/APV/testReport.js'
 import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { utc2beijing } from '@/utils/util.js'
+import { utc2beijing, textLoop } from '@/utils/util.js'
 import { Search } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import Termail from '@/components/Termail.vue'
@@ -80,7 +106,8 @@ import Termail from '@/components/Termail.vue'
 const route = useRoute()
 const router = useRouter()
 const debugModeTableRef = ref()
-const isDebugMode = ref(false)
+const drawer = ref(false)
+const showTermail = ref(false)
 const termmailInfo = ref({
   id: 141,
   ip: '10.4.127.140',
@@ -101,7 +128,6 @@ const tableData = ref([
   { name: '平台一', model: '型号一', user: '管理员', uptime: '2023/3/8 14:25:23' },
   { name: '平台一', model: '型号一', user: '管理员', uptime: '2023/3/8 14:25:23' }
 ])
-const isShowMarkDialog = ref(false)
 const loading = ref(false)
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -110,6 +136,7 @@ const searchUser = ref('')
 const searchBuild = ref('')
 const searchGroup = ref('')
 const debugModeDialog = ref(false)
+const buildDialog = ref(false)
 const titleDialog = ref('')
 const form = ref({
   name: '',
@@ -118,6 +145,17 @@ const form = ref({
 })
 const addDebugModeRuleFormRef = ref<FormInstance>()
 const addDebugModeFormRules = reactive<FormRules>({
+  name: [{ required: true, message: '平台名称不能为空', trigger: 'blur' }],
+  model: [{ required: true, message: '硬件型号不能为空', trigger: 'blur' }],
+  user: [{ required: true, message: '调试人不能为空', trigger: 'blur' }]
+})
+const buildForm = reactive({
+  name: '现有版本',
+  model: '',
+  user: ''
+})
+const addBuildFormRuleFormRef = ref<FormInstance>()
+const addBuildFormRules = reactive<FormRules>({
   name: [{ required: true, message: '平台名称不能为空', trigger: 'blur' }],
   model: [{ required: true, message: '硬件型号不能为空', trigger: 'blur' }],
   user: [{ required: true, message: '调试人不能为空', trigger: 'blur' }]
@@ -152,30 +190,16 @@ const openDebugMode = (type, id?) => {
 }
 
 const toDebug = (id) => {
-  isDebugMode.value = true
+  drawer.value = true
+  nextTick(() => {
+    showTermail.value = true
+    textLoop('您已进入【设备1】调试模式......', 'typing-text')
+  })
 }
 
 const cloeConsole = (row) => {
   termmailId.value = ''
-  isDebugMode.value = true
-}
-
-const closeDebugMode = () => {
-  ElMessageBox.confirm('该操作会退出调试模式?', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  })
-    .then(() => {
-      termmailId.value = ''
-      isDebugMode.value = false
-    })
-    .catch(() => {
-      ElMessage({
-        type: 'info',
-        message: '取消操作'
-      })
-    })
+  showTermail.value = false
 }
 
 const dateFormatter = (row, column) => {
@@ -184,7 +208,7 @@ const dateFormatter = (row, column) => {
 }
 
 const toMark = (id) => {
-  isShowMarkDialog.value = true
+  buildDialog.value = true
 }
 
 const onReseDebugModeRuleForm = (formEl: FormInstance | undefined) => {
@@ -201,9 +225,43 @@ const onSubmitDebugModeForm = async (formEl: FormInstance | undefined) => {
   })
 }
 
+const onReseBuildRuleForm = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  buildDialog.value = false
+}
+
+const onSubmitBuildForm = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate(async (valid, fields) => {
+    if (valid) {
+    }
+  })
+}
+
+const handleCloseDrawer = (done: () => void) => {
+  ElMessageBox.confirm('该操作会退出调试模式！', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(() => {
+      drawer.value = false
+      showTermail.value = false
+      termmailId.value = ''
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: '取消操作'
+      })
+    })
+}
+
 const handleClose = () => {
   addDebugModeRuleFormRef.value.resetFields()
   debugModeDialog.value = false
+  buildDialog.value = false
 }
 
 const handleSizeChange = (val: number) => {
@@ -214,41 +272,9 @@ const handleCurrentChange = (val: number) => {
   getReport(currentPage.value)
 }
 
-onMounted(async () => {
-  window.addEventListener('beforeunload', handleRefresh)
-})
+onMounted(async () => {})
 
-onBeforeUnmount(() => {
-  window.removeEventListener('beforeunload', handleRefresh)
-})
-
-function handleRefresh() {
-  event.preventDefault()
-  event.returnValue = ''
-}
-
-onBeforeRouteLeave((to, from, next) => {
-  if (!isDebugMode.value) {
-    next()
-  } else {
-    ElMessageBox.confirm('该操作会退出调试模式！', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
-      .then(() => {
-        termmailId.value = ''
-        isDebugMode.value = false
-        next()
-      })
-      .catch(() => {
-        ElMessage({
-          type: 'info',
-          message: '取消操作'
-        })
-      })
-  }
-})
+onBeforeUnmount(() => {})
 </script>
 
 <style lang="scss" scoped>
@@ -311,6 +337,17 @@ onBeforeRouteLeave((to, from, next) => {
     .el-input {
       width: 220px;
     }
+  }
+}
+</style>
+
+<style lang="scss">
+.consoleDrawer {
+  .el-drawer__header {
+    margin-bottom: 0px !important;
+  }
+  .console-wrap {
+    height: 88vh;
   }
 }
 </style>
