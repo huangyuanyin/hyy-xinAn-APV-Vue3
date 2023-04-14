@@ -96,7 +96,7 @@
       </span>
     </template>
   </el-dialog>
-  <el-dialog v-model="buildDialog" title="一键升降" width="35%" @close="handleClose">
+  <el-dialog v-model="buildDialog" title="设备升级" width="35%" @close="handleClose">
     <span>
       <el-form :inline="false" :model="buildForm" ref="addBuildFormRuleFormRef" :rules="addBuildFormRules" class="build-form" label-width="150px">
         <el-form-item label="升降方式">
@@ -131,7 +131,7 @@
   </el-drawer>
   <el-card shadow="never" v-if="showTermail">
     <div class="debugButton">
-      <el-button type="success" @click="toMark()"> 一键升降 </el-button>
+      <el-button type="success" @click="toMark()"> 设备升级 </el-button>
       <el-button type="danger" @click="handleCloseDrawer"> 退出调试 </el-button>
     </div>
     <el-tabs v-model="activeName" class="tabs" @tab-click="handleClick">
@@ -312,7 +312,7 @@ const onSubmitBuildForm = async (formEl: FormInstance | undefined) => {
       }
       let res = await debugUpbuild(params)
       if (res.code === 1000) {
-        ElMessage.success('一键升降级成功！')
+        ElMessage.success('设备升级级成功！')
         buildDialog.value = false
       }
     }
