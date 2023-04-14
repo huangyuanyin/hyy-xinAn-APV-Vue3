@@ -38,3 +38,13 @@ export function exitDebugApi(id) {
     urlType: 'APV'
   })
 }
+
+// 一键升级
+export function debugUpbuild(params) {
+  return request({
+    url: `/debug/upbuild/`,
+    method: 'put',
+    urlType: 'APV',
+    params
+  })
+}

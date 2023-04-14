@@ -99,19 +99,18 @@
   <el-dialog v-model="buildDialog" title="一键升降" width="35%" @close="handleClose">
     <span>
       <el-form :inline="false" :model="buildForm" ref="addBuildFormRuleFormRef" :rules="addBuildFormRules" class="build-form" label-width="150px">
-        <el-form-item label="升降方式" prop="name">
-          <el-radio-group v-model="buildForm.name">
+        <el-form-item label="升降方式">
+          <el-radio-group v-model="selectionMethod">
             <el-radio label="现有版本" />
-            <el-radio label="下载链接" />
+            <el-radio label="下载链接" disabled />
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="选择版本" prop="model" v-if="buildForm.name === '现有版本'">
-          <el-select v-model="buildForm.model" placeholder="请选择版本">
-            <el-option label="版本一" value="shanghai" />
-            <el-option label="版本二" value="beijing" />
+        <el-form-item label="选择版本" prop="build" v-if="selectionMethod === '现有版本'">
+          <el-select v-model="buildForm.build" placeholder="请选择版本">
+            <el-option :label="item.name" :value="item.name" v-for="(item, index) in buildData" :key="'buildData' + index" />
           </el-select>
         </el-form-item>
-        <el-form-item label="下载链接" prop="user" v-if="buildForm.name === '下载链接'">
+        <el-form-item label="下载链接" prop="user" v-if="selectionMethod === '下载链接'">
           <el-input v-model="buildForm.user" placeholder="请输入版本下载链接..." />
         </el-form-item>
       </el-form>
@@ -159,13 +158,15 @@ import { utc2beijing } from '@/utils/util.js'
 import { Search } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules, TabsPaneContext } from 'element-plus'
 import Termmail from '@/components/debugTermail.vue'
-import { debugTaskApi, toDebugApi, exitDebugApi, addDebugTaskApi } from '@/api/APV/debugTask.js'
+import { debugTaskApi, toDebugApi, exitDebugApi, addDebugTaskApi, debugUpbuild } from '@/api/APV/debugTask.js'
 import { d_groupApi } from '@/api/APV/index.js'
+import { buildApi } from '@/api/APV/buildManagement.js'
 
 const route = useRoute()
 const router = useRouter()
 const username = JSON.parse(localStorage.getItem('userInfo'))?.nickname
 const activeName = ref('console')
+const selectionMethod = ref('现有版本')
 const consoleTabs = ref([]) // 控制台tabs
 const debugModeTableRef = ref()
 const drawer = ref(false)
@@ -173,6 +174,7 @@ const showTermail = ref(false)
 const groupList = ref([]) // 平台列表
 const visibleOptions = ref([]) // 可见的平台列表
 const groupListTotal = ref(0) // 平台列表总数
+const buildData = ref([]) // 版本列表
 const groupPage = ref(1)
 const termmailId = ref('')
 const tableData = ref([])
@@ -197,13 +199,13 @@ const addDebugModeFormRules = reactive<FormRules>({
 })
 const buildForm = reactive({
   name: '现有版本',
-  model: '',
+  build: '',
   user: ''
 })
 const addBuildFormRuleFormRef = ref<FormInstance>()
 const addBuildFormRules = reactive<FormRules>({
   name: [{ required: true, message: '平台名称不能为空', trigger: 'blur' }],
-  model: [{ required: true, message: '硬件型号不能为空', trigger: 'blur' }],
+  build: [{ required: true, message: '请选择不能为空', trigger: 'blur' }],
   user: [{ required: true, message: '调试人不能为空', trigger: 'blur' }]
 })
 
@@ -303,6 +305,16 @@ const onSubmitBuildForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate(async (valid, fields) => {
     if (valid) {
+      const { build } = buildForm
+      const params = {
+        build,
+        id: debugId.value
+      }
+      let res = await debugUpbuild(params)
+      if (res.code === 1000) {
+        ElMessage.success('一键升降级成功！')
+        buildDialog.value = false
+      }
     }
   })
 }
@@ -383,6 +395,11 @@ const getGroupList = async () => {
   }
 }
 
+const getBuild = async () => {
+  let res = await buildApi({ filetype: 'apvbuild' })
+  buildData.value = res.data.map((item) => ({ name: item }))
+}
+
 const handleScroll = (evt) => {
   const el = evt
   console.log(`output->groupListTotal`, groupListTotal.value)
@@ -405,6 +422,7 @@ const updateVisibleOptions = () => {
 onMounted(async () => {
   debugTask()
   getGroupList()
+  getBuild()
 })
 
 onBeforeUnmount(() => {})
