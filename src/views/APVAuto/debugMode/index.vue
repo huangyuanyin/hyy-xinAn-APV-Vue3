@@ -1,26 +1,40 @@
 <template>
-  <el-card shadow="never">
+  <el-card shadow="never" v-if="!showTermail">
     <div class="debugMode-wrap">
       <el-button type="primary" size="large" @click="openDebugMode('add')">新增</el-button>
       <div class="ignore-select-wrap">
-        <el-input size="large" clearable v-model="searchUser" placeholder="请输入要搜索的调试人..." :suffix-icon="Search" @change="getReport(1)" />
+        <el-input size="large" clearable v-model="searchUser" placeholder="请输入要搜索的平台名称..." :suffix-icon="Search" @change="search()" />
       </div>
     </div>
     <el-table ref="debugModeTableRef" :data="tableData" style="width: 100%; margin-top: 10px" v-loading="loading">
       <el-table-column property="name" label="平台名称" align="center" />
-      <el-table-column property="uptime" label="硬件型号" :formatter="dateFormatter" width="220" align="center" />
+      <el-table-column property="isreal" label="是否是物理机" width="220" align="center">
+        <template #default="scope">
+          <el-tag v-if="scope.row.isreal === 1" type="success">是</el-tag>
+          <el-tag v-else type="danger">否</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column property="status" label="平台状态" width="220" align="center">
+        <template #default="scope">
+          <el-tag v-if="scope.row.starttime === null" type="success">空闲中</el-tag>
+          <el-tag v-if="scope.row.starttime !== null && scope.row.endtime === null" type="warning">调试中</el-tag>
+          <el-tag v-if="scope.row.starttime !== null && scope.row.endtime !== null" type="danger">调试结束</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column property="user" label="调试人" align="center" />
-      <el-table-column property="uptime" label="调试时间" :formatter="dateFormatter" width="220" align="center" />
+      <el-table-column property="starttime" label="开始时间" :formatter="dateFormatter" width="220" align="center" />
+      <el-table-column property="endtime" label="结束时间" :formatter="dateFormatter" width="220" align="center" />
+      <el-table-column property="remark" label="备注" align="center" />
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click="openDebugMode('edit', scope.row.id)">编辑</el-button>
-          <el-button link type="primary" size="small" @click="toMark(scope.row.id)">一键升降</el-button>
+          <!-- <el-button link type="primary" size="small" @click="openDebugMode('edit', scope.row.id)">编辑</el-button> -->
+          <!-- <el-button link type="primary" size="small" @click="openDebugMode('edit', scope.row.id)">详情</el-button> -->
           <el-button link type="primary" size="small" @click="toDebug(scope.row.id)">Debug</el-button>
-          <el-popconfirm title="确定删除这个平台?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消" @confirm="handleDelete(scope.row.id)">
+          <!-- <el-popconfirm title="确定删除这个平台?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消" @confirm="handleDelete(scope.row.id)">
             <template #reference>
               <el-button link type="danger" size="small">删除</el-button>
             </template>
-          </el-popconfirm>
+          </el-popconfirm> -->
         </template>
       </el-table-column>
     </el-table>
@@ -39,14 +53,39 @@
   <el-dialog v-model="debugModeDialog" :title="titleDialog" width="35%" @close="handleClose">
     <span>
       <el-form :inline="false" :model="form" ref="addDebugModeRuleFormRef" :rules="addDebugModeFormRules" class="debugMode-form" label-width="150px">
-        <el-form-item label="平台名称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入..." />
+        <el-form-item label="平台名称" prop="group">
+          <el-select v-model="form.group" placeholder="请选择平台名称" :options="groupList">
+            <el-scrollbar @scroll="handleScroll" :view-style="{ height: '150px' }" :wrap-style="{ height: '150px' }" max-height="150px" noresize>
+              <template #default="{ size }">
+                <div :style="{ height: size }">
+                  <template v-for="(option, index) in visibleOptions" :key="index">
+                    <el-option :value="option.name" :label="option.name" :disabled="option.status || option.user === username" />
+                  </template>
+                </div>
+              </template>
+            </el-scrollbar>
+          </el-select>
         </el-form-item>
-        <el-form-item label="硬件型号" prop="model">
-          <el-input v-model="form.model" placeholder="请输入..." />
+        <el-form-item label="是否硬件设备" prop="isreal">
+          <el-radio-group v-model="form.isreal">
+            <el-radio label="是" disabled />
+            <el-radio label="否" />
+          </el-radio-group>
         </el-form-item>
-        <el-form-item label="调试人" prop="user">
-          <el-input v-model="form.user" placeholder="请输入..." />
+        <!-- <el-form-item label="是否硬件设备" prop="isreal">
+          <el-radio-group v-model="form.isreal">
+            <el-radio label="是" />
+            <el-radio label="否" />
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="是否硬件设备" prop="isreal">
+          <el-radio-group v-model="form.isreal">
+            <el-radio label="是" />
+            <el-radio label="否" />
+          </el-radio-group>
+        </el-form-item> -->
+        <el-form-item label="备注信息">
+          <el-input v-model="form.remark" placeholder="请输入备注信息..." />
         </el-form-item>
       </el-form>
     </span>
@@ -89,65 +128,72 @@
       <h4 :class="titleClass" id="typing-text"></h4>
       <el-button type="danger" @click="handleCloseDrawer"> 退出调试 </el-button>
     </template>
-    <Termail v-if="showTermail" :termmailInfo="termmailInfo" :isShowClose="false" :TerminalCols="47" @closeTermmail="cloeConsole(termmailId)"></Termail>
+    <!-- <Termail v-if="showTermail" :termmailInfo="termmailInfo" :isShowClose="false" :TerminalCols="47" @closeTermmail="cloeConsole(termmailId)"></Termail> -->
   </el-drawer>
+  <el-card shadow="never" v-if="showTermail">
+    <div class="debugButton">
+      <el-button type="success" @click="toMark()"> 一键升降 </el-button>
+      <el-button type="danger" @click="handleCloseDrawer"> 退出调试 </el-button>
+    </div>
+    <el-tabs v-model="activeName" class="tabs" @tab-click="handleClick">
+      <el-tab-pane v-for="(item, index) in consoleTabs" :key="'consoleTabs' + index" :label="item.name" :name="String(item.name)" :lazy="true">
+        <keep-alive>
+          <component
+            :is="item.component"
+            v-if="item.component != null && activeName == String(item.name)"
+            :key="activeName"
+            :termmailInfo="item.termmailInfo"
+            @closeTermmail="cloeConsole(termmailId)"
+          ></component>
+        </keep-alive>
+      </el-tab-pane>
+    </el-tabs>
+  </el-card>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onBeforeUnmount, ref, reactive, nextTick } from 'vue'
-import { getReportApi } from '@/api/APV/testReport.js'
-import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
+import { onMounted, onBeforeUnmount, ref, reactive, markRaw, nextTick, watchEffect } from 'vue'
+import { onBeforeRouteLeave, useRoute, useRouter, NavigationGuardNext } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { utc2beijing, textLoop } from '@/utils/util.js'
+import { utc2beijing } from '@/utils/util.js'
 import { Search } from '@element-plus/icons-vue'
-import type { FormInstance, FormRules } from 'element-plus'
-import Termail from '@/components/Termail.vue'
+import type { FormInstance, FormRules, TabsPaneContext } from 'element-plus'
+import Termmail from '@/components/debugTermail.vue'
+import { debugTaskApi, toDebugApi, exitDebugApi, addDebugTaskApi } from '@/api/APV/debugTask.js'
+import { d_groupApi } from '@/api/APV/index.js'
 
 const route = useRoute()
 const router = useRouter()
+const username = JSON.parse(localStorage.getItem('userInfo'))?.nickname
+const activeName = ref('console')
+const consoleTabs = ref([]) // 控制台tabs
 const debugModeTableRef = ref()
 const drawer = ref(false)
 const showTermail = ref(false)
-const termmailInfo = ref({
-  id: 141,
-  ip: '10.4.127.140',
-  uname: 'sunyb',
-  gid__name: '140',
-  passw: 'click1',
-  type: 'console'
-})
+const groupList = ref([]) // 平台列表
+const visibleOptions = ref([]) // 可见的平台列表
+const groupListTotal = ref(0) // 平台列表总数
+const groupPage = ref(1)
 const termmailId = ref('')
-const tableData = ref([
-  { name: '平台一', model: '型号一', user: '管理员', uptime: '2023/3/8 14:25:23' },
-  { name: '平台一', model: '型号一', user: '管理员', uptime: '2023/3/8 14:25:23' },
-  { name: '平台一', model: '型号一', user: '管理员', uptime: '2023/3/8 14:25:23' },
-  { name: '平台一', model: '型号一', user: '管理员', uptime: '2023/3/8 14:25:23' },
-  { name: '平台一', model: '型号一', user: '管理员', uptime: '2023/3/8 14:25:23' },
-  { name: '平台一', model: '型号一', user: '管理员', uptime: '2023/3/8 14:25:23' },
-  { name: '平台一', model: '型号一', user: '管理员', uptime: '2023/3/8 14:25:23' },
-  { name: '平台一', model: '型号一', user: '管理员', uptime: '2023/3/8 14:25:23' },
-  { name: '平台一', model: '型号一', user: '管理员', uptime: '2023/3/8 14:25:23' }
-])
+const tableData = ref([])
 const loading = ref(false)
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 const searchUser = ref('')
-const searchBuild = ref('')
-const searchGroup = ref('')
 const debugModeDialog = ref(false)
 const buildDialog = ref(false)
 const titleDialog = ref('')
 const form = ref({
-  name: '',
-  model: '',
-  user: ''
+  group: '',
+  isreal: '0' as any,
+  remark: '',
+  config: {}
 })
 const addDebugModeRuleFormRef = ref<FormInstance>()
 const addDebugModeFormRules = reactive<FormRules>({
-  name: [{ required: true, message: '平台名称不能为空', trigger: 'blur' }],
-  model: [{ required: true, message: '硬件型号不能为空', trigger: 'blur' }],
-  user: [{ required: true, message: '调试人不能为空', trigger: 'blur' }]
+  group: [{ required: true, message: '请选择平台名称', trigger: 'blur' }],
+  isreal: [{ required: true, message: '请选择是否是硬件设备', trigger: 'change' }]
 })
 const buildForm = reactive({
   name: '现有版本',
@@ -160,16 +206,6 @@ const addBuildFormRules = reactive<FormRules>({
   model: [{ required: true, message: '硬件型号不能为空', trigger: 'blur' }],
   user: [{ required: true, message: '调试人不能为空', trigger: 'blur' }]
 })
-
-const getReport = async (page) => {
-  let build = searchBuild.value
-  let user = searchUser.value
-  let res = await getReportApi({ page, build, state: searchGroup.value, user })
-  if (res.code === 1000) {
-    tableData.value = res.data
-    total.value = res.total
-  }
-}
 
 const handleDelete = (id) => {
   console.log(id)
@@ -189,12 +225,31 @@ const openDebugMode = (type, id?) => {
   }
 }
 
-const toDebug = (id) => {
-  drawer.value = true
-  nextTick(() => {
+const debugId = ref(null)
+const toDebug = async (id) => {
+  debugId.value = id
+  let res = await toDebugApi({ id })
+  if (res.code === 1000) {
     showTermail.value = true
-    textLoop('您已进入【设备1】调试模式......', 'typing-text')
-  })
+    let list = [res.console].concat(res.apv)
+    await (consoleTabs.value = list.map((item) => {
+      return { name: item }
+    }))
+    await consoleTabs.value.map((item) => {
+      item.termmailInfo = {
+        id,
+        name: item.name
+      }
+      item.component = markRaw(Termmail)
+    })
+    console.log(`output->consoleTabs.value`, consoleTabs.value)
+  }
+}
+
+// 切换Tab
+const handleClick = (tab: TabsPaneContext, event: Event) => {
+  activeName.value = String(tab.props.name)
+  sessionStorage.setItem('activeName', activeName.value)
 }
 
 const cloeConsole = (row) => {
@@ -204,10 +259,14 @@ const cloeConsole = (row) => {
 
 const dateFormatter = (row, column) => {
   let date = row[column.property]
-  return utc2beijing(date)
+  if (date === null) {
+    return ''
+  } else {
+    return utc2beijing(date)
+  }
 }
 
-const toMark = (id) => {
+const toMark = () => {
   buildDialog.value = true
 }
 
@@ -221,6 +280,15 @@ const onSubmitDebugModeForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate(async (valid, fields) => {
     if (valid) {
+      const params = { ...form.value }
+      params.isreal = params.isreal === '1' ? 1 : 0
+      let res = await addDebugTaskApi(params)
+      if (res.code === 1000) {
+        ElMessage.success('新增成功！')
+        debugModeDialog.value = false
+        groupPage.value = 1
+        getGroupList()
+      }
     }
   })
 }
@@ -239,16 +307,25 @@ const onSubmitBuildForm = async (formEl: FormInstance | undefined) => {
   })
 }
 
-const handleCloseDrawer = (done: () => void) => {
+const exitDebug = async (next: () => void) => {
+  let res = await exitDebugApi(debugId.value)
+  if (res.code === 1000) {
+    drawer.value = false
+    showTermail.value = false
+    termmailId.value = ''
+    ElMessage.success('调试已结束！')
+    next()
+  }
+}
+
+const handleExitDebugConfirm = (next: NavigationGuardNext) => {
   ElMessageBox.confirm('该操作会退出调试模式！', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
   })
     .then(() => {
-      drawer.value = false
-      showTermail.value = false
-      termmailId.value = ''
+      exitDebug(next)
     })
     .catch(() => {
       ElMessage({
@@ -256,6 +333,10 @@ const handleCloseDrawer = (done: () => void) => {
         message: '取消操作'
       })
     })
+}
+
+const handleCloseDrawer = (next: () => void) => {
+  handleExitDebugConfirm(next)
 }
 
 const handleClose = () => {
@@ -270,21 +351,87 @@ const handleSizeChange = (val: number) => {
 }
 const handleCurrentChange = (val: number) => {
   currentPage.value = val
-  getReport(currentPage.value)
+  debugTask()
 }
 
-onMounted(async () => {})
+const search = () => {
+  currentPage.value = 1
+  debugTask()
+}
+
+const debugTask = async () => {
+  const params = {
+    page: currentPage.value,
+    name: searchUser.value ? searchUser.value : undefined
+  }
+  let res = await debugTaskApi(params)
+  if (res.code === 1000) {
+    tableData.value = res.data
+    total.value = res.total
+  }
+}
+
+const getGroupList = async () => {
+  const params = {
+    page: groupPage.value
+  }
+  let res = await d_groupApi(params)
+  if (res.code === 1000) {
+    groupListTotal.value = res.data.total
+    groupList.value = [...groupList.value, ...res.data.data]
+    updateVisibleOptions()
+  }
+}
+
+const handleScroll = (evt) => {
+  const el = evt
+  console.log(`output->groupListTotal`, groupListTotal.value)
+  if (groupListTotal.value <= groupList.value.length) {
+    return
+  }
+  if (el.scrollTop === 190 || el.scrollTop === 530 || el.scrollTop === 802) {
+    console.log(`output->`, groupList.value.length)
+    // 接近底部
+    groupPage.value++
+    updateVisibleOptions()
+    getGroupList()
+  }
+}
+
+const updateVisibleOptions = () => {
+  visibleOptions.value = groupList.value.slice(0, groupPage.value * 10)
+}
+
+onMounted(async () => {
+  debugTask()
+  getGroupList()
+})
 
 onBeforeUnmount(() => {})
+
+// 离开路由导航守卫
+onBeforeRouteLeave((to, from, next) => {
+  if (showTermail.value) {
+    handleExitDebugConfirm(() => next())
+  } else {
+    next()
+  }
+})
 </script>
 
 <style lang="scss" scoped>
-.debugMode-ing {
-  .tip {
-    .tip-title {
-    }
-  }
+.debugButton {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 10px;
+  margin-bottom: 20px;
 }
+
+:deep(.el-tabs__header) {
+  margin-bottom: 0;
+}
+
 .el-card {
   margin-top: 15px;
 }

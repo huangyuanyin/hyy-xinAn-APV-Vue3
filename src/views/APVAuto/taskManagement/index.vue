@@ -368,10 +368,9 @@
               <el-form-item label="TipServer Port" prop="TipPort" :required="item.required">
                 <el-input v-model="item.TipPort" :placeholder="placeholderTipPort" @input="onPhysicalItemChange(item, index)" />
               </el-form-item>
-              <!-- <el-form-item label="TipServer PassWord" prop="TestPass" :required="item.required">
-                <el-input v-model="item.TestPass" :placeholder="placeholderTestPass"
-                  @input="onPhysicalItemChange(item, index)" />
-              </el-form-item> -->
+              <el-form-item label="TipServer PassWord" prop="TestPass" :required="item.required">
+                <el-input v-model="item.TestPass" :placeholder="placeholderTestPass" @input="onPhysicalItemChange(item, index)" />
+              </el-form-item>
               <!--<el-form-item v-show="isPhysicalMachine == '1'" label="物理设备硬件型号" prop="model">
                     <el-input v-model="addTaskForm.config.model" :placeholder="placeholderTipModel" />
                   </el-form-item> -->
@@ -489,7 +488,9 @@
                 <div style="margin-bottom: 10px">
                   <span>TipPort：</span><span>{{ item.TipPort }}</span>
                 </div>
-                <!-- <div style="margin-bottom: 10px;"><span>TestPass：</span><span>{{ item.TestPass }}</span></div> -->
+                <div style="margin-bottom: 10px">
+                  <span>TestPass：</span><span>{{ item.TestPass }}</span>
+                </div>
               </div>
             </div>
             <div v-else style="display: flex; margin-bottom: 20px">
@@ -818,12 +819,12 @@ const addTaskFormRules = reactive<FormRules>({
 const physicalForms = ref([])
 
 const onPhysicalItemChange = (item, index) => {
-  // const { TipServer, TipPort, TestPass } = item
-  // item.required = !!(TipServer || TipPort || TestPass)
-  // item.required && !(TipServer && TipPort && TestPass) ? item.requiredTip = true : item.requiredTip = false
-  const { TipServer, TipPort } = item
-  item.required = !!(TipServer || TipPort)
-  item.required && !(TipServer && TipPort) ? (item.requiredTip = true) : (item.requiredTip = false)
+  const { TipServer, TipPort, TestPass } = item
+  item.required = !!(TipServer || TipPort || TestPass)
+  item.required && !(TipServer && TipPort && TestPass) ? (item.requiredTip = true) : (item.requiredTip = false)
+  // const { TipServer, TipPort } = item
+  // item.required = !!(TipServer || TipPort)
+  // item.required && !(TipServer && TipPort) ? (item.requiredTip = true) : (item.requiredTip = false)
   if (!item.required) {
     physicalForms.value[index].clearValidate()
   }
@@ -965,14 +966,14 @@ const toShowPreviewDialog = async (formEl: FormInstance | undefined) => {
   }
   // 去除未填写的配置项
   physicalItems.value.map((item) => {
-    // const { TipServer, TipPort, TestPass } = item
-    // if (!!(TipServer || TipPort || TestPass)) {
-    //   addTaskForm.config.push(item)
-    // }
-    const { TipServer, TipPort } = item
-    if (!!(TipServer || TipPort)) {
+    const { TipServer, TipPort, TestPass } = item
+    if (!!(TipServer || TipPort || TestPass)) {
       addTaskForm.config.push(item)
     }
+    // const { TipServer, TipPort } = item
+    // if (!!(TipServer || TipPort)) {
+    //   addTaskForm.config.push(item)
+    // }
   })
   // 选择含有物理机，未填写配置项提醒
   if (addTaskForm.config?.length == 0 && isPhysicalMachine.value === '1') {
@@ -1173,8 +1174,8 @@ const getGroupDataId = (value) => {
         id: item.id,
         name: item.name,
         TipServer: '',
-        TipPort: ''
-        // TestPass: "",
+        TipPort: '',
+        TestPass: ''
       })
     })
   } else {
@@ -1191,8 +1192,8 @@ const getGroupDataId = (value) => {
           id: item.id,
           name: item.name,
           TipServer: '',
-          TipPort: ''
-          // TestPass: "",
+          TipPort: '',
+          TestPass: ''
         })
       }
     })
@@ -1518,7 +1519,7 @@ const getTaskConfig = async () => {
   let res = await getTaskConfigApi()
   placeholderTipServer.value = res.data.TipServer || ''
   placeholderTipPort.value = res.data.TipPort || ''
-  // placeholderTestPass.value = res.data.TestPass || ''
+  placeholderTestPass.value = res.data.TestPass || ''
   // placeholderTipModel.value = res.data.model || ''
 }
 
