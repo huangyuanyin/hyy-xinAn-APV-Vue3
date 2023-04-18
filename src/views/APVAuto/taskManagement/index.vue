@@ -154,7 +154,7 @@
               <div class="stateStyle" v-if="scope.row.state === 'create'">
                 <!-- <div class="status-point" style="background-color: #e6a23c"></div>
                 <span style="color: #e6a23c">待启动</span> -->
-                <el-tooltip content="待启动" placement="top" effect="dark"><svg-icon style="width: 30px" iconName="icon-shebeidongtai"></svg-icon></el-tooltip>
+                <el-tooltip content="待启动" placement="top" effect="dark"><svg-icon style="width: 30px" iconName="icon-dengdai"></svg-icon></el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'complete'">
                 <!-- <div class="status-point" style="background-color: #409eff"></div>
@@ -207,7 +207,7 @@
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'create'">
                 <el-tooltip content="任务启动" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #67c23a" @click="changeTaskStatus('start', scope.row, false)"><SwitchButton /></el-icon>
+                  <svg-icon style="width: 20px" iconName="icon-shebeiyunhang" @click="changeTaskStatus('start', scope.row, false)"></svg-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'complete'">
