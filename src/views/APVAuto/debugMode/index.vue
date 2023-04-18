@@ -123,7 +123,7 @@
       <el-button type="success" @click="toMark()"> 设备升级 </el-button>
       <el-button type="danger" @click="handleCloseDrawer"> 退出调试 </el-button>
     </div> -->
-    <el-tabs v-model="activeName" class="tabs" @tab-click="handleClick">
+    <el-tabs v-model="activeName" class="tabs" :class="[isShowFullScreen ? 'isShow' : '']" @tab-click="handleClick" id="tabs">
       <el-tab-pane v-for="(item, index) in consoleTabs" :key="'consoleTabs' + index" :label="item.name" :name="String(item.name)" :lazy="true">
         <keep-alive>
           <component
@@ -131,10 +131,13 @@
             v-if="item.component != null && activeName == String(item.name)"
             :key="activeName"
             :termmailInfo="item.termmailInfo"
+            :isPropFullScreen="isShowFullScreen"
             @closeTermmail="cloeConsole(termmailId)"
             @toMark="toMark"
             @operationalDocument="operationalDocument"
             @backList="backList"
+            @fullScreen="fullScreen"
+            @exitFullScreen="exitFullScreen"
           ></component>
         </keep-alive>
       </el-tab-pane>
@@ -178,6 +181,7 @@ const searchUser = ref('')
 const debugModeDialog = ref(false)
 const buildDialog = ref(false)
 const titleDialog = ref('')
+const isShowFullScreen = ref(false)
 const form = ref({
   group: '',
   isreal: '0' as any,
@@ -272,6 +276,9 @@ const exitDebug2 = async (id, next: () => void) => {
 
 // 切换Tab
 const handleClick = (tab: TabsPaneContext, event: Event) => {
+  if (isShowFullScreen.value) {
+    fullScreen()
+  }
   activeName.value = String(tab.props.name)
   sessionStorage.setItem('activeName', activeName.value)
 }
@@ -303,8 +310,18 @@ const backList = () => {
 }
 
 const fullScreen = () => {
-  // 全屏
-  // let el = document.getElementById('termmail')
+  const terminalContainer = document.getElementById('tabs')
+  if (terminalContainer.requestFullscreen) {
+    isShowFullScreen.value = true
+    terminalContainer.requestFullscreen()
+  }
+}
+const exitFullScreen = () => {
+  const terminalContainer = document.getElementById('tabs')
+  if (document.exitFullscreen) {
+    isShowFullScreen.value = false
+    document.exitFullscreen()
+  }
 }
 
 const onReseDebugModeRuleForm = (formEl: FormInstance | undefined) => {
@@ -348,7 +365,7 @@ const onSubmitBuildForm = async (formEl: FormInstance | undefined) => {
       }
       let res = await debugUpbuild(params)
       if (res.code === 1000) {
-        ElMessage.success('设备升级级成功！')
+        ElMessage.success('设备开始升级！')
         buildDialog.value = false
       }
     }
@@ -455,7 +472,21 @@ const updateVisibleOptions = () => {
   visibleOptions.value = groupList.value.slice(0, groupPage.value * 10)
 }
 
+function checkFull() {
+  var fullScreen = parent.document.webkitIsFullScreen || parent.document.fullscreen || parent.document.mozFullScreen || parent.document.msFullscreenElement
+  return !fullScreen
+}
+
 onMounted(async () => {
+  window.addEventListener('resize', () => {
+    nextTick(() => {
+      if (checkFull()) {
+        isShowFullScreen.value = false
+        const terminalContainer = document.getElementById('tabs')
+        terminalContainer?.classList.add('fullScreen')
+      }
+    })
+  })
   debugTask()
   getGroupList()
   getBuild()
@@ -554,6 +585,14 @@ onBeforeUnmount(() => {})
   }
   .console-wrap {
     height: 88vh;
+  }
+}
+.isShow {
+  .el-tabs__item {
+    color: #fff;
+  }
+  .is-active {
+    color: #409eff;
   }
 }
 </style>

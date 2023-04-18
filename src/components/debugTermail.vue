@@ -9,7 +9,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, watchEffect } from 'vue'
 import Terminal from '../config/Xterm'
 
 const props = defineProps({
@@ -33,14 +33,33 @@ const props = defineProps({
   isShowClose: {
     type: Boolean,
     default: true
+  },
+  isPropFullScreen: {
+    type: Boolean,
+    default: false
   }
 })
-const emit = defineEmits(['toMark', 'operationalDocument', 'backList'])
+const emit = defineEmits(['toMark', 'operationalDocument', 'backList', 'fullScreen', 'exitFullScreen'])
 
 const term = ref(null)
 const terminalSocket = ref(null)
 const refreshTer = ref(true)
 const isFullScreen = ref(false)
+
+watch(
+  () => props.isPropFullScreen,
+  () => {
+    if (!props.isPropFullScreen) {
+      exitFullScreen()
+    }
+  }
+)
+
+watchEffect(() => {
+  if (props.isPropFullScreen) {
+    isFullScreen.value = true
+  }
+})
 
 const toMark = () => {
   emit('toMark')
@@ -55,21 +74,15 @@ const backList = () => {
 }
 
 const fullScreen = () => {
-  const terminalContainer = document.getElementById('console-wrap')
-  if (terminalContainer.requestFullscreen) {
-    term.value.resize(term.value.cols, 60)
-    isFullScreen.value = true
-    terminalContainer.requestFullscreen()
-  }
+  term.value.resize(term.value.cols, 50)
+  isFullScreen.value = true
+  emit('fullScreen')
 }
 
 const exitFullScreen = () => {
-  const terminalContainer = document.getElementById('console-wrap')
-  if (document.exitFullscreen) {
-    term.value.resize(term.value.cols, 43)
-    isFullScreen.value = false
-    document.exitFullscreen()
-  }
+  term.value.resize(term.value.cols, 43)
+  isFullScreen.value = false
+  emit('exitFullScreen')
 }
 
 const runRealTerminal = () => {
