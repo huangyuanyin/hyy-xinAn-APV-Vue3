@@ -1,6 +1,11 @@
 <template>
-  <div class="console-wrap">
+  <div class="console-wrap" id="console-wrap">
     <div class="console" id="terminal" v-show="refreshTer" tabindex="0"></div>
+    <el-button class="button1" type="default" @click="backList()"> 返回列表 </el-button>
+    <el-button v-if="!isFullScreen" class="button2" type="primary" @click="fullScreen()"> 全屏操作 </el-button>
+    <el-button v-else class="button2" type="primary" @click="exitFullScreen()"> 退出全屏 </el-button>
+    <el-button v-if="!isFullScreen" class="button3" type="info" @click="operationalDocument()"> 操作文档 </el-button>
+    <el-button v-if="!isFullScreen" class="button4" type="success" @click="toMark()"> 设备升级 </el-button>
   </div>
 </template>
 <script lang="ts" setup>
@@ -23,17 +28,49 @@ const props = defineProps({
   },
   TerminalCols: {
     type: Number,
-    default: 40
+    default: 43
   },
   isShowClose: {
     type: Boolean,
     default: true
   }
 })
+const emit = defineEmits(['toMark', 'operationalDocument', 'backList'])
 
 const term = ref(null)
 const terminalSocket = ref(null)
 const refreshTer = ref(true)
+const isFullScreen = ref(false)
+
+const toMark = () => {
+  emit('toMark')
+}
+
+const operationalDocument = () => {
+  emit('operationalDocument')
+}
+
+const backList = () => {
+  emit('backList')
+}
+
+const fullScreen = () => {
+  const terminalContainer = document.getElementById('console-wrap')
+  if (terminalContainer.requestFullscreen) {
+    term.value.resize(term.value.cols, 60)
+    isFullScreen.value = true
+    terminalContainer.requestFullscreen()
+  }
+}
+
+const exitFullScreen = () => {
+  const terminalContainer = document.getElementById('console-wrap')
+  if (document.exitFullscreen) {
+    term.value.resize(term.value.cols, 43)
+    isFullScreen.value = false
+    document.exitFullscreen()
+  }
+}
 
 const runRealTerminal = () => {
   console.log('webSocket is finished')
@@ -121,8 +158,24 @@ function handleKeyDown(event) {
       display: none; /* Chrome Safari */
     }
   }
-  .el-button {
-    right: 5px;
+  .button1 {
+    top: 4%;
+    right: 10px;
+    position: absolute;
+  }
+  .button2 {
+    top: 10%;
+    right: 10px;
+    position: absolute;
+  }
+  .button3 {
+    top: 16%;
+    right: 10px;
+    position: absolute;
+  }
+  .button4 {
+    top: 22%;
+    right: 10px;
     position: absolute;
   }
 }

@@ -29,7 +29,8 @@
         <template #default="scope">
           <!-- <el-button link type="primary" size="small" @click="openDebugMode('edit', scope.row.id)">编辑</el-button> -->
           <!-- <el-button link type="primary" size="small" @click="openDebugMode('edit', scope.row.id)">详情</el-button> -->
-          <el-button link type="primary" size="small" @click="toDebug(scope.row.id)">Debug</el-button>
+          <el-button link type="primary" size="small" @click="toDebug(scope.row.id)">开始调试</el-button>
+          <el-button link type="danger" size="small" @click="endDebug(scope.row)">结束调试</el-button>
           <!-- <el-popconfirm title="确定删除这个平台?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消" @confirm="handleDelete(scope.row.id)">
             <template #reference>
               <el-button link type="danger" size="small">删除</el-button>
@@ -68,22 +69,10 @@
         </el-form-item>
         <el-form-item label="是否硬件设备" prop="isreal">
           <el-radio-group v-model="form.isreal">
-            <el-radio label="是" disabled />
-            <el-radio label="否" />
-          </el-radio-group>
-        </el-form-item>
-        <!-- <el-form-item label="是否硬件设备" prop="isreal">
-          <el-radio-group v-model="form.isreal">
             <el-radio label="是" />
             <el-radio label="否" />
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="是否硬件设备" prop="isreal">
-          <el-radio-group v-model="form.isreal">
-            <el-radio label="是" />
-            <el-radio label="否" />
-          </el-radio-group>
-        </el-form-item> -->
         <el-form-item label="备注信息">
           <el-input v-model="form.remark" placeholder="请输入备注信息..." />
         </el-form-item>
@@ -102,7 +91,7 @@
         <el-form-item label="升降方式">
           <el-radio-group v-model="selectionMethod">
             <el-radio label="现有版本" />
-            <el-radio label="下载链接" disabled />
+            <el-radio label="下载链接" />
           </el-radio-group>
         </el-form-item>
         <el-form-item label="选择版本" prop="build" v-if="selectionMethod === '现有版本'">
@@ -110,8 +99,8 @@
             <el-option :label="item.name" :value="item.name" v-for="(item, index) in buildData" :key="'buildData' + index" />
           </el-select>
         </el-form-item>
-        <el-form-item label="下载链接" prop="user" v-if="selectionMethod === '下载链接'">
-          <el-input v-model="buildForm.user" placeholder="请输入版本下载链接..." />
+        <el-form-item label="下载链接" prop="url" v-if="selectionMethod === '下载链接'">
+          <el-input v-model="buildForm.url" placeholder="请输入版本下载链接..." />
         </el-form-item>
       </el-form>
     </span>
@@ -129,11 +118,11 @@
     </template>
     <!-- <Termail v-if="showTermail" :termmailInfo="termmailInfo" :isShowClose="false" :TerminalCols="47" @closeTermmail="cloeConsole(termmailId)"></Termail> -->
   </el-drawer>
-  <el-card shadow="never" v-if="showTermail">
-    <div class="debugButton">
+  <el-card shadow="never" v-if="showTermail" class="showTermail">
+    <!-- <div class="debugButton">
       <el-button type="success" @click="toMark()"> 设备升级 </el-button>
       <el-button type="danger" @click="handleCloseDrawer"> 退出调试 </el-button>
-    </div>
+    </div> -->
     <el-tabs v-model="activeName" class="tabs" @tab-click="handleClick">
       <el-tab-pane v-for="(item, index) in consoleTabs" :key="'consoleTabs' + index" :label="item.name" :name="String(item.name)" :lazy="true">
         <keep-alive>
@@ -143,6 +132,9 @@
             :key="activeName"
             :termmailInfo="item.termmailInfo"
             @closeTermmail="cloeConsole(termmailId)"
+            @toMark="toMark"
+            @operationalDocument="operationalDocument"
+            @backList="backList"
           ></component>
         </keep-alive>
       </el-tab-pane>
@@ -189,8 +181,8 @@ const titleDialog = ref('')
 const form = ref({
   group: '',
   isreal: '0' as any,
-  remark: '',
-  config: {}
+  remark: ''
+  // config: {}
 })
 const addDebugModeRuleFormRef = ref<FormInstance>()
 const addDebugModeFormRules = reactive<FormRules>({
@@ -200,13 +192,13 @@ const addDebugModeFormRules = reactive<FormRules>({
 const buildForm = reactive({
   name: '现有版本',
   build: '',
-  user: ''
+  url: ''
 })
 const addBuildFormRuleFormRef = ref<FormInstance>()
 const addBuildFormRules = reactive<FormRules>({
   name: [{ required: true, message: '平台名称不能为空', trigger: 'blur' }],
-  build: [{ required: true, message: '请选择不能为空', trigger: 'blur' }],
-  user: [{ required: true, message: '调试人不能为空', trigger: 'blur' }]
+  build: [{ required: true, message: '请选择版本', trigger: 'blur' }],
+  url: [{ required: true, message: 'build链接不能为空', trigger: 'blur' }]
 })
 
 const handleDelete = (id) => {
@@ -248,6 +240,36 @@ const toDebug = async (id) => {
   }
 }
 
+const endDebug = async (val) => {
+  ElMessageBox.confirm(`平台【${val.name}】会退出调试模式！`, '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(async () => {
+      exitDebug2(val.id, () => {})
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: '取消操作'
+      })
+    })
+}
+
+const exitDebug2 = async (id, next: () => void) => {
+  let res = await exitDebugApi(id)
+  if (res.code === 1000) {
+    drawer.value = false
+    showTermail.value = false
+    termmailId.value = ''
+    ElMessage.success('调试已结束！')
+    currentPage.value = 1
+    debugTask()
+    next()
+  }
+}
+
 // 切换Tab
 const handleClick = (tab: TabsPaneContext, event: Event) => {
   activeName.value = String(tab.props.name)
@@ -272,6 +294,19 @@ const toMark = () => {
   buildDialog.value = true
 }
 
+const operationalDocument = () => {
+  ElMessage('开发中...')
+}
+
+const backList = () => {
+  showTermail.value = false
+}
+
+const fullScreen = () => {
+  // 全屏
+  // let el = document.getElementById('termmail')
+}
+
 const onReseDebugModeRuleForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.resetFields()
@@ -283,7 +318,7 @@ const onSubmitDebugModeForm = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       const params = { ...form.value }
-      params.isreal = params.isreal === '1' ? 1 : 0
+      params.isreal = params.isreal === '是' ? 1 : 0
       let res = await addDebugTaskApi(params)
       if (res.code === 1000) {
         ElMessage.success('新增成功！')
@@ -305,9 +340,10 @@ const onSubmitBuildForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate(async (valid, fields) => {
     if (valid) {
-      const { build } = buildForm
+      const { build, url } = buildForm
       const params = {
-        build,
+        build: selectionMethod.value === '现有版本' ? build : undefined,
+        url: selectionMethod.value === '现有版本' ? undefined : url,
         id: debugId.value
       }
       let res = await debugUpbuild(params)
@@ -428,13 +464,13 @@ onMounted(async () => {
 onBeforeUnmount(() => {})
 
 // 离开路由导航守卫
-onBeforeRouteLeave((to, from, next) => {
-  if (showTermail.value) {
-    handleExitDebugConfirm(() => next())
-  } else {
-    next()
-  }
-})
+// onBeforeRouteLeave((to, from, next) => {
+//   if (showTermail.value) {
+//     handleExitDebugConfirm(() => next())
+//   } else {
+//     next()
+//   }
+// })
 </script>
 
 <style lang="scss" scoped>
@@ -449,7 +485,11 @@ onBeforeRouteLeave((to, from, next) => {
 :deep(.el-tabs__header) {
   margin-bottom: 0;
 }
-
+.showTermail {
+  :deep(.el-card__body) {
+    padding-top: 0px;
+  }
+}
 .el-card {
   margin-top: 15px;
 }
