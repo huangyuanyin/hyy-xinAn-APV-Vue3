@@ -48,3 +48,12 @@ export function debugUpbuild(params) {
     params
   })
 }
+
+// 一键升级 - 查看日志
+export function getDebugUpbuildLogApi(id) {
+  return request({
+    url: `/debug/upbuild/?id=${id}`,
+    method: 'get',
+    urlType: 'APV'
+  })
+}

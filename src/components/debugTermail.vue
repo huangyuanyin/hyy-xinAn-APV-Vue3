@@ -1,11 +1,12 @@
 <template>
   <div class="console-wrap" id="console-wrap">
     <div class="console" id="terminal" v-show="refreshTer" tabindex="0"></div>
-    <el-button class="button1" type="default" @click="backList()"> 返回列表 </el-button>
-    <el-button v-if="!isFullScreen" class="button2" type="primary" @click="fullScreen()"> 全屏操作 </el-button>
-    <el-button v-else class="button2" type="primary" @click="exitFullScreen()"> 退出全屏 </el-button>
-    <el-button v-if="!isFullScreen" class="button3" type="info" @click="operationalDocument()"> 操作文档 </el-button>
-    <el-button v-if="!isFullScreen" class="button4" type="success" @click="toMark()"> 设备升级 </el-button>
+    <el-button class="ignore-button1" type="default" @click="backList()"> 返回列表 </el-button>
+    <el-button v-if="!isFullScreen" class="ignore-button2" type="primary" @click="fullScreen()"> 全屏操作 </el-button>
+    <el-button v-else class="ignore-button2" type="primary" @click="exitFullScreen()"> 退出全屏 </el-button>
+    <el-button v-if="!isFullScreen" class="ignore-button3" type="info" @click="operationalDocument()"> 操作文档 </el-button>
+    <el-button v-if="!isFullScreen" class="ignore-button4" type="success" @click="toMark()"> 设备升级 </el-button>
+    <el-button v-if="!isFullScreen" class="ignore-button5" type="warning" @click="seeProcess()"> 升级进度 </el-button>
   </div>
 </template>
 <script lang="ts" setup>
@@ -18,8 +19,8 @@ const props = defineProps({
     default: {
       pid: 1,
       name: 'terminal',
-      cols: 400,
-      rows: 400
+      cols: 700,
+      rows: 100
     }
   },
   termmailInfo: {
@@ -39,7 +40,7 @@ const props = defineProps({
     default: false
   }
 })
-const emit = defineEmits(['toMark', 'operationalDocument', 'backList', 'fullScreen', 'exitFullScreen'])
+const emit = defineEmits(['toMark', 'operationalDocument', 'backList', 'fullScreen', 'exitFullScreen', 'seeProcess'])
 
 const term = ref(null)
 const terminalSocket = ref(null)
@@ -63,6 +64,10 @@ watchEffect(() => {
 
 const toMark = () => {
   emit('toMark')
+}
+
+const seeProcess = () => {
+  emit('seeProcess')
 }
 
 const operationalDocument = () => {
@@ -162,34 +167,49 @@ function handleKeyDown(event) {
     height: 100%;
     :deep(.xterm-text-layer) {
       width: 100%;
-      height: 100%;
+      height: 80vh;
     }
     :deep(.terminal) {
-      height: 100%;
+      height: 80vh;
     }
     ::-webkit-scrollbar {
       display: none; /* Chrome Safari */
     }
   }
-  .button1 {
-    top: 4%;
+  .ignore-button1 {
+    top: 40px;
     right: 10px;
     position: absolute;
   }
-  .button2 {
-    top: 10%;
+  .ignore-button2 {
+    top: 80px;
     right: 10px;
     position: absolute;
   }
-  .button3 {
-    top: 16%;
+  .ignore-button3 {
+    top: 120px;
     right: 10px;
     position: absolute;
   }
-  .button4 {
-    top: 22%;
+  .ignore-button4 {
+    top: 160px;
     right: 10px;
     position: absolute;
   }
+  .ignore-button5 {
+    top: 200px;
+    right: 10px;
+    position: absolute;
+  }
+}
+</style>
+
+<style>
+.xterm-screen,
+.xterm-cursor-layer,
+.xterm-link-layer,
+.xterm-selection-layer,
+.xterm-text-layer {
+  height: 100% !important;
 }
 </style>

@@ -7,8 +7,8 @@
       </div>
     </div>
     <el-table ref="debugModeTableRef" :data="tableData" style="width: 100%; margin-top: 10px" v-loading="loading">
-      <el-table-column property="name" label="平台名称" align="center" />
-      <el-table-column property="isreal" label="是否是物理机" width="220" align="center">
+      <el-table-column property="name" label="平台名称" align="center" width="220" />
+      <el-table-column property="isreal" label="是否是物理机" width="150" align="center">
         <template #default="scope">
           <el-tag v-if="scope.row.isreal === 1" type="success">是</el-tag>
           <el-tag v-else type="danger">否</el-tag>
@@ -25,7 +25,7 @@
       <el-table-column property="starttime" label="开始时间" :formatter="dateFormatter" width="220" align="center" />
       <el-table-column property="endtime" label="结束时间" :formatter="dateFormatter" width="220" align="center" />
       <el-table-column property="remark" label="备注" align="center" />
-      <el-table-column fixed="right" label="操作" align="center">
+      <el-table-column fixed="right" label="操作" align="center" width="200">
         <template #default="scope">
           <!-- <el-button link type="primary" size="small" @click="openDebugMode('edit', scope.row.id)">编辑</el-button> -->
           <!-- <el-button link type="primary" size="small" @click="openDebugMode('edit', scope.row.id)">详情</el-button> -->
@@ -138,11 +138,15 @@
             @backList="backList"
             @fullScreen="fullScreen"
             @exitFullScreen="exitFullScreen"
+            @seeProcess="seeProcess"
           ></component>
         </keep-alive>
       </el-tab-pane>
     </el-tabs>
   </el-card>
+  <el-dialog v-model="codeMirrorDialog" title="升级进度" width="55%" @close="handleClose">
+    <CodeMirror :code="codeMirrorVal" />
+  </el-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -153,9 +157,10 @@ import { utc2beijing } from '@/utils/util.js'
 import { Search } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules, TabsPaneContext } from 'element-plus'
 import Termmail from '@/components/debugTermail.vue'
-import { debugTaskApi, toDebugApi, exitDebugApi, addDebugTaskApi, debugUpbuild } from '@/api/APV/debugTask.js'
+import { debugTaskApi, toDebugApi, exitDebugApi, addDebugTaskApi, debugUpbuild, getDebugUpbuildLogApi } from '@/api/APV/debugTask.js'
 import { d_groupApi } from '@/api/APV/index.js'
 import { buildApi } from '@/api/APV/buildManagement.js'
+import CodeMirror from '@/components/CodeMirror.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -182,6 +187,8 @@ const debugModeDialog = ref(false)
 const buildDialog = ref(false)
 const titleDialog = ref('')
 const isShowFullScreen = ref(false)
+const codeMirrorDialog = ref(false)
+const codeMirrorVal = ref('')
 const form = ref({
   group: '',
   isreal: '0' as any,
@@ -324,6 +331,14 @@ const exitFullScreen = () => {
   }
 }
 
+const seeProcess = async () => {
+  let res = await getDebugUpbuildLogApi(debugId.value)
+  if (res.code === 1000) {
+    codeMirrorDialog.value = true
+    codeMirrorVal.value = res.data
+  }
+}
+
 const onReseDebugModeRuleForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.resetFields()
@@ -409,6 +424,8 @@ const handleClose = () => {
   addBuildFormRuleFormRef.value?.resetFields()
   debugModeDialog.value = false
   buildDialog.value = false
+  codeMirrorDialog.value = false
+  codeMirrorVal.value = ''
 }
 
 const handleSizeChange = (val: number) => {

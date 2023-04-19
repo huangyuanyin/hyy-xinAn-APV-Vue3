@@ -175,34 +175,50 @@
             <template #default="scope">
               <div class="stateStyle" v-if="scope.row.state === 'waitcheck'">
                 <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #409eff" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
+                  <el-icon :size="20" style="color: #409eff" @click="changeTaskStatus('restart', scope.row, false)">
+                    <VideoPlay />
+                  </el-icon>
                 </el-tooltip>
                 <el-tooltip content="APV环境检测" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #f56c6c; margin-left: 10px" @click="checkAPV(scope.row.id)"><Warning /></el-icon>
+                  <el-icon :size="20" style="color: #f56c6c; margin-left: 10px" @click="checkAPV(scope.row.id)">
+                    <Warning />
+                  </el-icon>
                 </el-tooltip>
                 <el-tooltip content="测试环境释放" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #000; margin-left: 10px" @click="releaseAPV(scope.row.id)"><Promotion /></el-icon>
+                  <el-icon :size="20" style="color: #000; margin-left: 10px" @click="releaseAPV(scope.row.id)">
+                    <Promotion />
+                  </el-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'stop'">
                 <el-tooltip content="重新执行所有测试用例，并删除上次的测试结果" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #909399" @click="changeTaskStatus('start', scope.row, true)"><RefreshRight /></el-icon>
+                  <el-icon :size="20" style="color: #909399" @click="changeTaskStatus('start', scope.row, true)">
+                    <RefreshRight />
+                  </el-icon>
                 </el-tooltip>
                 <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #409eff; margin-left: 10px" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
+                  <el-icon :size="20" style="color: #409eff; margin-left: 10px" @click="changeTaskStatus('restart', scope.row, false)">
+                    <VideoPlay />
+                  </el-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle fail" v-if="scope.row.state === 'fail'">
                 <el-tooltip content="重新执行所有测试用例，并删除上次的测试结果" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #909399" @click="changeTaskStatus('start', scope.row, true)"><RefreshRight /></el-icon>
+                  <el-icon :size="20" style="color: #909399" @click="changeTaskStatus('start', scope.row, true)">
+                    <RefreshRight />
+                  </el-icon>
                 </el-tooltip>
                 <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #409eff; margin-left: 10px" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
+                  <el-icon :size="20" style="color: #409eff; margin-left: 10px" @click="changeTaskStatus('restart', scope.row, false)">
+                    <VideoPlay />
+                  </el-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'running'">
                 <el-tooltip content="任务暂停" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #e6a23c" @click="changeTaskStatus('stop', scope.row, false)"><VideoPause /></el-icon>
+                  <el-icon :size="20" style="color: #e6a23c" @click="changeTaskStatus('stop', scope.row, false)">
+                    <VideoPause />
+                  </el-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'create'">
@@ -212,12 +228,16 @@
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'complete'">
                 <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #409eff" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
+                  <el-icon :size="20" style="color: #409eff" @click="changeTaskStatus('restart', scope.row, false)">
+                    <VideoPlay />
+                  </el-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'ready'">
                 <el-tooltip content="任务准备中，禁止操作" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #f56c6c; cursor: no-drop"><CircleClose /></el-icon>
+                  <el-icon :size="20" style="color: #f56c6c; cursor: no-drop">
+                    <CircleClose />
+                  </el-icon>
                 </el-tooltip>
               </div>
             </template>
@@ -1234,7 +1254,8 @@ const openTestPlatformDialog = (data) => {
       group = item.group
     }
   })
-  state.d_groupDataAfter = JSON.parse(JSON.stringify(state.d_groupData)).filter((item) => item.status != true)
+  // state.d_groupDataAfter = JSON.parse(JSON.stringify(state.d_groupData)).filter((item) => item.status != true)
+  state.d_groupDataAfter = JSON.parse(JSON.stringify(state.d_groupData))
   group.map((item) => {
     state.d_groupDataAfter.map((it) => {
       if (it.name == item) {
@@ -1611,27 +1632,33 @@ const handleTaskCurrentChange = (val: number) => {
 .remarks {
   display: flex;
   flex-direction: column;
+
   span {
     color: #ff6b84;
   }
 }
+
 .stateStyle {
   display: flex;
   justify-content: center;
   align-items: center;
+
   .svg-icon {
     width: 40px;
     height: 40px;
   }
+
   .el-icon {
     width: 25px;
     height: 25px;
     cursor: pointer;
+
     &:hover {
       background-color: #eeeeee;
     }
   }
 }
+
 .my-header {
   display: flex;
   align-items: center;
@@ -1657,6 +1684,7 @@ const handleTaskCurrentChange = (val: number) => {
   display: flex;
   justify-content: center;
   align-items: center;
+
   .svg-icon {
     width: 50px;
     height: 50px;
@@ -1728,6 +1756,7 @@ const handleTaskCurrentChange = (val: number) => {
 .moreButton {
   display: flex;
   flex-direction: column;
+
   .el-button {
     margin-left: 0;
   }
@@ -1756,11 +1785,13 @@ const handleTaskCurrentChange = (val: number) => {
   .ignore-tagList {
     margin-left: 20px;
   }
+
   .tagList {
     display: flex;
     align-items: center;
     height: 80px;
     font-size: 14px;
+
     .ignore-title {
       width: 98px;
       margin-right: 12px;
@@ -1864,14 +1895,17 @@ const handleTaskCurrentChange = (val: number) => {
   margin-bottom: 20px;
   display: flex;
   justify-content: space-between;
+
   .ignore-select-wrap {
     flex: 1;
     display: flex;
     justify-content: end;
+
     .el-select {
       margin: 0 10px;
       width: 220px;
     }
+
     .el-input {
       height: 40px;
       width: 220px;
@@ -1904,6 +1938,7 @@ const handleTaskCurrentChange = (val: number) => {
     font-size: 16px;
     font-weight: 600;
   }
+
   .left-after {
     width: 150px !important;
   }
@@ -1949,9 +1984,11 @@ const handleTaskCurrentChange = (val: number) => {
 
   .ignore-casesProps-tree {
     z-index: 999;
+
     .el-input {
       height: 32px;
     }
+
     .el-checkbox {
       margin-right: 5px !important;
     }
@@ -1964,6 +2001,7 @@ const handleTaskCurrentChange = (val: number) => {
     justify-content: center !important;
   }
 }
+
 .el-notification {
   width: 30vw !important;
 }
