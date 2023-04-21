@@ -377,12 +377,9 @@
             <template #title>
               <span>{{ `【${item.name}】` + `&nbsp` + '的物理机配置项：' }}</span>
               <span v-if="item.requiredTip" class="requiredTip">【待完善】</span>
-              <!-- <el-icon class="header-icon">
-                <info-filled />
-              </el-icon> -->
             </template>
             <el-form :model="item" ref="physicalForms" label-width="160px">
-              <el-form-item label="TipServer IP " prop="TipServer" :required="item.required">
+              <!-- <el-form-item label="TipServer IP " prop="TipServer" :required="item.required">
                 <el-input v-model="item.TipServer" :placeholder="placeholderTipServer" @input="onPhysicalItemChange(item, index)" />
               </el-form-item>
               <el-form-item label="TipServer Port" prop="TipPort" :required="item.required">
@@ -390,10 +387,13 @@
               </el-form-item>
               <el-form-item label="TipServer PassWord" prop="TestPass" :required="item.required">
                 <el-input v-model="item.TestPass" :placeholder="placeholderTestPass" @input="onPhysicalItemChange(item, index)" />
+              </el-form-item> -->
+              <el-form-item label="是否是物理机：">
+                <el-radio-group v-model="item.isapv">
+                  <el-radio :label="true">是</el-radio>
+                  <el-radio :label="false">否</el-radio>
+                </el-radio-group>
               </el-form-item>
-              <!--<el-form-item v-show="isPhysicalMachine == '1'" label="物理设备硬件型号" prop="model">
-                    <el-input v-model="addTaskForm.config.model" :placeholder="placeholderTipModel" />
-                  </el-form-item> -->
             </el-form>
           </el-collapse-item>
         </el-collapse>
@@ -439,6 +439,13 @@
               <span style="float: left">{{ item.ip }} -- {{ item.name }}</span>
             </el-option>
           </el-select>
+        </el-form-item>
+        <!-- 是否是物理机 -->
+        <el-form-item label="是否是物理机：">
+          <el-radio-group v-model="addTestPlatForm.isapv">
+            <el-radio :label="true">是</el-radio>
+            <el-radio :label="false">否</el-radio>
+          </el-radio-group>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -499,7 +506,7 @@
         </div>
         <template v-if="isPhysicalMachine == '1'">
           <div class="phy-items" v-for="(item, index) in physicalItems" :key="'physicalItems' + index">
-            <div v-if="item.TipPort !== ''" style="display: flex; margin-bottom: 20px">
+            <!-- <div v-if="item.TipPort !== ''" style="display: flex; margin-bottom: 20px">
               <span class="title">{{ `【${item.name}】` + '为物理机，配置项：' }}</span>
               <div>
                 <div style="margin-bottom: 10px">
@@ -515,6 +522,12 @@
             </div>
             <div v-else style="display: flex; margin-bottom: 20px">
               <span class="title">{{ `【${item.name}】` + '为虚拟机，无配置项' }}</span>
+            </div> -->
+            <div v-if="item.isapv">
+              <span class="title">{{ `【${item.name}】` + '为物理机' }}</span>
+            </div>
+            <div v-else>
+              <span class="title">{{ `【${item.name}】` + '为虚拟机' }}</span>
             </div>
           </div>
         </template>
@@ -611,7 +624,7 @@ const taskProgressData = ref(null)
 const physicalItemsChangeData = ref(null)
 
 const handleChange = (val: string[]) => {
-  console.log(val)
+  // console.log(val)
 }
 const changePhysicalMachine = (val: string) => {
   if (val === '1' && addTaskForm.group.length === 0) {
@@ -627,8 +640,9 @@ const changePhysicalMachine = (val: string) => {
           id: item.value,
           name: item.label,
           required: false,
-          TipServer: '',
-          TipPort: ''
+          isapv: false
+          // TipServer: '',
+          // TipPort: ''
         })
       }
     })
@@ -735,7 +749,8 @@ const searchGroup = ref('')
 // 添加测试平台数据
 const addTestPlatForm = reactive({
   id: null,
-  group: null
+  group: null,
+  isapv: false
 })
 const addTestPlatFormRef = ref<FormInstance>()
 
@@ -891,8 +906,9 @@ const openAddDialog = async (type, operation, data) => {
                 id: item.value,
                 name: item.label,
                 required: false,
-                TipServer: '',
-                TipPort: ''
+                isapv: false
+                // TipServer: '',
+                // TipPort: ''
               })
             }
           })
@@ -986,19 +1002,20 @@ const toShowPreviewDialog = async (formEl: FormInstance | undefined) => {
   }
   // 去除未填写的配置项
   physicalItems.value.map((item) => {
-    const { TipServer, TipPort, TestPass } = item
-    if (!!(TipServer || TipPort || TestPass)) {
-      addTaskForm.config.push(item)
-    }
+    // const { TipServer, TipPort, TestPass } = item
+    // if (!!(TipServer || TipPort || TestPass)) {
+    //   addTaskForm.config.push(item)
+    // }
     // const { TipServer, TipPort } = item
     // if (!!(TipServer || TipPort)) {
     //   addTaskForm.config.push(item)
     // }
+    addTaskForm.config.push(item)
   })
   // 选择含有物理机，未填写配置项提醒
-  if (addTaskForm.config?.length == 0 && isPhysicalMachine.value === '1') {
-    return ElMessage.error('至少填写一个物理机配置项')
-  }
+  // if (addTaskForm.config?.length == 0 && isPhysicalMachine.value === '1') {
+  //   return ElMessage.error('至少填写一个物理机配置项')
+  // }
   console.log('forms', addTaskForm)
   if (!formEl) return
   await formEl.validate(async (valid, fields) => {
@@ -1025,6 +1042,15 @@ const onAddTaskForm = async (formEl: FormInstance | undefined) => {
       }
       if (titleDialog.value == '添加任务') {
         delete addTaskForm.id
+        // 遍历addTaskForm.config，去除相同的对象
+        var newArr = []
+        addTaskForm.config.forEach((item) => {
+          var check = newArr.every((b) => {
+            return item.name !== b.name
+          })
+          check ? newArr.push(item) : ''
+        })
+        addTaskForm.config = newArr
         addTask(addTaskForm)
       } else {
         editTask(addTaskForm)
@@ -1127,8 +1153,8 @@ const addTask = async (params) => {
     })
     addTaskRuleFormRef.value.resetFields()
     dialogVisible.value = false
+    physicalItems.value = []
   }
-  physicalItems.value = []
 }
 
 // 任务管理 编辑接口
@@ -1193,9 +1219,10 @@ const getGroupDataId = (value) => {
       physicalItems.value.push({
         id: item.id,
         name: item.name,
-        TipServer: '',
-        TipPort: '',
-        TestPass: ''
+        isapv: false
+        // TipServer: '',
+        // TipPort: '',
+        // TestPass: ''
       })
     })
   } else {
@@ -1211,9 +1238,10 @@ const getGroupDataId = (value) => {
         physicalItems.value.push({
           id: item.id,
           name: item.name,
-          TipServer: '',
-          TipPort: '',
-          TestPass: ''
+          isapv: item.isapv
+          // TipServer: '',
+          // TipPort: '',
+          // TestPass: ''
         })
       }
     })
@@ -1228,7 +1256,6 @@ const getGroupDataId = (value) => {
 
 const deleteGroupDataId = (value) => {
   physicalItems.value = physicalItems.value.filter((item) => item.name !== value)
-  console.log('删一个', value, physicalItems.value)
 }
 
 // 测试平台 下拉选择框
@@ -1276,7 +1303,8 @@ const onAddTestPlatForm = async (formEl: FormInstance | undefined) => {
     if (addTestPlatForm.group != '') {
       const params = {
         id: addTestPlatForm.id,
-        group: addTestPlatForm.group
+        group: addTestPlatForm.group,
+        isapv: addTestPlatForm.isapv
       }
       putTestPlat(params)
     } else {
@@ -1292,12 +1320,15 @@ const putTestPlat = async (params) => {
   if (res.code === 1000) {
     await getTask(taskCurrentPage.value)
     await handle()
-    platformDialog.value = false
     ElMessage({
       message: res?.msg || '添加成功',
       type: 'success',
       duration: 2500
     })
+    platformDialog.value = false
+    addTestPlatForm.id = ''
+    addTestPlatForm.group = ''
+    addTestPlatForm.isapv = false
   } else {
     platformDialog.value = false
     ElMessage({
@@ -1335,6 +1366,7 @@ const handleCloseTag = (data, id) => {
 const deleteTestPlat = async (params) => {
   let res = await deleteTestPlatApi(params)
   if (res.code === 1000) {
+    platformDialog.value = false
     ElMessage({
       message: res?.msg || '删除成功',
       type: 'success',
@@ -1493,8 +1525,9 @@ watch(
           name: item,
           value: item,
           required: false,
-          TipServer: '',
-          TipPort: ''
+          isapv: false
+          // TipServer: '',
+          // TipPort: ''
         }
       })
     } else {
@@ -1521,8 +1554,9 @@ watch(
           name: it,
           value: it,
           required: false,
-          TipServer: '',
-          TipPort: ''
+          isapv: false
+          // TipServer: '',
+          // TipPort: ''
         })
       })
       console.log(`output->addTaskForm.group`, addTaskForm.group)
@@ -1587,6 +1621,7 @@ const onResetTaskForm = (formEl: FormInstance | undefined) => {
   groupDialogVisible.value = false
   platformDialog.value = false
   addTestPlatForm.group = ''
+  addTestPlatForm.isapv = false
   physicalItems.value = []
 }
 
@@ -1605,6 +1640,7 @@ const handleClose = (done: () => void) => {
 const handleTestPlatClose = (done: () => void) => {
   platformDialog.value = false
   addTestPlatForm.group = ''
+  addTestPlatForm.isapv = false
   addTestPlatFormRef.value.resetFields()
 }
 
