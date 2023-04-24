@@ -6,7 +6,7 @@
         <el-input size="large" clearable v-model="searchUser" placeholder="请输入要搜索的平台名称..." :suffix-icon="Search" @change="search()" />
       </div>
     </div>
-    <el-table ref="debugModeTableRef" :data="tableData" style="width: 100%; margin-top: 10px" v-loading="loading">
+    <el-table ref="debugModeTableRef" :data="tableData" style="width: 100%; margin-top: 10px" v-loading="loading" height="65vh">
       <el-table-column property="name" label="平台名称" align="center" width="220" />
       <el-table-column property="isreal" label="是否是物理机" width="150" align="center">
         <template #default="scope">
@@ -16,9 +16,15 @@
       </el-table-column>
       <el-table-column property="status" label="平台状态" width="220" align="center">
         <template #default="scope">
-          <el-tag v-if="scope.row.starttime === null" type="success">空闲中</el-tag>
-          <el-tag v-if="scope.row.starttime !== null && scope.row.endtime === null" type="warning">调试中</el-tag>
-          <el-tag v-if="scope.row.starttime !== null && scope.row.endtime !== null" type="danger">调试结束</el-tag>
+          <el-tooltip content="空闲中" placement="top" effect="dark">
+            <svg-icon v-if="scope.row.starttime === null" style="height: 43px; width: 43px; margin: 5px 0" iconName="icon-xiuxiqu"></svg-icon>
+          </el-tooltip>
+          <el-tooltip content="调试中" placement="top" effect="dark">
+            <svg-icon v-if="scope.row.starttime !== null && scope.row.endtime === null" style="height: 43px; width: 43px; margin: 5px 0" iconName="icon-jinhangzhong"></svg-icon>
+          </el-tooltip>
+          <el-tooltip content="调试结束" placement="top" effect="dark">
+            <svg-icon v-if="scope.row.starttime !== null && scope.row.endtime !== null" style="height: 43px; width: 43px; margin: 5px 0" iconName="icon-yijieshu"></svg-icon>
+          </el-tooltip>
         </template>
       </el-table-column>
       <el-table-column property="user" label="调试人" align="center" />
@@ -29,8 +35,12 @@
         <template #default="scope">
           <!-- <el-button link type="primary" size="small" @click="openDebugMode('edit', scope.row.id)">编辑</el-button> -->
           <!-- <el-button link type="primary" size="small" @click="openDebugMode('edit', scope.row.id)">详情</el-button> -->
-          <el-button link type="primary" size="small" @click="toDebug(scope.row.id)">开始调试</el-button>
-          <el-button link type="danger" size="small" @click="endDebug(scope.row)">结束调试</el-button>
+          <el-tooltip content="开始调试" placement="top" effect="dark">
+            <el-icon :size="20" style="color: #409eff; margin-right: 15px; cursor: pointer" @click="toDebug(scope.row.id)"><VideoPlay /></el-icon>
+          </el-tooltip>
+          <el-tooltip content="结束调试" placement="top" effect="dark">
+            <el-icon :size="20" style="color: #f56c6c; cursor: pointer" @click="endDebug(scope.row)"><SwitchButton /></el-icon>
+          </el-tooltip>
           <!-- <el-popconfirm title="确定删除这个平台?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消" @confirm="handleDelete(scope.row.id)">
             <template #reference>
               <el-button link type="danger" size="small">删除</el-button>
@@ -154,7 +164,7 @@ import { onMounted, onBeforeUnmount, ref, reactive, markRaw, nextTick, watchEffe
 import { onBeforeRouteLeave, useRoute, useRouter, NavigationGuardNext } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { utc2beijing } from '@/utils/util.js'
-import { Search } from '@element-plus/icons-vue'
+import { Search, Open, VideoPlay, SwitchButton } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules, TabsPaneContext } from 'element-plus'
 import Termmail from '@/components/debugTermail.vue'
 import { debugTaskApi, toDebugApi, exitDebugApi, addDebugTaskApi, debugUpbuild, getDebugUpbuildLogApi } from '@/api/APV/debugTask.js'

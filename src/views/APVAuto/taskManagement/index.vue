@@ -223,7 +223,7 @@
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'create'">
                 <el-tooltip content="任务启动" placement="top" effect="dark">
-                  <svg-icon style="width: 20px" iconName="icon-shebeiyunhang" @click="changeTaskStatus('start', scope.row, false)"></svg-icon>
+                  <svg-icon style="width: 30px; cursor: pointer" iconName="icon-shebeiyunhang" @click="changeTaskStatus('start', scope.row, false)"></svg-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'complete'">

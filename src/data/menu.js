@@ -72,17 +72,17 @@ export const APVAutoMenuData = [
   // },
   {
     id: '0303',
-    title: '测试报告',
-    path: '/APVAuto/templateReport',
-    icon: 'Document',
+    title: '调试模式',
+    path: '/APVAuto/debugMode',
+    icon: 'Monitor',
     isDisabled: false,
     children: []
   },
   {
     id: '0304',
-    title: '调试模式',
-    path: '/APVAuto/debugMode',
-    icon: 'Monitor',
+    title: '测试报告',
+    path: '/APVAuto/templateReport',
+    icon: 'Document',
     isDisabled: false,
     children: []
   }
