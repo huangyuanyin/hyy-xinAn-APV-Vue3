@@ -464,11 +464,11 @@
       </div>
       <el-form :inline="false" :model="addTestPlatForm" ref="addTestPlatFormRef" class="addDevice-form" label-width="140px">
         <!-- 是否是物理机 -->
-        <el-form-item label="添加测试平台类型：">
-          <el-radio-group v-model="addTestPlatForm.isapv" @change="changeIsApv">
-            <el-radio :label="true">物理机</el-radio>
-            <el-radio :label="false">虚拟机</el-radio>
-          </el-radio-group>
+        <el-form-item label="测试平台类型：">
+          <el-select clearable v-model="addTestPlatForm.isapv" placeholder="请选择测试平台类型..." @change="changeIsApv">
+            <el-option label="物理环境" :value="true"></el-option>
+            <el-option label="虚拟环境" :value="false"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="添加测试平台：">
           <el-select
@@ -789,7 +789,7 @@ const searchGroup = ref('')
 const addTestPlatForm = reactive({
   id: null,
   group: null,
-  isapv: true
+  isapv: false
 })
 const addTestPlatFormRef = ref<FormInstance>()
 

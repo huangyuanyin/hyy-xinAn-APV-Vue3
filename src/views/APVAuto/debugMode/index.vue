@@ -8,35 +8,52 @@
     </div>
     <el-table ref="debugModeTableRef" :data="tableData" style="width: 100%; margin-top: 10px" v-loading="loading" height="65vh">
       <el-table-column property="name" label="平台名称" align="center" width="220" />
-      <el-table-column property="isreal" label="是否是物理机" width="150" align="center">
+      <el-table-column property="isapv" label="是否是物理机" width="150" align="center">
         <template #default="scope">
-          <el-tag v-if="scope.row.isreal === 1" type="success">是</el-tag>
+          <el-tag v-if="scope.row.isapv" type="success">是</el-tag>
           <el-tag v-else type="danger">否</el-tag>
         </template>
       </el-table-column>
       <el-table-column property="status" label="平台状态" width="220" align="center">
         <template #default="scope">
           <el-tooltip content="空闲中" placement="top" effect="dark">
-            <svg-icon v-if="scope.row.starttime === null" style="height: 43px; width: 43px; margin: 5px 0" iconName="icon-xiuxiqu"></svg-icon>
+            <svg-icon v-if="scope.row.starttime === null" style="height: 30px; margin: 5px 0" iconName="icon-shuqianzhunbeizhong"></svg-icon>
           </el-tooltip>
           <el-tooltip content="调试中" placement="top" effect="dark">
-            <svg-icon v-if="scope.row.starttime !== null && scope.row.endtime === null" style="height: 43px; width: 43px; margin: 5px 0" iconName="icon-jinhangzhong"></svg-icon>
+            <svg-icon
+              v-if="scope.row.starttime !== null && scope.row.endtime === null"
+              style="width: 30px; height: 30px; margin: 5px 0"
+              iconName="icon-shebeidongtai-copy"
+            ></svg-icon>
           </el-tooltip>
           <el-tooltip content="调试结束" placement="top" effect="dark">
-            <svg-icon v-if="scope.row.starttime !== null && scope.row.endtime !== null" style="height: 43px; width: 43px; margin: 5px 0" iconName="icon-yijieshu"></svg-icon>
+            <svg-icon v-if="scope.row.starttime !== null && scope.row.endtime !== null" style="width: 30px; height: 30px; margin: 5px 0" iconName="icon-yijieshu"></svg-icon>
           </el-tooltip>
         </template>
       </el-table-column>
       <el-table-column property="user" label="调试人" align="center" />
-      <el-table-column property="starttime" label="开始时间" :formatter="dateFormatter" width="220" align="center" />
-      <el-table-column property="endtime" label="结束时间" :formatter="dateFormatter" width="220" align="center" />
+      <el-table-column property="starttime" label="开始时间" width="220" align="center">
+        <template #default="scope">
+          <span v-if="scope.row.starttime === null" type="danger"> - </span>
+          <span v-else type="success">{{ utc2beijing(scope.row.starttime) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column property="endtime" label="结束时间" width="220" align="center">
+        <template #default="scope">
+          <span v-if="scope.row.endtime === null" type="danger"> - </span>
+          <span v-else type="success">{{ utc2beijing(scope.row.endtime) }}</span>
+        </template>
+      </el-table-column>
       <el-table-column property="remark" label="备注" align="center" />
       <el-table-column fixed="right" label="操作" align="center" width="200">
         <template #default="scope">
           <!-- <el-button link type="primary" size="small" @click="openDebugMode('edit', scope.row.id)">编辑</el-button> -->
           <!-- <el-button link type="primary" size="small" @click="openDebugMode('edit', scope.row.id)">详情</el-button> -->
-          <el-tooltip content="开始调试" placement="top" effect="dark">
+          <el-tooltip content="开始调试" placement="top" effect="dark" v-if="scope.row.starttime === null || (scope.row.starttime !== null && scope.row.endtime !== null)">
             <el-icon :size="20" style="color: #409eff; margin-right: 15px; cursor: pointer" @click="toDebug(scope.row.id)"><VideoPlay /></el-icon>
+          </el-tooltip>
+          <el-tooltip content="继续调试" placement="top" effect="dark" v-if="scope.row.starttime !== null && scope.row.endtime === null">
+            <svg-icon style="width: 33px; height: 33px; cursor: pointer; margin-right: 15px" iconName="icon-shebeiyunhang" @click="toDebug(scope.row.id)"></svg-icon>
           </el-tooltip>
           <el-tooltip content="结束调试" placement="top" effect="dark">
             <el-icon :size="20" style="color: #f56c6c; cursor: pointer" @click="endDebug(scope.row)"><SwitchButton /></el-icon>
@@ -64,14 +81,14 @@
   <el-dialog v-model="debugModeDialog" :title="titleDialog" width="35%" @close="handleClose">
     <span>
       <el-form :inline="false" :model="form" ref="addDebugModeRuleFormRef" :rules="addDebugModeFormRules" class="debugMode-form" label-width="150px">
-        <el-form-item label="是否硬件设备" prop="isreal">
-          <el-radio-group v-model="form.isreal">
-            <el-radio label="是" />
-            <el-radio label="否" />
-          </el-radio-group>
+        <el-form-item label="平台类型：" prop="isapv">
+          <el-select clearable v-model="form.isapv" placeholder="请选择测试平台类型..." @change="selectIsapv">
+            <el-option label="物理环境" :value="true"></el-option>
+            <el-option label="虚拟环境" :value="false"></el-option>
+          </el-select>
         </el-form-item>
-        <el-form-item label="平台名称" prop="group">
-          <el-select v-model="form.group" placeholder="请选择平台名称" :options="groupList">
+        <el-form-item label="平台名称：" prop="group">
+          <el-select v-model="form.group" placeholder="请选择平台名称" :options="groupList" @visible-change="getIsApvList(form.isapv)">
             <el-scrollbar @scroll="handleScroll" :view-style="{ height: '150px' }" :wrap-style="{ height: '150px' }" max-height="150px" noresize>
               <template #default="{ size }">
                 <div :style="{ height: size }">
@@ -83,7 +100,7 @@
             </el-scrollbar>
           </el-select>
         </el-form-item>
-        <el-form-item label="备注信息">
+        <el-form-item label="备注信息：">
           <el-input v-model="form.remark" placeholder="请输入备注信息..." />
         </el-form-item>
       </el-form>
@@ -201,14 +218,14 @@ const codeMirrorDialog = ref(false)
 const codeMirrorVal = ref('')
 const form = ref({
   group: '',
-  isreal: '0' as any,
+  isapv: false,
   remark: ''
   // config: {}
 })
 const addDebugModeRuleFormRef = ref<FormInstance>()
 const addDebugModeFormRules = reactive<FormRules>({
   group: [{ required: true, message: '请选择平台名称', trigger: 'blur' }],
-  isreal: [{ required: true, message: '请选择是否是硬件设备', trigger: 'change' }]
+  isapv: [{ required: true, message: '请选择平台类型', trigger: 'change' }]
 })
 const buildForm = reactive({
   name: '现有版本',
@@ -349,6 +366,20 @@ const seeProcess = async () => {
   }
 }
 
+const getIsApvList = async (val) => {
+  const params = {
+    isapv: val ? 'True' : 'False'
+  }
+  let res = await d_groupApi(params)
+  if (res.code === 1000) {
+    visibleOptions.value = res.data
+  }
+}
+
+const selectIsapv = (val) => {
+  form.value.group = ''
+}
+
 const onReseDebugModeRuleForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.resetFields()
@@ -360,7 +391,7 @@ const onSubmitDebugModeForm = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       const params = { ...form.value }
-      params.isreal = params.isreal === '是' ? 1 : 0
+      // params.isapv = params.isapv === '是' ? 1 : 0
       let res = await addDebugTaskApi(params)
       if (res.code === 1000) {
         ElMessage.success('新增成功！')
