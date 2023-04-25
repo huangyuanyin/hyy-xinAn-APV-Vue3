@@ -17,7 +17,7 @@
       <el-table-column property="status" label="平台状态" width="220" align="center">
         <template #default="scope">
           <el-tooltip content="空闲中" placement="top" effect="dark">
-            <svg-icon v-if="scope.row.starttime === null" style="height: 30px; margin: 5px 0" iconName="icon-shuqianzhunbeizhong"></svg-icon>
+            <svg-icon v-if="scope.row.starttime === null" style="width: 30px; height: 30px; margin: 5px 0" iconName="icon-shuqianzhunbeizhong"></svg-icon>
           </el-tooltip>
           <el-tooltip content="调试中" placement="top" effect="dark">
             <svg-icon
@@ -398,6 +398,7 @@ const onSubmitDebugModeForm = async (formEl: FormInstance | undefined) => {
         debugModeDialog.value = false
         groupPage.value = 1
         getGroupList()
+        debugTask()
       }
     }
   })
