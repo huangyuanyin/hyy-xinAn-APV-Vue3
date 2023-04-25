@@ -51,7 +51,7 @@ const routes = [
             name: 'DeviceManagement',
             meta: {
               title: '资源管理',
-              keepAlive: false
+              keepAlive: true
             },
             component: () => import('@/views/APVAuto/deviceManagement/index.vue')
           },
@@ -115,6 +115,39 @@ const routes = [
             ]
           },
           {
+            path: '/APVAuto/templateReport_new',
+            name: 'TemplateReportNew',
+            meta: {
+              title: '测试报告_新版'
+            },
+            component: () => import('@/views/APVAuto/templateReport_new/components/historyLayout.vue'),
+            children: [
+              {
+                path: '',
+                component: () => import('@/views/APVAuto/templateReport_new/index.vue'),
+                meta: {
+                  keepAlive: false
+                }
+              },
+              {
+                path: '/APVAuto/reportDetail_new',
+                name: 'reportDetailNew',
+                meta: {
+                  title: '测试报告详情_新版'
+                },
+                component: () => import('@/views/APVAuto/templateReport_new/reportDetail.vue')
+              },
+              {
+                path: '/APVAuto/templateReport/failNumDetail',
+                name: 'reportFailNumDetail',
+                meta: {
+                  title: '失败数详情'
+                },
+                component: () => import('@/views/APVAuto/templateReport_new/components/FailNumDetail.vue')
+              }
+            ]
+          },
+          {
             path: '/APVAuto/historyReport/:reportId',
             name: 'historyReport',
             meta: {
@@ -153,6 +186,14 @@ const routes = [
               title: '数据分析'
             },
             component: () => import('@/views/APVAuto/templateReport/dataAnalysis.vue')
+          },
+          {
+            path: '/APVAuto/debugMode',
+            name: 'DebugMode',
+            meta: {
+              title: '调试模式'
+            },
+            component: () => import('@/views/APVAuto/debugMode/index.vue')
           }
         ]
       },

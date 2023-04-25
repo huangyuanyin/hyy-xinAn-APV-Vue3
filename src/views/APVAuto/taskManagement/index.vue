@@ -154,7 +154,7 @@
               <div class="stateStyle" v-if="scope.row.state === 'create'">
                 <!-- <div class="status-point" style="background-color: #e6a23c"></div>
                 <span style="color: #e6a23c">待启动</span> -->
-                <el-tooltip content="待启动" placement="top" effect="dark"><svg-icon style="width: 30px" iconName="icon-shebeidongtai"></svg-icon></el-tooltip>
+                <el-tooltip content="待启动" placement="top" effect="dark"><svg-icon style="width: 30px" iconName="icon-dengdai"></svg-icon></el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'complete'">
                 <!-- <div class="status-point" style="background-color: #409eff"></div>
@@ -175,49 +175,69 @@
             <template #default="scope">
               <div class="stateStyle" v-if="scope.row.state === 'waitcheck'">
                 <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #409eff" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
+                  <el-icon :size="20" style="color: #409eff" @click="changeTaskStatus('restart', scope.row, false)">
+                    <VideoPlay />
+                  </el-icon>
                 </el-tooltip>
                 <el-tooltip content="APV环境检测" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #f56c6c; margin-left: 10px" @click="checkAPV(scope.row.id)"><Warning /></el-icon>
+                  <el-icon :size="20" style="color: #f56c6c; margin-left: 10px" @click="checkAPV(scope.row.id)">
+                    <Warning />
+                  </el-icon>
                 </el-tooltip>
                 <el-tooltip content="测试环境释放" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #000; margin-left: 10px" @click="releaseAPV(scope.row.id)"><Promotion /></el-icon>
+                  <el-icon :size="20" style="color: #000; margin-left: 10px" @click="releaseAPV(scope.row.id)">
+                    <Promotion />
+                  </el-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'stop'">
                 <el-tooltip content="重新执行所有测试用例，并删除上次的测试结果" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #909399" @click="changeTaskStatus('start', scope.row, true)"><RefreshRight /></el-icon>
+                  <el-icon :size="20" style="color: #909399" @click="changeTaskStatus('start', scope.row, true)">
+                    <RefreshRight />
+                  </el-icon>
                 </el-tooltip>
                 <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #409eff; margin-left: 10px" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
+                  <el-icon :size="20" style="color: #409eff; margin-left: 10px" @click="changeTaskStatus('restart', scope.row, false)">
+                    <VideoPlay />
+                  </el-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle fail" v-if="scope.row.state === 'fail'">
                 <el-tooltip content="重新执行所有测试用例，并删除上次的测试结果" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #909399" @click="changeTaskStatus('start', scope.row, true)"><RefreshRight /></el-icon>
+                  <el-icon :size="20" style="color: #909399" @click="changeTaskStatus('start', scope.row, true)">
+                    <RefreshRight />
+                  </el-icon>
                 </el-tooltip>
                 <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #409eff; margin-left: 10px" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
+                  <el-icon :size="20" style="color: #409eff; margin-left: 10px" @click="changeTaskStatus('restart', scope.row, false)">
+                    <VideoPlay />
+                  </el-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'running'">
                 <el-tooltip content="任务暂停" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #e6a23c" @click="changeTaskStatus('stop', scope.row, false)"><VideoPause /></el-icon>
+                  <el-icon :size="20" style="color: #e6a23c" @click="changeTaskStatus('stop', scope.row, false)">
+                    <VideoPause />
+                  </el-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'create'">
                 <el-tooltip content="任务启动" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #67c23a" @click="changeTaskStatus('start', scope.row, false)"><SwitchButton /></el-icon>
+                  <svg-icon style="width: 30px; cursor: pointer" iconName="icon-shebeiyunhang" @click="changeTaskStatus('start', scope.row, false)"></svg-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'complete'">
                 <el-tooltip content="继续运行该任务下失败用例" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #409eff" @click="changeTaskStatus('restart', scope.row, false)"><VideoPlay /></el-icon>
+                  <el-icon :size="20" style="color: #409eff" @click="changeTaskStatus('restart', scope.row, false)">
+                    <VideoPlay />
+                  </el-icon>
                 </el-tooltip>
               </div>
               <div class="stateStyle" v-if="scope.row.state === 'ready'">
                 <el-tooltip content="任务准备中，禁止操作" placement="top" effect="dark">
-                  <el-icon :size="20" style="color: #f56c6c; cursor: no-drop"><CircleClose /></el-icon>
+                  <el-icon :size="20" style="color: #f56c6c; cursor: no-drop">
+                    <CircleClose />
+                  </el-icon>
                 </el-tooltip>
               </div>
             </template>
@@ -311,7 +331,7 @@
               <el-option v-for="(item, index) in state.buildData" :key="'buildData' + index" :label="item.name" :value="item.name" />
             </el-select>
           </el-form-item>
-          <el-form-item label="测试平台" prop="group">
+          <!-- <el-form-item label="测试平台" prop="group">
             <el-select
               multiple
               clearable
@@ -322,6 +342,36 @@
               :disabled="titleDialog === '任务详情'"
             >
               <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name" :value="item.name" :disabled="item.status">
+                <span style="float: left">{{ item.ip }} -- {{ item.name }}</span>
+              </el-option>
+            </el-select>
+          </el-form-item> -->
+          <el-form-item label="测试平台 - 虚拟机">
+            <el-select
+              multiple
+              clearable
+              v-model="addTaskForm.group_false"
+              placeholder="选填...（如无虚拟机可不选）"
+              @change="getGroupDataId_false"
+              @remove-tag="deleteGroupDataId"
+              :disabled="titleDialog === '任务详情'"
+            >
+              <el-option v-for="(item, index) in state.d_groupData_false" :key="'d_groupData_false' + index" :label="item.name" :value="item.name" :disabled="item.status">
+                <span style="float: left">{{ item.ip }} -- {{ item.name }}</span>
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="测试平台 - 物理机">
+            <el-select
+              multiple
+              clearable
+              v-model="addTaskForm.group_true"
+              placeholder="选填...（如无物理机可不选）"
+              @change="getGroupDataId_true"
+              @remove-tag="deleteGroupDataId"
+              :disabled="titleDialog === '任务详情'"
+            >
+              <el-option v-for="(item, index) in state.d_groupData_true" :key="'d_groupData_true' + index" :label="item.name" :value="item.name" :disabled="item.status">
                 <span style="float: left">{{ item.ip }} -- {{ item.name }}</span>
               </el-option>
             </el-select>
@@ -345,36 +395,35 @@
               <span>注：可根据测试设备硬件等信息区分同一build的不同测试任务</span>
             </div>
           </el-form-item>
-          <el-form-item label="是否含有物理机" prop="config">
+          <!-- <el-form-item label="是否含有物理机" prop="config">
             <el-radio-group v-model="isPhysicalMachine" @change="changePhysicalMachine" :disabled="titleDialog === '任务详情'">
               <el-radio label="1">是</el-radio>
               <el-radio label="0">否</el-radio>
             </el-radio-group>
-          </el-form-item>
+          </el-form-item> -->
         </el-form>
         <el-collapse v-show="isPhysicalMachine == '1'" v-model="activeNames" @change="handleChange">
           <el-collapse-item v-for="(item, index) in physicalItems" :key="'physicalItems' + index" :name="item.name">
             <template #title>
               <span>{{ `【${item.name}】` + `&nbsp` + '的物理机配置项：' }}</span>
               <span v-if="item.requiredTip" class="requiredTip">【待完善】</span>
-              <!-- <el-icon class="header-icon">
-                <info-filled />
-              </el-icon> -->
             </template>
             <el-form :model="item" ref="physicalForms" label-width="160px">
-              <el-form-item label="TipServer IP " prop="TipServer" :required="item.required">
+              <!-- <el-form-item label="TipServer IP " prop="TipServer" :required="item.required">
                 <el-input v-model="item.TipServer" :placeholder="placeholderTipServer" @input="onPhysicalItemChange(item, index)" />
               </el-form-item>
               <el-form-item label="TipServer Port" prop="TipPort" :required="item.required">
                 <el-input v-model="item.TipPort" :placeholder="placeholderTipPort" @input="onPhysicalItemChange(item, index)" />
               </el-form-item>
-              <!-- <el-form-item label="TipServer PassWord" prop="TestPass" :required="item.required">
-                <el-input v-model="item.TestPass" :placeholder="placeholderTestPass"
-                  @input="onPhysicalItemChange(item, index)" />
+              <el-form-item label="TipServer PassWord" prop="TestPass" :required="item.required">
+                <el-input v-model="item.TestPass" :placeholder="placeholderTestPass" @input="onPhysicalItemChange(item, index)" />
               </el-form-item> -->
-              <!--<el-form-item v-show="isPhysicalMachine == '1'" label="物理设备硬件型号" prop="model">
-                    <el-input v-model="addTaskForm.config.model" :placeholder="placeholderTipModel" />
-                  </el-form-item> -->
+              <el-form-item label="是否是物理机：">
+                <el-radio-group v-model="item.isapv">
+                  <el-radio :label="true">是</el-radio>
+                  <el-radio :label="false">否</el-radio>
+                </el-radio-group>
+              </el-form-item>
             </el-form>
           </el-collapse-item>
         </el-collapse>
@@ -405,7 +454,7 @@
     <!--平台弹窗-->
     <el-dialog v-model="platformDialog" title="修改测试平台" custom-class="platformDialog" width="50%" :before-close="handleTestPlatClose">
       <div class="tagList ignore-tagList">
-        <span class="ignore-title">已有测试平台：</span>
+        <span class="ignore-title" style="width: 110px; text-align: end; font-size: 14px">已有测试平台：</span>
         <el-tag v-if="testPlatList.length == 0" class="ml-2" type="info">暂无测试平台</el-tag>
         <div>
           <el-tag class="tagType" v-for="(item, index) in testPlatList" :key="'testPlatList' + index" closable @close="handleCloseTag(item, item.id)">
@@ -413,10 +462,23 @@
           </el-tag>
         </div>
       </div>
-      <el-form :inline="false" :model="addTestPlatForm" ref="addTestPlatFormRef" class="addDevice-form" label-width="130px">
+      <el-form :inline="false" :model="addTestPlatForm" ref="addTestPlatFormRef" class="addDevice-form" label-width="140px">
+        <!-- 是否是物理机 -->
+        <el-form-item label="测试平台类型：">
+          <el-select clearable v-model="addTestPlatForm.isapv" placeholder="请选择测试平台类型..." @change="changeIsApv">
+            <el-option label="物理环境" :value="true"></el-option>
+            <el-option label="虚拟环境" :value="false"></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="添加测试平台：">
-          <el-select clearable v-model="addTestPlatForm.group" placeholder="请选择要添加的测试平台..." @change="getTestPlatDataId">
-            <el-option v-for="(item, index) in state.d_groupDataAfter" :key="'d_groupDataAfter' + index" :label="item.name" :value="item.name" :disabled="item.disabled">
+          <el-select
+            clearable
+            v-model="addTestPlatForm.group"
+            placeholder="请选择要添加的测试平台..."
+            @change="getTestPlatDataId"
+            @visible-change="getGroupList(addTestPlatForm.isapv)"
+          >
+            <el-option v-for="(item, index) in state.d_groupDataAfter_2" :key="'d_groupDataAfter_2' + index" :label="item.name" :value="item.name" :disabled="item.status">
               <span style="float: left">{{ item.ip }} -- {{ item.name }}</span>
             </el-option>
           </el-select>
@@ -480,7 +542,7 @@
         </div>
         <template v-if="isPhysicalMachine == '1'">
           <div class="phy-items" v-for="(item, index) in physicalItems" :key="'physicalItems' + index">
-            <div v-if="item.TipPort !== ''" style="display: flex; margin-bottom: 20px">
+            <!-- <div v-if="item.TipPort !== ''" style="display: flex; margin-bottom: 20px">
               <span class="title">{{ `【${item.name}】` + '为物理机，配置项：' }}</span>
               <div>
                 <div style="margin-bottom: 10px">
@@ -489,11 +551,19 @@
                 <div style="margin-bottom: 10px">
                   <span>TipPort：</span><span>{{ item.TipPort }}</span>
                 </div>
-                <!-- <div style="margin-bottom: 10px;"><span>TestPass：</span><span>{{ item.TestPass }}</span></div> -->
+                <div style="margin-bottom: 10px">
+                  <span>TestPass：</span><span>{{ item.TestPass }}</span>
+                </div>
               </div>
             </div>
             <div v-else style="display: flex; margin-bottom: 20px">
               <span class="title">{{ `【${item.name}】` + '为虚拟机，无配置项' }}</span>
+            </div> -->
+            <div v-if="item.isapv">
+              <span class="title">{{ `【${item.name}】` + '为物理机' }}</span>
+            </div>
+            <div v-else>
+              <span class="title">{{ `【${item.name}】` + '为虚拟机' }}</span>
             </div>
           </div>
         </template>
@@ -590,7 +660,7 @@ const taskProgressData = ref(null)
 const physicalItemsChangeData = ref(null)
 
 const handleChange = (val: string[]) => {
-  console.log(val)
+  // console.log(val)
 }
 const changePhysicalMachine = (val: string) => {
   if (val === '1' && addTaskForm.group.length === 0) {
@@ -606,8 +676,9 @@ const changePhysicalMachine = (val: string) => {
           id: item.value,
           name: item.label,
           required: false,
-          TipServer: '',
-          TipPort: ''
+          isapv: false
+          // TipServer: '',
+          // TipPort: ''
         })
       }
     })
@@ -683,6 +754,9 @@ const state: any = reactive({
   getD_group: [], // 测试平台数据
   buildData: [], // 压测版本数据
   d_groupDataAfter: [],
+  d_groupDataAfter_2: [],
+  d_groupData_true: [],
+  d_groupData_false: [],
   selectStatusList: [
     {
       value: 'running',
@@ -714,7 +788,8 @@ const searchGroup = ref('')
 // 添加测试平台数据
 const addTestPlatForm = reactive({
   id: null,
-  group: null
+  group: null,
+  isapv: false
 })
 const addTestPlatFormRef = ref<FormInstance>()
 
@@ -725,10 +800,12 @@ const addTaskForm = reactive({
   name: '',
   user: JSON.parse(localStorage.getItem('userInfo'))?.nickname,
   build: '',
-  group: [],
+  group_true: [],
+  group_false: [],
   cases: null,
   remarks: '',
-  config: []
+  config: [],
+  group: []
   // config: {
   //   TipServer: "",
   //   TipPort: "",
@@ -800,6 +877,8 @@ const addTaskFormRules = reactive<FormRules>({
   build: [{ required: true, message: '请选择测build版本', trigger: 'blur' }],
   group: [{ required: true, message: '请选择测试平台', trigger: 'blur' }],
   cases: [{ required: true, message: '请选择用例集', trigger: 'blur' }],
+  group_true: [{ required: true, message: '请选择测试平台-物理机', trigger: 'blur' }],
+  group_false: [{ required: true, message: '请选择测试平台-虚拟机', trigger: 'blur' }],
   // config: [
   //   { required: true, message: "请选择是否需要物理机", trigger: "blur" },
   // ],
@@ -818,12 +897,12 @@ const addTaskFormRules = reactive<FormRules>({
 const physicalForms = ref([])
 
 const onPhysicalItemChange = (item, index) => {
-  // const { TipServer, TipPort, TestPass } = item
-  // item.required = !!(TipServer || TipPort || TestPass)
-  // item.required && !(TipServer && TipPort && TestPass) ? item.requiredTip = true : item.requiredTip = false
-  const { TipServer, TipPort } = item
-  item.required = !!(TipServer || TipPort)
-  item.required && !(TipServer && TipPort) ? (item.requiredTip = true) : (item.requiredTip = false)
+  const { TipServer, TipPort, TestPass } = item
+  item.required = !!(TipServer || TipPort || TestPass)
+  item.required && !(TipServer && TipPort && TestPass) ? (item.requiredTip = true) : (item.requiredTip = false)
+  // const { TipServer, TipPort } = item
+  // item.required = !!(TipServer || TipPort)
+  // item.required && !(TipServer && TipPort) ? (item.requiredTip = true) : (item.requiredTip = false)
   if (!item.required) {
     physicalForms.value[index].clearValidate()
   }
@@ -847,6 +926,9 @@ const openAddDialog = async (type, operation, data) => {
         titleDialog.value = '编辑任务'
         buttonText.value = '确定'
         editDisabled.value = true
+        addTaskForm.group_false = data.config.filter((item) => item.isapv == false).map((item) => item.name)
+        addTaskForm.group_true = data.config.filter((item) => item.isapv == true).map((item) => item.name)
+        console.log(`output->`, addTaskForm.group_false)
       } else if (operation == 'detail') {
         titleDialog.value = '任务详情'
         editDisabled.value = true
@@ -856,30 +938,31 @@ const openAddDialog = async (type, operation, data) => {
       if (operation == 'add') {
         isPhysicalMachine.value = '0'
       } else {
-        if (data.config.length === 0 || data.config == null) {
-          isPhysicalMachine.value = '0'
-        } else {
-          isPhysicalMachine.value = '1'
-          physicalItems.value = data.config
-          let arr = data.config.map((item) => {
-            return item.id
-          })
-          data.groupAfter.map((item) => {
-            if (!arr.includes(item.value)) {
-              physicalItems.value.push({
-                id: item.value,
-                name: item.label,
-                required: false,
-                TipServer: '',
-                TipPort: ''
-              })
-            }
-          })
-          // addTaskForm.config.TipServer = data.config.TipServer
-          // addTaskForm.config.TipPort = data.config.TipPort
-          // addTaskForm.config.TestPass = data.config.TestPass
-          // addTaskForm.config.model = data.config.model
-        }
+        // if (data.config.length === 0 || data.config == null) {
+        //   isPhysicalMachine.value = '0'
+        // } else {
+        //   isPhysicalMachine.value = '1'
+        //   physicalItems.value = data.config
+        //   let arr = data.config.map((item) => {
+        //     return item.id
+        //   })
+        //   data.groupAfter.map((item) => {
+        //     if (!arr.includes(item.value)) {
+        //       physicalItems.value.push({
+        //         id: item.value,
+        //         name: item.label,
+        //         required: false,
+        //         isapv: false
+        //         // TipServer: '',
+        //         // TipPort: ''
+        //       })
+        //     }
+        //   })
+        //   // addTaskForm.config.TipServer = data.config.TipServer
+        //   // addTaskForm.config.TipPort = data.config.TipPort
+        //   // addTaskForm.config.TestPass = data.config.TestPass
+        //   // addTaskForm.config.model = data.config.model
+        // }
       }
       // if (data && data.state === 'running') {
       //   return ElMessage({
@@ -892,6 +975,8 @@ const openAddDialog = async (type, operation, data) => {
         getOneData(type, data?.id)
       })
       dialogVisible.value = true
+      getDgroupDataList(true)
+      getDgroupDataList(false)
       break
     default:
       break
@@ -964,25 +1049,49 @@ const toShowPreviewDialog = async (formEl: FormInstance | undefined) => {
     }
   }
   // 去除未填写的配置项
-  physicalItems.value.map((item) => {
-    // const { TipServer, TipPort, TestPass } = item
-    // if (!!(TipServer || TipPort || TestPass)) {
-    //   addTaskForm.config.push(item)
-    // }
-    const { TipServer, TipPort } = item
-    if (!!(TipServer || TipPort)) {
-      addTaskForm.config.push(item)
-    }
+  // physicalItems.value.map((item) => {
+  //   // const { TipServer, TipPort, TestPass } = item
+  //   // if (!!(TipServer || TipPort || TestPass)) {
+  //   //   addTaskForm.config.push(item)
+  //   // }
+  //   // const { TipServer, TipPort } = item
+  //   // if (!!(TipServer || TipPort)) {
+  //   //   addTaskForm.config.push(item)
+  //   // }
+  //   addTaskForm.config.push(item)
+  // })
+  let arr_true = []
+  arr_true = addTaskForm.group_true.map((it, index) => {
+    return { name: it, isapv: true }
   })
+  let arr_false = []
+  arr_false = addTaskForm.group_false.map((it, index) => {
+    return { name: it, isapv: false }
+  })
+  // 遍历addTaskForm.group_true
+
+  addTaskForm.config = [].concat(arr_false, arr_true).filter((it) => it.name !== '无')
+  // 取出addTaskForm.config中的name
+  let arr = []
+  arr = addTaskForm.config.map((it) => it.name)
+  // 去重
+  arr = [...new Set(arr)]
+  // 去除addTaskForm.group中的name
+  addTaskForm.group = arr
+
+  // addTaskForm.config.filter((it) => {
+  //   it.name[0] !== '无' || it.name.length != 0
+  // })
   // 选择含有物理机，未填写配置项提醒
-  if (addTaskForm.config?.length == 0 && isPhysicalMachine.value === '1') {
-    return ElMessage.error('至少填写一个物理机配置项')
-  }
+  // if (addTaskForm.config?.length == 0 && isPhysicalMachine.value === '1') {
+  //   return ElMessage.error('至少填写一个物理机配置项')
+  // }
   console.log('forms', addTaskForm)
   if (!formEl) return
   await formEl.validate(async (valid, fields) => {
     if (valid) {
-      submitPreviewDialog.value = true
+      // submitPreviewDialog.value = true
+      onAddTaskForm(addTaskRuleFormRef.value)
       casesName.value = addTaskForm.cases.cases_name
       caseModule.value = addTaskForm.cases.module_name
     }
@@ -1000,13 +1109,24 @@ const onAddTaskForm = async (formEl: FormInstance | undefined) => {
       console.log('添加成功...', JSON.parse(JSON.stringify(addTaskForm)))
       // addTaskForm.group = "[" + String(addTaskForm.group) + "]"
       if (isPhysicalMachine.value == '0') {
-        delete addTaskForm.config
+        // delete addTaskForm.config
       }
       if (titleDialog.value == '添加任务') {
         delete addTaskForm.id
-        addTask(addTaskForm)
+        // 遍历addTaskForm.config，去除相同的对象
+        // var newArr = []
+        // addTaskForm.config.forEach((item) => {
+        //   var check = newArr.every((b) => {
+        //     return item.name !== b.name
+        //   })
+        //   check ? newArr.push(item) : ''
+        // })
+        // addTaskForm.config = newArr
+        const { group_false, group_true, ...params } = addTaskForm
+        addTask(params)
       } else {
-        editTask(addTaskForm)
+        const { group_false, group_true, ...params } = addTaskForm
+        editTask(params)
       }
     } else {
       console.log('error submit!', fields)
@@ -1105,9 +1225,11 @@ const addTask = async (params) => {
       duration: 1000
     })
     addTaskRuleFormRef.value.resetFields()
+    addTaskForm.group_true = []
+    addTaskForm.group_false = []
     dialogVisible.value = false
+    physicalItems.value = []
   }
-  physicalItems.value = []
 }
 
 // 任务管理 编辑接口
@@ -1122,6 +1244,8 @@ const editTask = async (params) => {
       duration: 1000
     })
     addTaskRuleFormRef.value.resetFields()
+    addTaskForm.group_true = []
+    addTaskForm.group_false = []
     dialogVisible.value = false
   }
   physicalItems.value = []
@@ -1172,9 +1296,10 @@ const getGroupDataId = (value) => {
       physicalItems.value.push({
         id: item.id,
         name: item.name,
-        TipServer: '',
-        TipPort: ''
-        // TestPass: "",
+        isapv: false
+        // TipServer: '',
+        // TipPort: '',
+        // TestPass: ''
       })
     })
   } else {
@@ -1190,9 +1315,10 @@ const getGroupDataId = (value) => {
         physicalItems.value.push({
           id: item.id,
           name: item.name,
-          TipServer: '',
-          TipPort: ''
-          // TestPass: "",
+          isapv: item.isapv
+          // TipServer: '',
+          // TipPort: '',
+          // TestPass: ''
         })
       }
     })
@@ -1205,14 +1331,50 @@ const getGroupDataId = (value) => {
   })
 }
 
+const getGroupDataId_true = (value) => {
+  // addTaskForm.config = []
+  // addTaskForm.config.push({ name: value, isapv: true })
+}
+
+const getGroupDataId_false = (value) => {
+  // addTaskForm.config = []
+  // addTaskForm.config.push({ name: value, isapv: false })
+  console.log(`output->add`, addTaskForm)
+}
+
 const deleteGroupDataId = (value) => {
   physicalItems.value = physicalItems.value.filter((item) => item.name !== value)
-  console.log('删一个', value, physicalItems.value)
 }
 
 // 测试平台 下拉选择框
 const getTestPlatDataId = (value) => {
   addTestPlatForm.group = value
+}
+
+const getGroupList = async (val) => {
+  let res = await d_groupApi({ isapv: val ? 'True' : 'False' })
+  if (res.code === 1000) {
+    state.d_groupDataAfter_2 = res.data
+  }
+}
+
+const getDgroupDataList = async (val) => {
+  let res = await d_groupApi({ isapv: val ? 'True' : 'False' })
+  if (res.code === 1000) {
+    if (val) {
+      state.d_groupData_true = res.data
+      // state.d_groupData_true.unshift({
+      //   ip: '无物理机',
+      //   name: '无'
+      // })
+    } else {
+      state.d_groupData_false = res.data
+    }
+  }
+}
+
+const changeIsApv = (val) => {
+  addTestPlatForm.group = []
 }
 
 // 打开添加测试平台弹窗
@@ -1233,7 +1395,8 @@ const openTestPlatformDialog = (data) => {
       group = item.group
     }
   })
-  state.d_groupDataAfter = JSON.parse(JSON.stringify(state.d_groupData)).filter((item) => item.status != true)
+  // state.d_groupDataAfter = JSON.parse(JSON.stringify(state.d_groupData)).filter((item) => item.status != true)
+  state.d_groupDataAfter = JSON.parse(JSON.stringify(state.d_groupData))
   group.map((item) => {
     state.d_groupDataAfter.map((it) => {
       if (it.name == item) {
@@ -1254,7 +1417,8 @@ const onAddTestPlatForm = async (formEl: FormInstance | undefined) => {
     if (addTestPlatForm.group != '') {
       const params = {
         id: addTestPlatForm.id,
-        group: addTestPlatForm.group
+        group: addTestPlatForm.group,
+        isapv: addTestPlatForm.isapv
       }
       putTestPlat(params)
     } else {
@@ -1270,12 +1434,15 @@ const putTestPlat = async (params) => {
   if (res.code === 1000) {
     await getTask(taskCurrentPage.value)
     await handle()
-    platformDialog.value = false
     ElMessage({
       message: res?.msg || '添加成功',
       type: 'success',
       duration: 2500
     })
+    platformDialog.value = false
+    addTestPlatForm.id = ''
+    addTestPlatForm.group = ''
+    addTestPlatForm.isapv = false
   } else {
     platformDialog.value = false
     ElMessage({
@@ -1313,6 +1480,7 @@ const handleCloseTag = (data, id) => {
 const deleteTestPlat = async (params) => {
   let res = await deleteTestPlatApi(params)
   if (res.code === 1000) {
+    platformDialog.value = false
     ElMessage({
       message: res?.msg || '删除成功',
       type: 'success',
@@ -1471,8 +1639,9 @@ watch(
           name: item,
           value: item,
           required: false,
-          TipServer: '',
-          TipPort: ''
+          isapv: false
+          // TipServer: '',
+          // TipPort: ''
         }
       })
     } else {
@@ -1499,8 +1668,9 @@ watch(
           name: it,
           value: it,
           required: false,
-          TipServer: '',
-          TipPort: ''
+          isapv: false
+          // TipServer: '',
+          // TipPort: ''
         })
       })
       console.log(`output->addTaskForm.group`, addTaskForm.group)
@@ -1518,7 +1688,7 @@ const getTaskConfig = async () => {
   let res = await getTaskConfigApi()
   placeholderTipServer.value = res.data.TipServer || ''
   placeholderTipPort.value = res.data.TipPort || ''
-  // placeholderTestPass.value = res.data.TestPass || ''
+  placeholderTestPass.value = res.data.TestPass || ''
   // placeholderTipModel.value = res.data.model || ''
 }
 
@@ -1565,7 +1735,10 @@ const onResetTaskForm = (formEl: FormInstance | undefined) => {
   groupDialogVisible.value = false
   platformDialog.value = false
   addTestPlatForm.group = ''
+  addTestPlatForm.isapv = false
   physicalItems.value = []
+  addTaskForm.group_true = []
+  addTaskForm.group_false = []
 }
 
 // 关闭弹窗
@@ -1583,6 +1756,7 @@ const handleClose = (done: () => void) => {
 const handleTestPlatClose = (done: () => void) => {
   platformDialog.value = false
   addTestPlatForm.group = ''
+  addTestPlatForm.isapv = false
   addTestPlatFormRef.value.resetFields()
 }
 
@@ -1607,30 +1781,39 @@ const handleTaskCurrentChange = (val: number) => {
 </script>
 
 <style lang="scss" scoped>
+// :deep(.el-input--suffix) {
+//   height: 40px;
+// }
 .remarks {
   display: flex;
   flex-direction: column;
+
   span {
     color: #ff6b84;
   }
 }
+
 .stateStyle {
   display: flex;
   justify-content: center;
   align-items: center;
+
   .svg-icon {
     width: 40px;
     height: 40px;
   }
+
   .el-icon {
     width: 25px;
     height: 25px;
     cursor: pointer;
+
     &:hover {
       background-color: #eeeeee;
     }
   }
 }
+
 .my-header {
   display: flex;
   align-items: center;
@@ -1656,6 +1839,7 @@ const handleTaskCurrentChange = (val: number) => {
   display: flex;
   justify-content: center;
   align-items: center;
+
   .svg-icon {
     width: 50px;
     height: 50px;
@@ -1727,6 +1911,7 @@ const handleTaskCurrentChange = (val: number) => {
 .moreButton {
   display: flex;
   flex-direction: column;
+
   .el-button {
     margin-left: 0;
   }
@@ -1755,11 +1940,13 @@ const handleTaskCurrentChange = (val: number) => {
   .ignore-tagList {
     margin-left: 20px;
   }
+
   .tagList {
     display: flex;
     align-items: center;
     height: 80px;
     font-size: 14px;
+
     .ignore-title {
       width: 98px;
       margin-right: 12px;
@@ -1863,14 +2050,17 @@ const handleTaskCurrentChange = (val: number) => {
   margin-bottom: 20px;
   display: flex;
   justify-content: space-between;
+
   .ignore-select-wrap {
     flex: 1;
     display: flex;
     justify-content: end;
+
     .el-select {
       margin: 0 10px;
       width: 220px;
     }
+
     .el-input {
       height: 40px;
       width: 220px;
@@ -1903,6 +2093,7 @@ const handleTaskCurrentChange = (val: number) => {
     font-size: 16px;
     font-weight: 600;
   }
+
   .left-after {
     width: 150px !important;
   }
@@ -1948,9 +2139,11 @@ const handleTaskCurrentChange = (val: number) => {
 
   .ignore-casesProps-tree {
     z-index: 999;
+
     .el-input {
       height: 32px;
     }
+
     .el-checkbox {
       margin-right: 5px !important;
     }
@@ -1963,6 +2156,7 @@ const handleTaskCurrentChange = (val: number) => {
     justify-content: center !important;
   }
 }
+
 .el-notification {
   width: 30vw !important;
 }

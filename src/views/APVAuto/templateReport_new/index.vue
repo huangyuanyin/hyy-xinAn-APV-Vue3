@@ -164,7 +164,7 @@ const toDetail = (id, type) => {
   switch (type) {
     case 'detail': {
       router.push({
-        path: '/APVAuto/reportDetail',
+        path: '/APVAuto/reportDetail_new',
         query: {
           resultid: id
         }

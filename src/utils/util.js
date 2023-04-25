@@ -72,3 +72,25 @@ export const getSpecialNowDate = () => {
   }
   return year + month + day + hour + minutes + seconds
 }
+
+// 不定长文本逐个出现并不断循环的效果
+export const textLoop = (text, idName) => {
+  const delay = 100 // 每个字符出现的延迟时间（毫秒）
+  const typingText = document.getElementById(idName)
+
+  function type() {
+    let i = 0
+    const intervalId = setInterval(() => {
+      if (i < text.length) {
+        typingText.innerHTML += text.charAt(i)
+        i++
+      } else {
+        clearInterval(intervalId)
+        typingText.innerHTML = ''
+        i = 0
+      }
+    }, delay)
+  }
+  type() // 初始执行一次
+  setInterval(type, delay * text.length) // 循环执行
+}
