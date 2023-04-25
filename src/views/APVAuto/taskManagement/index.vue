@@ -346,12 +346,12 @@
               </el-option>
             </el-select>
           </el-form-item> -->
-          <el-form-item label="测试平台 - 虚拟机" prop="group_false">
+          <el-form-item label="测试平台 - 虚拟机">
             <el-select
               multiple
               clearable
               v-model="addTaskForm.group_false"
-              placeholder="请选择..."
+              placeholder="选填...（如无虚拟机可不选）"
               @change="getGroupDataId_false"
               @remove-tag="deleteGroupDataId"
               :disabled="titleDialog === '任务详情'"
@@ -1244,6 +1244,8 @@ const editTask = async (params) => {
       duration: 1000
     })
     addTaskRuleFormRef.value.resetFields()
+    addTaskForm.group_true = []
+    addTaskForm.group_false = []
     dialogVisible.value = false
   }
   physicalItems.value = []
@@ -1735,6 +1737,8 @@ const onResetTaskForm = (formEl: FormInstance | undefined) => {
   addTestPlatForm.group = ''
   addTestPlatForm.isapv = false
   physicalItems.value = []
+  addTaskForm.group_true = []
+  addTaskForm.group_false = []
 }
 
 // 关闭弹窗
