@@ -331,7 +331,7 @@
               <el-option v-for="(item, index) in state.buildData" :key="'buildData' + index" :label="item.name" :value="item.name" />
             </el-select>
           </el-form-item>
-          <el-form-item label="测试平台" prop="group">
+          <!-- <el-form-item label="测试平台" prop="group">
             <el-select
               multiple
               clearable
@@ -342,6 +342,36 @@
               :disabled="titleDialog === '任务详情'"
             >
               <el-option v-for="(item, index) in state.d_groupData" :key="'d_groupData' + index" :label="item.name" :value="item.name" :disabled="item.status">
+                <span style="float: left">{{ item.ip }} -- {{ item.name }}</span>
+              </el-option>
+            </el-select>
+          </el-form-item> -->
+          <el-form-item label="测试平台 - 虚拟机" prop="group_false">
+            <el-select
+              multiple
+              clearable
+              v-model="addTaskForm.group_false"
+              placeholder="请选择..."
+              @change="getGroupDataId_false"
+              @remove-tag="deleteGroupDataId"
+              :disabled="titleDialog === '任务详情'"
+            >
+              <el-option v-for="(item, index) in state.d_groupData_false" :key="'d_groupData_false' + index" :label="item.name" :value="item.name" :disabled="item.status">
+                <span style="float: left">{{ item.ip }} -- {{ item.name }}</span>
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="测试平台 - 物理机">
+            <el-select
+              multiple
+              clearable
+              v-model="addTaskForm.group_true"
+              placeholder="选填...（如无物理机可不选）"
+              @change="getGroupDataId_true"
+              @remove-tag="deleteGroupDataId"
+              :disabled="titleDialog === '任务详情'"
+            >
+              <el-option v-for="(item, index) in state.d_groupData_true" :key="'d_groupData_true' + index" :label="item.name" :value="item.name" :disabled="item.status">
                 <span style="float: left">{{ item.ip }} -- {{ item.name }}</span>
               </el-option>
             </el-select>
@@ -365,12 +395,12 @@
               <span>注：可根据测试设备硬件等信息区分同一build的不同测试任务</span>
             </div>
           </el-form-item>
-          <el-form-item label="是否含有物理机" prop="config">
+          <!-- <el-form-item label="是否含有物理机" prop="config">
             <el-radio-group v-model="isPhysicalMachine" @change="changePhysicalMachine" :disabled="titleDialog === '任务详情'">
               <el-radio label="1">是</el-radio>
               <el-radio label="0">否</el-radio>
             </el-radio-group>
-          </el-form-item>
+          </el-form-item> -->
         </el-form>
         <el-collapse v-show="isPhysicalMachine == '1'" v-model="activeNames" @change="handleChange">
           <el-collapse-item v-for="(item, index) in physicalItems" :key="'physicalItems' + index" :name="item.name">
@@ -424,7 +454,7 @@
     <!--平台弹窗-->
     <el-dialog v-model="platformDialog" title="修改测试平台" custom-class="platformDialog" width="50%" :before-close="handleTestPlatClose">
       <div class="tagList ignore-tagList">
-        <span class="ignore-title">已有测试平台：</span>
+        <span class="ignore-title" style="width: 110px; text-align: end; font-size: 14px">已有测试平台：</span>
         <el-tag v-if="testPlatList.length == 0" class="ml-2" type="info">暂无测试平台</el-tag>
         <div>
           <el-tag class="tagType" v-for="(item, index) in testPlatList" :key="'testPlatList' + index" closable @close="handleCloseTag(item, item.id)">
@@ -432,20 +462,26 @@
           </el-tag>
         </div>
       </div>
-      <el-form :inline="false" :model="addTestPlatForm" ref="addTestPlatFormRef" class="addDevice-form" label-width="130px">
+      <el-form :inline="false" :model="addTestPlatForm" ref="addTestPlatFormRef" class="addDevice-form" label-width="140px">
+        <!-- 是否是物理机 -->
+        <el-form-item label="添加测试平台类型：">
+          <el-radio-group v-model="addTestPlatForm.isapv" @change="changeIsApv">
+            <el-radio :label="true">物理机</el-radio>
+            <el-radio :label="false">虚拟机</el-radio>
+          </el-radio-group>
+        </el-form-item>
         <el-form-item label="添加测试平台：">
-          <el-select clearable v-model="addTestPlatForm.group" placeholder="请选择要添加的测试平台..." @change="getTestPlatDataId">
-            <el-option v-for="(item, index) in state.d_groupDataAfter" :key="'d_groupDataAfter' + index" :label="item.name" :value="item.name" :disabled="item.disabled">
+          <el-select
+            clearable
+            v-model="addTestPlatForm.group"
+            placeholder="请选择要添加的测试平台..."
+            @change="getTestPlatDataId"
+            @visible-change="getGroupList(addTestPlatForm.isapv)"
+          >
+            <el-option v-for="(item, index) in state.d_groupDataAfter_2" :key="'d_groupDataAfter_2' + index" :label="item.name" :value="item.name" :disabled="item.status">
               <span style="float: left">{{ item.ip }} -- {{ item.name }}</span>
             </el-option>
           </el-select>
-        </el-form-item>
-        <!-- 是否是物理机 -->
-        <el-form-item label="是否是物理机：">
-          <el-radio-group v-model="addTestPlatForm.isapv">
-            <el-radio :label="true">是</el-radio>
-            <el-radio :label="false">否</el-radio>
-          </el-radio-group>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -718,6 +754,9 @@ const state: any = reactive({
   getD_group: [], // 测试平台数据
   buildData: [], // 压测版本数据
   d_groupDataAfter: [],
+  d_groupDataAfter_2: [],
+  d_groupData_true: [],
+  d_groupData_false: [],
   selectStatusList: [
     {
       value: 'running',
@@ -750,7 +789,7 @@ const searchGroup = ref('')
 const addTestPlatForm = reactive({
   id: null,
   group: null,
-  isapv: false
+  isapv: true
 })
 const addTestPlatFormRef = ref<FormInstance>()
 
@@ -761,10 +800,12 @@ const addTaskForm = reactive({
   name: '',
   user: JSON.parse(localStorage.getItem('userInfo'))?.nickname,
   build: '',
-  group: [],
+  group_true: [],
+  group_false: [],
   cases: null,
   remarks: '',
-  config: []
+  config: [],
+  group: []
   // config: {
   //   TipServer: "",
   //   TipPort: "",
@@ -836,6 +877,8 @@ const addTaskFormRules = reactive<FormRules>({
   build: [{ required: true, message: '请选择测build版本', trigger: 'blur' }],
   group: [{ required: true, message: '请选择测试平台', trigger: 'blur' }],
   cases: [{ required: true, message: '请选择用例集', trigger: 'blur' }],
+  group_true: [{ required: true, message: '请选择测试平台-物理机', trigger: 'blur' }],
+  group_false: [{ required: true, message: '请选择测试平台-虚拟机', trigger: 'blur' }],
   // config: [
   //   { required: true, message: "请选择是否需要物理机", trigger: "blur" },
   // ],
@@ -883,6 +926,9 @@ const openAddDialog = async (type, operation, data) => {
         titleDialog.value = '编辑任务'
         buttonText.value = '确定'
         editDisabled.value = true
+        addTaskForm.group_false = data.config.filter((item) => item.isapv == false).map((item) => item.name)
+        addTaskForm.group_true = data.config.filter((item) => item.isapv == true).map((item) => item.name)
+        console.log(`output->`, addTaskForm.group_false)
       } else if (operation == 'detail') {
         titleDialog.value = '任务详情'
         editDisabled.value = true
@@ -892,31 +938,31 @@ const openAddDialog = async (type, operation, data) => {
       if (operation == 'add') {
         isPhysicalMachine.value = '0'
       } else {
-        if (data.config.length === 0 || data.config == null) {
-          isPhysicalMachine.value = '0'
-        } else {
-          isPhysicalMachine.value = '1'
-          physicalItems.value = data.config
-          let arr = data.config.map((item) => {
-            return item.id
-          })
-          data.groupAfter.map((item) => {
-            if (!arr.includes(item.value)) {
-              physicalItems.value.push({
-                id: item.value,
-                name: item.label,
-                required: false,
-                isapv: false
-                // TipServer: '',
-                // TipPort: ''
-              })
-            }
-          })
-          // addTaskForm.config.TipServer = data.config.TipServer
-          // addTaskForm.config.TipPort = data.config.TipPort
-          // addTaskForm.config.TestPass = data.config.TestPass
-          // addTaskForm.config.model = data.config.model
-        }
+        // if (data.config.length === 0 || data.config == null) {
+        //   isPhysicalMachine.value = '0'
+        // } else {
+        //   isPhysicalMachine.value = '1'
+        //   physicalItems.value = data.config
+        //   let arr = data.config.map((item) => {
+        //     return item.id
+        //   })
+        //   data.groupAfter.map((item) => {
+        //     if (!arr.includes(item.value)) {
+        //       physicalItems.value.push({
+        //         id: item.value,
+        //         name: item.label,
+        //         required: false,
+        //         isapv: false
+        //         // TipServer: '',
+        //         // TipPort: ''
+        //       })
+        //     }
+        //   })
+        //   // addTaskForm.config.TipServer = data.config.TipServer
+        //   // addTaskForm.config.TipPort = data.config.TipPort
+        //   // addTaskForm.config.TestPass = data.config.TestPass
+        //   // addTaskForm.config.model = data.config.model
+        // }
       }
       // if (data && data.state === 'running') {
       //   return ElMessage({
@@ -929,6 +975,8 @@ const openAddDialog = async (type, operation, data) => {
         getOneData(type, data?.id)
       })
       dialogVisible.value = true
+      getDgroupDataList(true)
+      getDgroupDataList(false)
       break
     default:
       break
@@ -1001,17 +1049,39 @@ const toShowPreviewDialog = async (formEl: FormInstance | undefined) => {
     }
   }
   // 去除未填写的配置项
-  physicalItems.value.map((item) => {
-    // const { TipServer, TipPort, TestPass } = item
-    // if (!!(TipServer || TipPort || TestPass)) {
-    //   addTaskForm.config.push(item)
-    // }
-    // const { TipServer, TipPort } = item
-    // if (!!(TipServer || TipPort)) {
-    //   addTaskForm.config.push(item)
-    // }
-    addTaskForm.config.push(item)
+  // physicalItems.value.map((item) => {
+  //   // const { TipServer, TipPort, TestPass } = item
+  //   // if (!!(TipServer || TipPort || TestPass)) {
+  //   //   addTaskForm.config.push(item)
+  //   // }
+  //   // const { TipServer, TipPort } = item
+  //   // if (!!(TipServer || TipPort)) {
+  //   //   addTaskForm.config.push(item)
+  //   // }
+  //   addTaskForm.config.push(item)
+  // })
+  let arr_true = []
+  arr_true = addTaskForm.group_true.map((it, index) => {
+    return { name: it, isapv: true }
   })
+  let arr_false = []
+  arr_false = addTaskForm.group_false.map((it, index) => {
+    return { name: it, isapv: false }
+  })
+  // 遍历addTaskForm.group_true
+
+  addTaskForm.config = [].concat(arr_false, arr_true).filter((it) => it.name !== '无')
+  // 取出addTaskForm.config中的name
+  let arr = []
+  arr = addTaskForm.config.map((it) => it.name)
+  // 去重
+  arr = [...new Set(arr)]
+  // 去除addTaskForm.group中的name
+  addTaskForm.group = arr
+
+  // addTaskForm.config.filter((it) => {
+  //   it.name[0] !== '无' || it.name.length != 0
+  // })
   // 选择含有物理机，未填写配置项提醒
   // if (addTaskForm.config?.length == 0 && isPhysicalMachine.value === '1') {
   //   return ElMessage.error('至少填写一个物理机配置项')
@@ -1020,7 +1090,8 @@ const toShowPreviewDialog = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate(async (valid, fields) => {
     if (valid) {
-      submitPreviewDialog.value = true
+      // submitPreviewDialog.value = true
+      onAddTaskForm(addTaskRuleFormRef.value)
       casesName.value = addTaskForm.cases.cases_name
       caseModule.value = addTaskForm.cases.module_name
     }
@@ -1038,22 +1109,24 @@ const onAddTaskForm = async (formEl: FormInstance | undefined) => {
       console.log('添加成功...', JSON.parse(JSON.stringify(addTaskForm)))
       // addTaskForm.group = "[" + String(addTaskForm.group) + "]"
       if (isPhysicalMachine.value == '0') {
-        delete addTaskForm.config
+        // delete addTaskForm.config
       }
       if (titleDialog.value == '添加任务') {
         delete addTaskForm.id
         // 遍历addTaskForm.config，去除相同的对象
-        var newArr = []
-        addTaskForm.config.forEach((item) => {
-          var check = newArr.every((b) => {
-            return item.name !== b.name
-          })
-          check ? newArr.push(item) : ''
-        })
-        addTaskForm.config = newArr
-        addTask(addTaskForm)
+        // var newArr = []
+        // addTaskForm.config.forEach((item) => {
+        //   var check = newArr.every((b) => {
+        //     return item.name !== b.name
+        //   })
+        //   check ? newArr.push(item) : ''
+        // })
+        // addTaskForm.config = newArr
+        const { group_false, group_true, ...params } = addTaskForm
+        addTask(params)
       } else {
-        editTask(addTaskForm)
+        const { group_false, group_true, ...params } = addTaskForm
+        editTask(params)
       }
     } else {
       console.log('error submit!', fields)
@@ -1152,6 +1225,8 @@ const addTask = async (params) => {
       duration: 1000
     })
     addTaskRuleFormRef.value.resetFields()
+    addTaskForm.group_true = []
+    addTaskForm.group_false = []
     dialogVisible.value = false
     physicalItems.value = []
   }
@@ -1254,6 +1329,17 @@ const getGroupDataId = (value) => {
   })
 }
 
+const getGroupDataId_true = (value) => {
+  // addTaskForm.config = []
+  // addTaskForm.config.push({ name: value, isapv: true })
+}
+
+const getGroupDataId_false = (value) => {
+  // addTaskForm.config = []
+  // addTaskForm.config.push({ name: value, isapv: false })
+  console.log(`output->add`, addTaskForm)
+}
+
 const deleteGroupDataId = (value) => {
   physicalItems.value = physicalItems.value.filter((item) => item.name !== value)
 }
@@ -1261,6 +1347,32 @@ const deleteGroupDataId = (value) => {
 // 测试平台 下拉选择框
 const getTestPlatDataId = (value) => {
   addTestPlatForm.group = value
+}
+
+const getGroupList = async (val) => {
+  let res = await d_groupApi({ isapv: val ? 'True' : 'False' })
+  if (res.code === 1000) {
+    state.d_groupDataAfter_2 = res.data
+  }
+}
+
+const getDgroupDataList = async (val) => {
+  let res = await d_groupApi({ isapv: val ? 'True' : 'False' })
+  if (res.code === 1000) {
+    if (val) {
+      state.d_groupData_true = res.data
+      // state.d_groupData_true.unshift({
+      //   ip: '无物理机',
+      //   name: '无'
+      // })
+    } else {
+      state.d_groupData_false = res.data
+    }
+  }
+}
+
+const changeIsApv = (val) => {
+  addTestPlatForm.group = []
 }
 
 // 打开添加测试平台弹窗
@@ -1665,6 +1777,9 @@ const handleTaskCurrentChange = (val: number) => {
 </script>
 
 <style lang="scss" scoped>
+// :deep(.el-input--suffix) {
+//   height: 40px;
+// }
 .remarks {
   display: flex;
   flex-direction: column;

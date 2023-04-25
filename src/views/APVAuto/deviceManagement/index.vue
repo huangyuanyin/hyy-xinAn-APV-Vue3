@@ -16,6 +16,12 @@
           <el-table :data="state.d_groupData" stripe>
             <el-table-column prop="ip" label="物理机IP" align="center" width="200" />
             <el-table-column prop="name" label="测试平台名称" align="center" width="180" />
+            <el-table-column prop="isapv" label="是否是物理机" align="center" width="180">
+              <template #default="scope">
+                <el-tag type="warning" v-if="scope.row.isapv === true"> 是 </el-tag>
+                <el-tag type="info" v-else> 否 </el-tag>
+              </template>
+            </el-table-column>
             <el-table-column prop="build" label="测试版本" align="center" width="300">
               <template #default="scope">
                 <el-tag class="tagType" v-for="(item, index) in scope.row.build" :key="'build' + index">
@@ -110,7 +116,7 @@
       <el-tab-pane label="测试用例清单" name="showTestCase">
         <ShowTestCase />
       </el-tab-pane>
-      <el-tab-pane label="串口服务器管理" name="serialServer">
+      <el-tab-pane label="串口服务器管理" name="serialServer" disabled>
         <SerialServer />
       </el-tab-pane>
       <el-tab-pane v-for="(item, index) in consoleTabs" :key="'consoleTabs' + index" :label="item.name" :name="String(item.name)" :lazy="true" closable>

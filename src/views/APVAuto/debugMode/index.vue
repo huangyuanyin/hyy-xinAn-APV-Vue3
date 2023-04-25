@@ -64,6 +64,12 @@
   <el-dialog v-model="debugModeDialog" :title="titleDialog" width="35%" @close="handleClose">
     <span>
       <el-form :inline="false" :model="form" ref="addDebugModeRuleFormRef" :rules="addDebugModeFormRules" class="debugMode-form" label-width="150px">
+        <el-form-item label="是否硬件设备" prop="isreal">
+          <el-radio-group v-model="form.isreal">
+            <el-radio label="是" />
+            <el-radio label="否" />
+          </el-radio-group>
+        </el-form-item>
         <el-form-item label="平台名称" prop="group">
           <el-select v-model="form.group" placeholder="请选择平台名称" :options="groupList">
             <el-scrollbar @scroll="handleScroll" :view-style="{ height: '150px' }" :wrap-style="{ height: '150px' }" max-height="150px" noresize>
@@ -76,12 +82,6 @@
               </template>
             </el-scrollbar>
           </el-select>
-        </el-form-item>
-        <el-form-item label="是否硬件设备" prop="isreal">
-          <el-radio-group v-model="form.isreal">
-            <el-radio label="是" />
-            <el-radio label="否" />
-          </el-radio-group>
         </el-form-item>
         <el-form-item label="备注信息">
           <el-input v-model="form.remark" placeholder="请输入备注信息..." />
