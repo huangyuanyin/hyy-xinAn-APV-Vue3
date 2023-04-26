@@ -75,6 +75,7 @@ const operationalDocument = () => {
 }
 
 const backList = () => {
+  terminalSocket.value.close()
   emit('backList')
 }
 
@@ -140,8 +141,10 @@ onMounted(() => {
 // name: 'Console',
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleKeyDown)
+  terminalSocket.value.close()
   terminalSocket.value = null
   term.value = null
+  emit('backList')
 })
 function handleKeyDown(event) {
   // 忽略其他按键，只处理可见字符

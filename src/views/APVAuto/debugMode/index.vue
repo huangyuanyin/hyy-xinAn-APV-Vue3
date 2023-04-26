@@ -27,7 +27,7 @@
             ></svg-icon>
           </el-tooltip>
           <el-tooltip content="调试结束" placement="top" effect="dark">
-            <svg-icon v-if="scope.row.starttime !== null && scope.row.endtime !== null" style="width: 30px; height: 30px; margin: 5px 0" iconName="icon-yijieshu"></svg-icon>
+            <svg-icon v-if="scope.row.starttime !== null && scope.row.endtime !== null" style="width: 30px; height: 30px; margin: 5px 0" iconName="icon-wancheng"></svg-icon>
           </el-tooltip>
         </template>
       </el-table-column>
@@ -341,6 +341,8 @@ const operationalDocument = () => {
 
 const backList = () => {
   showTermail.value = false
+  currentPage.value = 1
+  debugTask()
 }
 
 const fullScreen = () => {

@@ -182,6 +182,12 @@
           <el-form-item label="平台名称" prop="name">
             <el-input v-model="addGroupForm.name" placeholder="请输入..." />
           </el-form-item>
+          <el-form-item label="平台类型" prop="isapv">
+            <el-select v-model="addGroupForm.isapv" placeholder="请选择平台类型...">
+              <el-option label="物理环境" :value="true" />
+              <el-option label="虚拟环境" :value="false" />
+            </el-select>
+          </el-form-item>
           <!-- <el-form-item label="ServerIp" prop="buildip">
             <el-input v-model="addGroupForm.buildip" placeholder="请输入..." />
           </el-form-item> -->
@@ -406,7 +412,8 @@ let addGroupForm = reactive({
   id: '',
   name: '',
   ip: '',
-  build: null
+  build: null,
+  isapv: null
 })
 
 // 拉取文件弹窗form
@@ -451,6 +458,7 @@ const addGroupRuleFormRef = ref<FormInstance>()
 const addGroupFormRules = reactive<FormRules>({
   name: [{ required: true, message: '平台名称不能为空', trigger: 'blur' }],
   build: [{ required: true, message: '支持测试版本不能为空', trigger: 'blur' }],
+  isapv: [{ required: true, message: '请选择平台类型', trigger: 'change' }],
   buildip: [{ required: true, validator: validateIPAddress, trigger: 'blur' }]
 })
 
@@ -549,6 +557,7 @@ const getOneData = (type, id) => {
           addGroupForm.ip = item.ip
           addGroupForm.name = item.name
           addGroupForm.build = item.build
+          addGroupForm.isapv = item.isapv
           // addGroupForm.buildip = item.buildip
         }
       })

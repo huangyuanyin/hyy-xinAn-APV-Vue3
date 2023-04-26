@@ -928,10 +928,11 @@ const openAddDialog = async (type, operation, data) => {
         editDisabled.value = true
         addTaskForm.group_false = data.config.filter((item) => item.isapv == false).map((item) => item.name)
         addTaskForm.group_true = data.config.filter((item) => item.isapv == true).map((item) => item.name)
-        console.log(`output->`, addTaskForm.group_false)
       } else if (operation == 'detail') {
         titleDialog.value = '任务详情'
         editDisabled.value = true
+        addTaskForm.group_false = data.config.filter((item) => item.isapv == false).map((item) => item.name)
+        addTaskForm.group_true = data.config.filter((item) => item.isapv == true).map((item) => item.name)
       }
       casValue.value = []
       physicalItemsChangeData.value = data
@@ -1750,6 +1751,8 @@ const handleClose = (done: () => void) => {
   continueDialogVisible.value = false
   addTaskRuleFormRef.value.resetFields()
   physicalItems.value = []
+  addTaskForm.group_true = []
+  addTaskForm.group_false = []
 }
 
 // 关闭测试平台弹窗
