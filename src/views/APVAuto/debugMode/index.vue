@@ -239,6 +239,12 @@ const addBuildFormRules = reactive<FormRules>({
   url: [{ required: true, message: 'build链接不能为空', trigger: 'blur' }]
 })
 
+watchEffect(() => {
+  if (!showTermail.value) {
+    consoleTabs.value = []
+  }
+})
+
 const handleDelete = async (id) => {
   let res = await deleteDebugTaskApi(id)
   if (res.code === 1000) {
@@ -557,8 +563,6 @@ onMounted(async () => {
   getGroupList()
   getBuild()
 })
-
-onBeforeUnmount(() => {})
 
 // 离开路由导航守卫
 // onBeforeRouteLeave((to, from, next) => {

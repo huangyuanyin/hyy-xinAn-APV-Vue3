@@ -131,19 +131,19 @@ onMounted(() => {
   term.value.open(terminalContainer)
   // open websocket
   terminalSocket.value = new WebSocket(`ws://${import.meta.env.VITE_XTERM_URL}/ws/chat/${name}/${id}`)
-  console.log('dada', terminalSocket.value)
   terminalSocket.value.onopen = runRealTerminal
   // terminalSocket.value.onclose = closeRealTerminal
   // terminalSocket.value.onerror = errorRealTerminal
   term.value.attach(terminalSocket.value)
   term.value._initialized = true
 })
-// name: 'Console',
+
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleKeyDown)
   terminalSocket.value.close()
   terminalSocket.value = null
   term.value = null
+  console.log(`output->关闭链接`)
   emit('backList')
 })
 function handleKeyDown(event) {
