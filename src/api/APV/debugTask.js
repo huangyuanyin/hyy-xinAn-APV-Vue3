@@ -3,10 +3,19 @@ import request from '@/utils/request.js'
 // 调试设备 - 获取
 export function debugTaskApi(params) {
   return request({
-    url: '/autoapv/debugtask/',
+    url: '/autoapv/debug/',
     method: 'get',
     urlType: 'APV',
     params
+  })
+}
+
+// 调试设备 - 删除
+export function deleteDebugTaskApi(id) {
+  return request({
+    url: `/autoapv/debug/?id=${id}`,
+    method: 'delete',
+    urlType: 'APV'
   })
 }
 

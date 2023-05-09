@@ -58,11 +58,11 @@
           <el-tooltip content="结束调试" placement="top" effect="dark">
             <el-icon :size="20" style="color: #f56c6c; cursor: pointer" @click="endDebug(scope.row)"><SwitchButton /></el-icon>
           </el-tooltip>
-          <!-- <el-popconfirm title="确定删除这个平台?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消" @confirm="handleDelete(scope.row.id)">
+          <el-popconfirm title="确定删除这个调试平台?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消" @confirm="handleDelete(scope.row.id)">
             <template #reference>
-              <el-button link type="danger" size="small">删除</el-button>
+              <el-icon :size="20" style="color: #f56c6c; cursor: pointer; margin-left: 15px"><Delete /></el-icon>
             </template>
-          </el-popconfirm> -->
+          </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
@@ -181,10 +181,10 @@ import { onMounted, onBeforeUnmount, ref, reactive, markRaw, nextTick, watchEffe
 import { onBeforeRouteLeave, useRoute, useRouter, NavigationGuardNext } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { utc2beijing } from '@/utils/util.js'
-import { Search, Open, VideoPlay, SwitchButton } from '@element-plus/icons-vue'
+import { Search, Open, VideoPlay, SwitchButton, Delete } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules, TabsPaneContext } from 'element-plus'
 import Termmail from '@/components/debugTermail.vue'
-import { debugTaskApi, toDebugApi, exitDebugApi, addDebugTaskApi, debugUpbuild, getDebugUpbuildLogApi } from '@/api/APV/debugTask.js'
+import { debugTaskApi, toDebugApi, exitDebugApi, addDebugTaskApi, debugUpbuild, getDebugUpbuildLogApi, deleteDebugTaskApi } from '@/api/APV/debugTask.js'
 import { d_groupApi } from '@/api/APV/index.js'
 import { buildApi } from '@/api/APV/buildManagement.js'
 import CodeMirror from '@/components/CodeMirror.vue'
@@ -239,8 +239,13 @@ const addBuildFormRules = reactive<FormRules>({
   url: [{ required: true, message: 'build链接不能为空', trigger: 'blur' }]
 })
 
-const handleDelete = (id) => {
-  console.log(id)
+const handleDelete = async (id) => {
+  let res = await deleteDebugTaskApi(id)
+  if (res.code === 1000) {
+    currentPage.value = 1
+    debugTask()
+    ElMessage.success('调试平台删除成功！')
+  }
 }
 
 // 新增编辑弹窗
