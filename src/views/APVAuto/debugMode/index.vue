@@ -50,17 +50,17 @@
           <!-- <el-button link type="primary" size="small" @click="openDebugMode('edit', scope.row.id)">编辑</el-button> -->
           <!-- <el-button link type="primary" size="small" @click="openDebugMode('edit', scope.row.id)">详情</el-button> -->
           <el-tooltip content="开始调试" placement="top" effect="dark" v-if="scope.row.starttime === null || (scope.row.starttime !== null && scope.row.endtime !== null)">
-            <el-icon :size="20" style="color: #409eff; margin-right: 15px; cursor: pointer" @click="toDebug(scope.row.id)"><VideoPlay /></el-icon>
+            <el-icon :size="20" style="color: #409eff; width: 30px; margin-right: 15px; cursor: pointer" @click="toDebug(scope.row.id)"><VideoPlay /></el-icon>
           </el-tooltip>
           <el-tooltip content="继续调试" placement="top" effect="dark" v-if="scope.row.starttime !== null && scope.row.endtime === null">
-            <svg-icon style="width: 33px; height: 33px; cursor: pointer; margin-right: 15px" iconName="icon-shebeiyunhang" @click="toDebug(scope.row.id)"></svg-icon>
+            <svg-icon style="width: 30px; height: 30px; cursor: pointer; margin-right: 15px" iconName="icon-shebeiyunhang" @click="toDebug(scope.row.id)"></svg-icon>
           </el-tooltip>
           <el-tooltip content="结束调试" placement="top" effect="dark">
-            <el-icon :size="20" style="color: #f56c6c; cursor: pointer" @click="endDebug(scope.row)"><SwitchButton /></el-icon>
+            <el-icon :size="20" style="color: #f56c6c; width: 30px; cursor: pointer" @click="endDebug(scope.row)"><SwitchButton /></el-icon>
           </el-tooltip>
           <el-popconfirm title="确定删除这个调试平台?" trigger="click" confirm-button-text="确认删除" cancel-button-text="取消" @confirm="handleDelete(scope.row.id)">
             <template #reference>
-              <el-icon :size="20" style="color: #f56c6c; cursor: pointer; margin-left: 15px"><Delete /></el-icon>
+              <el-icon :size="20" style="color: #f56c6c; width: 30px; cursor: pointer; margin-left: 15px"><Delete /></el-icon>
             </template>
           </el-popconfirm>
         </template>
