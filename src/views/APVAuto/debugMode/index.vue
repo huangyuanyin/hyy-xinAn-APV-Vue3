@@ -174,6 +174,9 @@
   <el-dialog v-model="codeMirrorDialog" title="升级进度" width="55%" @close="handleClose">
     <CodeMirror :code="codeMirrorVal" />
   </el-dialog>
+  <el-dialog v-model="operationDocrDialog" title="操作文档" width="55%" @close="handleClose">
+    <CodeMirror :code="docTextVal" />
+  </el-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -188,6 +191,7 @@ import { debugTaskApi, toDebugApi, exitDebugApi, addDebugTaskApi, debugUpbuild, 
 import { d_groupApi } from '@/api/APV/index.js'
 import { buildApi } from '@/api/APV/buildManagement.js'
 import CodeMirror from '@/components/CodeMirror.vue'
+import { docText } from '@/data/doc.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -215,7 +219,9 @@ const buildDialog = ref(false)
 const titleDialog = ref('')
 const isShowFullScreen = ref(false)
 const codeMirrorDialog = ref(false)
+const operationDocrDialog = ref(false)
 const codeMirrorVal = ref('')
+const docTextVal = ref('')
 const form = ref({
   group: '',
   isapv: false,
@@ -347,7 +353,8 @@ const toMark = () => {
 }
 
 const operationalDocument = () => {
-  ElMessage('开发中...')
+  operationDocrDialog.value = true
+  docTextVal.value = docText
 }
 
 const backList = () => {
@@ -481,6 +488,8 @@ const handleClose = () => {
   buildDialog.value = false
   codeMirrorDialog.value = false
   codeMirrorVal.value = ''
+  docTextVal.value = ''
+  operationDocrDialog.value = false
 }
 
 const handleSizeChange = (val: number) => {

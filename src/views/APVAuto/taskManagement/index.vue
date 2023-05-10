@@ -2114,6 +2114,16 @@ const handleTaskCurrentChange = (val: number) => {
 </style>
 
 <style lang="scss">
+.el-notification__content {
+  max-height: 50vh !important;
+  overflow: auto !important;
+}
+// 隐藏滚动条
+.el-notification__content::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: hsla(0, 0%, 100%, 0.6);
+}
 .morePopover {
   min-width: 0px !important;
   width: auto !important;
