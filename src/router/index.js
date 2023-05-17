@@ -118,7 +118,7 @@ const routes = [
             path: '/APVAuto/templateReport_new',
             name: 'TemplateReportNew',
             meta: {
-              title: '测试报告_新版'
+              title: '测试报告'
             },
             component: () => import('@/views/APVAuto/templateReport_new/components/historyLayout.vue'),
             children: [
@@ -133,7 +133,7 @@ const routes = [
                 path: '/APVAuto/reportDetail_new',
                 name: 'reportDetailNew',
                 meta: {
-                  title: '测试报告详情_新版'
+                  title: '测试报告详情'
                 },
                 component: () => import('@/views/APVAuto/templateReport_new/reportDetail.vue')
               },
@@ -167,7 +167,7 @@ const routes = [
                   title: '历史报告详情',
                   keepAlive: false
                 },
-                component: () => import('@/views/APVAuto/templateReport/reportDetail.vue')
+                component: () => import('@/views/APVAuto/templateReport_new/reportDetail.vue')
               },
               {
                 path: 'failNumDetail',

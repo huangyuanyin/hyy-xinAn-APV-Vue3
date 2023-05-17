@@ -50,7 +50,7 @@
           <el-table-column prop="uptimeAfter" label="开始时间" align="center" width="200" />
           <el-table-column prop="build" label="build版本" align="center" width="250">
             <template #default="scope">
-              <span> {{ scope.row.build.split('-')[1].split('.')[0] }} </span>
+              <span> {{ scope.row.build.split('-')[0] === 'ArrayOS' ? scope.row.build.split('-')[1].split('.')[0] : scope.row.build.split('.')[0] }} </span>
             </template>
           </el-table-column>
           <!-- <el-table-column prop="groupAfter" label="测试平台" class-name="testStyle" width="320" header-align="center">

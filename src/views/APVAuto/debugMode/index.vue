@@ -180,9 +180,9 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onBeforeUnmount, ref, reactive, markRaw, nextTick, watchEffect } from 'vue'
+import { onMounted, onBeforeUnmount, ref, reactive, markRaw, nextTick, watchEffect, h } from 'vue'
 import { onBeforeRouteLeave, useRoute, useRouter, NavigationGuardNext } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import { utc2beijing } from '@/utils/util.js'
 import { Search, Open, VideoPlay, SwitchButton, Delete } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules, TabsPaneContext } from 'element-plus'
@@ -353,8 +353,25 @@ const toMark = () => {
 }
 
 const operationalDocument = () => {
-  operationDocrDialog.value = true
+  // operationDocrDialog.value = true
   docTextVal.value = docText
+  ElNotification({
+    title: '操作文档',
+    dangerouslyUseHTMLString: true,
+    customClass: 'operationDocrDialog',
+    duration: 0,
+    // codeMirror作为组件传入
+    message: h(CodeMirror, {
+      code: docTextVal.value,
+      options: {
+        mode: 'text/html',
+        theme: 'material',
+        lineNumbers: true,
+        line: true,
+        readOnly: true
+      }
+    })
+  })
 }
 
 const backList = () => {
@@ -568,6 +585,7 @@ onMounted(async () => {
       }
     })
   })
+
   debugTask()
   getGroupList()
   getBuild()
@@ -658,6 +676,17 @@ onMounted(async () => {
 </style>
 
 <style lang="scss">
+.operationDocrDialog {
+  width: 800px;
+  height: 600px;
+  .el-notification__content {
+    width: 750px;
+    height: 600px;
+  }
+  .cm-editor {
+    height: 600px;
+  }
+}
 .consoleDrawer {
   .el-drawer__header {
     margin-bottom: 0px !important;

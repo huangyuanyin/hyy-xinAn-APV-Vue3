@@ -1,27 +1,80 @@
 <template>
-  <el-card class="report-card">
-    <div class="ribbon">
-      <span>打的标记</span>
-    </div>
-    <div class="top">
-      <span>报告信息</span>
+  <div>
+    <el-card class="report-card">
       <div>
-        <el-button type="primary" @click="toBack">返回</el-button>
-        <el-button type="primary" disabled>导出报告</el-button>
+        <!-- <div class="ribbon">
+          <span>打的标记</span>
+        </div> -->
+        <div class="top">
+          <span>报告信息</span>
+          <div>
+            <el-button type="primary" @click="toBack">返回</el-button>
+            <el-button type="primary" disabled>导出报告</el-button>
+          </div>
+        </div>
+        <div class="content">
+          <div class="content-item" v-for="(item, index) in contentItemList" :key="'item' + index">
+            <span class="itemName">{{ item.name }}：</span>
+            <span class="itemValue">{{ item.value }}</span>
+          </div>
+        </div>
+        <div v-if="isShow" id="overview"></div>
       </div>
-    </div>
-    <div class="content">
-      <div class="content-item" v-for="(item, index) in contentItemList" :key="'item' + index">
-        <span class="itemName">{{ item.name }}：</span>
-        <span class="itemValue">{{ item.value }}</span>
-      </div>
-    </div>
-  </el-card>
+    </el-card>
+  </div>
+
   <el-card class="detail-card">
-    <el-tabs type="border-card">
-      <el-tab-pane label="概览">
-        <div v-if="isShow" id="overview" style="width: 90vw; height: 500px"></div>
-      </el-tab-pane>
+    <!-- <el-tabs type="border-card">
+      <el-tab-pane label="概览"> -->
+    <el-table
+      :data="modeTableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)"
+      v-if="showModelTable"
+      border
+      style="width: 100%"
+      height="47vh"
+      @expand-change="getLog"
+      :expand-row-keys="expands"
+      :row-key="getRowKeys"
+    >
+      <!-- <el-table-column label="case_ID" prop="case_id" /> -->
+      <el-table-column label="模块名" prop="Module" />
+      <el-table-column label="Pass_Num" prop="Pass_Num">
+        <template #default="scope">
+          <el-button link :disabled="scope.row.Pass_Num === 0" type="primary" size="" @click="toSeeDeatil(scope.row, 'pass')">{{ scope.row.Pass_Num }}</el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="Fail_Num" prop="Fail_Num">
+        <template #default="scope">
+          <el-button link :disabled="scope.row.Fail_Num === 0" type="danger" size="" @click="toSeeDeatil(scope.row, 'fail')">{{ scope.row.Fail_Num }}</el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="Known_Issue" prop="Known_Issue">
+        <template #default="scope">
+          <el-button link :disabled="scope.row.Known_Issue === 0" type="warning" size="" @click="toSeeDeatil(scope.row, 'fail_issue')">{{ scope.row.Known_Issue }}</el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="Times(min)" prop="Times(min)" />
+      <el-table-column label="通过率" prop="Pass_Rate(%)" />
+      <!-- <el-table-column label="操作" fixed="right">
+      <template #default="scope">
+        <el-button link type="primary" size="small" @click="toSeeLog(scope.row)">查看</el-button>
+      </template>
+    </el-table-column> -->
+    </el-table>
+    <el-pagination
+      class="pagination"
+      v-if="showModelTable"
+      v-model:currentPage="currentPage"
+      v-model:page-size="pageSize"
+      :page-sizes="[10, 20, 30, 40]"
+      :small="true"
+      :background="false"
+      layout="total, prev, pager, next, jumper"
+      :total="total"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+    />
+    <!-- </el-tab-pane>
       <el-tab-pane label="详情" class="detailsPane">
         <el-form :inline="true" :model="formInline" class="detailForm">
           <el-form-item label="">
@@ -36,40 +89,8 @@
           </el-form-item>
         </el-form>
         <el-table :data="detailTableData" border style="width: 100%" height="45vh" @expand-change="getLog" :expand-row-keys="expands" :row-key="getRowKeys">
-          <!-- <el-table-column type="expand">
-            <template #default="props">
-              <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-                <el-tab-pane label="用例脚本" name="first">
-                  <el-input v-model="case_script" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无用例脚本" />
-                </el-tab-pane>
-                <el-tab-pane label="脚本执行日志" name="second">
-                  <el-input v-model="case_log" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无脚本执行日志" />
-                </el-tab-pane>
-                <template v-for="(item, index) in shell_log" :key="'shell_log' + index">
-                  <el-tab-pane :label="'交互日志' + (index + 1)" :name="item.value">
-                    <el-input v-model="item.value" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无交互日志" />
-                  </el-tab-pane>
-                </template>
-              </el-tabs>
-            </template>
-          </el-table-column> -->
           <el-table-column label="case_ID" prop="case_id" />
           <el-table-column label="模块" prop="module" />
-          <!-- <el-table-column label="用例脚本" prop="case_script">
-            <template #default="scope">
-              <el-button link type="primary" size="small" @click="toDetailCase(scope.row.case_script)">详情</el-button>
-            </template>
-          </el-table-column>
-          <el-table-column label="脚本执行日志" prop="case_log">
-            <template #default="scope">
-              <el-button link type="primary" size="small" @click="toDetailCase(scope.row.case_log)">详情</el-button>
-            </template>
-          </el-table-column>
-          <el-table-column label="APV交互日志" prop="shell_log">
-            <template #default="scope">
-              <el-button link type="primary" size="small" @click="toDetailCase(scope.row.shell_log)">详情</el-button>
-            </template>
-          </el-table-column> -->
           <el-table-column label="响应时间" prop="use_time" />
           <el-table-column label="Comment" prop="comment" />
           <el-table-column label="结果" prop="result" />
@@ -91,7 +112,38 @@
           @current-change="handleCurrentChange"
         />
       </el-tab-pane>
-    </el-tabs>
+    </el-tabs> -->
+    <div class="el-pagination-style" v-if="!showModelTable">
+      <div class="el-pagination-style-left">
+        <el-button type="primary" size="" @click="goBack">返回模块列表</el-button>
+        <div>
+          当前模块：<span style="font-weight: 600">{{ currentModel }}</span>
+        </div>
+      </div>
+      <el-pagination
+        v-model:currentPage="currentDetailPage"
+        v-model:page-size="detailPageSize"
+        :page-sizes="[10, 20, 30, 40]"
+        :small="true"
+        :background="false"
+        layout="total, prev, pager, next, jumper"
+        :total="detailTotal"
+        @size-change="handleDetailSizeChange"
+        @current-change="handleDetailCurrentChange"
+      />
+    </div>
+    <el-table :data="detailTableData" border style="width: 100%" height="47vh" @expand-change="getLog" :expand-row-keys="expands" :row-key="getRowKeys" v-if="!showModelTable">
+      <el-table-column label="case_ID" prop="case_id" />
+      <el-table-column label="模块" prop="module" />
+      <el-table-column label="响应时间" prop="use_time" />
+      <el-table-column label="Comment" prop="comment" />
+      <el-table-column label="结果" prop="result" />
+      <el-table-column label="操作" fixed="right">
+        <template #default="scope">
+          <el-button link type="primary" size="small" @click="toSeeLog(scope.row)">查看</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
   </el-card>
   <!--case脚本详情-->
   <el-dialog :model-value="isShowCaseScriptDialog" custom-class="caseScriptDialog" title="case脚本详情" @close="closeCaseScriptDialog">
@@ -105,15 +157,15 @@
       <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
         <el-tab-pane label="用例脚本" name="first">
           <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
-          <el-input v-model="case_script" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无用例脚本" />
+          <el-input v-model="case_script" :autosize="{ minRows: 12, maxRows: 30 }" type="textarea" placeholder="暂无用例脚本" />
         </el-tab-pane>
         <el-tab-pane label="脚本执行日志" name="second">
           <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
-          <el-input v-model="case_log" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无脚本执行日志" />
+          <el-input v-model="case_log" :autosize="{ minRows: 12, maxRows: 30 }" type="textarea" placeholder="暂无脚本执行日志" />
         </el-tab-pane>
         <template v-for="(item, index) in shell_log" :key="'shell_log' + index">
           <el-tab-pane :label="'交互日志' + (index + 1)" :name="item.value">
-            <el-input v-model="item.value" :autosize="{ minRows: 12, maxRows: 20 }" type="textarea" placeholder="暂无交互日志" />
+            <el-input v-model="item.value" :autosize="{ minRows: 12, maxRows: 30 }" type="textarea" placeholder="暂无交互日志" />
           </el-tab-pane>
         </template>
       </el-tabs>
@@ -137,6 +189,7 @@ const router = useRouter()
 const reportId = route.query.resultid || route.params.detailId || route.query.historyResultid || ''
 const isHistory = route.query.resultid ? false : true
 const isShowDialog = ref(false)
+const modeTableData = ref([]) // 模块数据
 const tableData = ref([]) // 详情数据
 const detailTableData = ref([])
 const isShowLogDialog = ref(false) // 日志详情弹窗
@@ -159,6 +212,7 @@ let obj = {
   fn: () => {},
   arr: [1, 2, 5]
 }
+const showModelTable = ref(true)
 const jsonData = reactive(obj)
 const case_script = ref('')
 const case_log = ref('')
@@ -171,9 +225,15 @@ const expands = ref([]) // 通过该属性设置Table目前的展开行，需要
 const casValue: any = ref([])
 const caseOptions = ref([])
 const currentPage = ref(1)
-const pageSize = ref(20)
+const pageSize = ref(10)
 const total = ref(0)
 const isShow = ref(false)
+const currentDetailPage = ref(1)
+const detailPageSize = ref(20)
+const detailTotal = ref(0)
+const currentRow = ref(null)
+const currentType = ref(null)
+const currentModel = ref(null)
 
 // 调用 测试报告详情接口
 const getReportDetail = async (id) => {
@@ -193,13 +253,27 @@ const getReportDetail = async (id) => {
       }
     })
     res.data && res.data['pass'] ? (contentItemList.value[1].value = res.data['pass']) : (contentItemList.value[1].value = '0')
-    res.modules &&
-      res.modules.map((item) => {
-        caseOptions.value.push({
-          value: item,
-          label: item
-        })
-      })
+    const headers = res.data.group_module[0]
+    const result = []
+
+    for (let i = 1; i < res.data.group_module.length; i++) {
+      const obj = {}
+      for (let j = 0; j < headers.length; j++) {
+        obj[headers[j]] = res.data.group_module[i][j]
+      }
+      result.push(obj)
+    }
+
+    caseOptions.value = result
+    total.value = result.length || 0
+    // res.modules &&
+    //   res.modules.map((item) => {
+    //     caseOptions.value.push({
+    //       value: item,
+    //       label: item
+    //     })
+    //   })
+    modeTableData.value = caseOptions.value
   }
 }
 
@@ -221,13 +295,25 @@ const getHistoryReportDetail = async (id) => {
       }
     })
     res.data && res.data['pass'] ? (contentItemList.value[1].value = res.data['pass']) : (contentItemList.value[1].value = '0')
-    res.data.modules &&
-      res.data.modules.map((item) => {
-        caseOptions.value.push({
-          value: item,
-          label: item
-        })
-      })
+    const headers = res.data.group_module[0]
+    const result = []
+    for (let i = 1; i < res.data.group_module.length; i++) {
+      const obj = {}
+      for (let j = 0; j < headers.length; j++) {
+        obj[headers[j]] = res.data.group_module[i][j]
+      }
+      result.push(obj)
+    }
+    caseOptions.value = result
+    total.value = result.length || 0
+    // res.modules &&
+    //   res.modules.map((item) => {
+    //     caseOptions.value.push({
+    //       value: item,
+    //       label: item
+    //     })
+    //   })
+    modeTableData.value = caseOptions.value
   }
 }
 
@@ -235,7 +321,7 @@ const getReportModuleDetail = async (params) => {
   let res = await getReportDetailApi(params)
   if (res?.code == 1000) {
     detailTableData.value = res.data || []
-    total.value = res.total || 0
+    detailTotal.value = res.total || 0
   }
 }
 
@@ -243,7 +329,7 @@ const getHistoryReportModuleDetail = async (params) => {
   let res = await getHistoryReportDetailApi(params)
   if (res?.code == 1000) {
     detailTableData.value = res.data || []
-    total.value = res.total || 0
+    detailTotal.value = res.total || 0
   }
 }
 
@@ -370,7 +456,7 @@ const showOverview = () => {
             }
           },
           labelLine: {
-            length: 60,
+            length: 16,
             length2: 100,
             show: true,
             color: '#00ffff'
@@ -391,7 +477,7 @@ const showOverview = () => {
       y: 'center',
       textStyle: {
         color: '#fff',
-        fontSize: 60,
+        fontSize: 26,
         fontWeight: 'normal',
         align: 'center',
         width: '200px'
@@ -427,8 +513,8 @@ const showOverview = () => {
       icon: 'circle',
       orient: 'horizontal',
       data: ['成功数', '失败数', '已知问题', '总数'],
-      right: 250,
-      bottom: 100,
+      right: 300,
+      bottom: 30,
       align: 'right',
       textStyle: {
         color: '#fff'
@@ -643,6 +729,15 @@ const handleCurrentChange = (val: number) => {
   selectSearch(currentPage.value)
 }
 
+const handleDetailSizeChange = (val: number) => {
+  console.log(`${val} items per page`)
+}
+
+const handleDetailCurrentChange = (val: number) => {
+  currentDetailPage.value = val
+  toSeeDeatil(currentRow.value, currentType.value)
+}
+
 const toSeeLog = (row) => {
   logTitle.value = `【 ${row.case_id}】的日志详情`
   activeName.value = 'first'
@@ -673,6 +768,27 @@ const toSeeLog = (row) => {
   isShowLogDialog.value = true
 }
 
+const toSeeDeatil = (row, type) => {
+  currentRow.value = row
+  currentType.value = type
+  currentModel.value = row.Module
+  showModelTable.value = false
+  const params = {
+    id: reportId,
+    details: 'True',
+    result: type,
+    module: row.Module,
+    page: currentDetailPage.value
+  }
+  isHistory ? getHistoryReportModuleDetail(params) : getReportModuleDetail(params)
+}
+
+const goBack = () => {
+  showModelTable.value = true
+  currentPage.value = 1
+  isHistory ? getHistoryReportModuleDetail({ id: reportId, details: 'True', page: 1 }) : getReportModuleDetail({ id: reportId, details: 'True', page: 1 })
+}
+
 onMounted(async () => {
   isHistory ? await getHistoryReportDetail(reportId) : await getReportDetail(reportId)
   isHistory ? await getHistoryReportModuleDetail({ id: reportId, details: 'True', page: 1 }) : await getReportModuleDetail({ id: reportId, details: 'True', page: 1 })
@@ -694,29 +810,41 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    position: absolute;
+    z-index: 9;
+    width: 95%;
+    top: 6%;
+    padding-left: 40px;
 
     span {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 800;
+      color: #fff;
     }
   }
 
   .content {
     display: flex;
     flex-wrap: wrap;
+    position: absolute;
+    z-index: 9;
+    color: #fff;
+    top: 20%;
+    padding-left: 50px;
+    width: 40vw;
 
     .content-item {
       width: 350px;
-      margin: 10px 0;
+      margin: 15px 0;
 
       span {
-        font-size: 14px;
+        font-size: 15px;
       }
     }
   }
 
   :deep(.el-card__body) {
-    padding-left: 75px;
+    // padding-left: 75px;
   }
 
   .ribbon {
@@ -729,9 +857,10 @@ onMounted(async () => {
     transform: rotate(-45deg);
     box-shadow: 0 0 10px #888;
     opacity: 0.8;
+    z-index: 9;
 
     span {
-      color: #fff;
+      color: #000;
       padding: 5px 50px;
       display: block;
     }
@@ -823,9 +952,37 @@ onMounted(async () => {
   }
 }
 
-.el-pagination {
+:deep(.el-card__body) {
+  padding: 0px;
+}
+.pagination {
+  margin: 10px 10px;
+  display: flex;
   justify-content: flex-end;
-  margin-top: 10px;
+  align-items: center;
+}
+.el-pagination-style {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30px 0 20px;
+  margin: 10px 0;
+  .el-pagination-style-left {
+    display: flex;
+    align-items: center;
+    .el-button {
+      margin-right: 20px;
+    }
+  }
+}
+
+.modelTable {
+  margin-top: 20px;
+}
+
+#overview {
+  width: 90vw;
+  height: 300px;
 }
 </style>
 

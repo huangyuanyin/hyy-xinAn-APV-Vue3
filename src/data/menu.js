@@ -78,20 +78,20 @@ export const APVAutoMenuData = [
     isDisabled: false,
     children: []
   },
+  // {
+  //   id: '0304',
+  //   title: '测试报告',
+  //   path: '/APVAuto/templateReport',
+  //   icon: 'Document',
+  //   isDisabled: false,
+  //   children: []
+  // },
   {
-    id: '0304',
+    id: '0305',
     title: '测试报告',
-    path: '/APVAuto/templateReport',
+    path: '/APVAuto/templateReport_new',
     icon: 'Document',
     isDisabled: false,
     children: []
   }
-  // {
-  //   id: '0305',
-  //   title: '测试报告_新版',
-  //   path: '/APVAuto/templateReport_new',
-  //   icon: 'Document',
-  //   isDisabled: false,
-  //   children: []
-  // }
 ]
