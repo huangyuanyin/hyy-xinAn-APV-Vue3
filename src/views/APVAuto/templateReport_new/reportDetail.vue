@@ -134,7 +134,6 @@
     </div>
     <el-table :data="detailTableData" border style="width: 100%" height="47vh" @expand-change="getLog" :expand-row-keys="expands" :row-key="getRowKeys" v-if="!showModelTable">
       <el-table-column label="case_ID" prop="case_id" />
-      <el-table-column label="模块" prop="module" />
       <el-table-column label="响应时间" prop="use_time" />
       <el-table-column label="Comment" prop="comment" />
       <el-table-column label="结果" prop="result" />
@@ -152,20 +151,31 @@
     </div>
   </el-dialog>
   <DataTemplateDialog :dialogData="dialogData" :isShowDialog="isShowDialog" @closeDialog="closeDialog" />
-  <el-dialog :model-value="isShowLogDialog" custom-class="caseScriptDialog" :title="logTitle" @close="isShowLogDialog = false">
+  <el-dialog :model-value="isShowLogDialog" custom-class="caseScriptDialog2" @close="isShowLogDialog = false" :show-close="false" fullscreen>
+    <template #header="{ close, titleId, titleClass }">
+      <div class="my-header" style="display: flex; align-items: center; justify-content: space-between">
+        <div style="display: flex; align-items: center">
+          <h4 :id="titleId" :class="titleClass">{{ logTitle }}</h4>
+        </div>
+        <el-button type="danger" @click="close">
+          <el-icon class="el-icon--left"><CircleCloseFilled /></el-icon>
+          关闭
+        </el-button>
+      </div>
+    </template>
     <div class="detailCaseScript">
       <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
         <el-tab-pane label="用例脚本" name="first">
           <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
-          <el-input v-model="case_script" :autosize="{ minRows: 12, maxRows: 30 }" type="textarea" placeholder="暂无用例脚本" />
+          <el-input v-model="case_script" :autosize="{ minRows: 12, maxRows: 36 }" type="textarea" placeholder="暂无用例脚本" />
         </el-tab-pane>
         <el-tab-pane label="脚本执行日志" name="second">
           <!-- <json-viewer :value="jsonData" copyable boxed sort /> -->
-          <el-input v-model="case_log" :autosize="{ minRows: 12, maxRows: 30 }" type="textarea" placeholder="暂无脚本执行日志" />
+          <el-input v-model="case_log" :autosize="{ minRows: 12, maxRows: 36 }" type="textarea" placeholder="暂无脚本执行日志" />
         </el-tab-pane>
         <template v-for="(item, index) in shell_log" :key="'shell_log' + index">
           <el-tab-pane :label="'交互日志' + (index + 1)" :name="item.value">
-            <el-input v-model="item.value" :autosize="{ minRows: 12, maxRows: 30 }" type="textarea" placeholder="暂无交互日志" />
+            <el-input v-model="item.value" :autosize="{ minRows: 12, maxRows: 36 }" type="textarea" placeholder="暂无交互日志" />
           </el-tab-pane>
         </template>
       </el-tabs>
@@ -183,6 +193,7 @@ import { utc2beijing } from '@/utils/util.js'
 import { options } from './data.js'
 import * as monaco from 'monaco-editor'
 import type { TabsPaneContext } from 'element-plus'
+import { CircleCloseFilled, FullScreen } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -433,7 +444,7 @@ const showOverview = () => {
       name: '',
       type: 'pie',
       clockWise: false,
-      radius: [105, 109],
+      radius: [85, 89],
       hoverAnimation: false,
       itemStyle: {
         normal: {
@@ -500,8 +511,8 @@ const showOverview = () => {
           z: 3,
           style: {
             image: img,
-            width: 178,
-            height: 178
+            width: 148,
+            height: 148
           },
           left: 'center',
           top: 'center',
@@ -513,7 +524,7 @@ const showOverview = () => {
       icon: 'circle',
       orient: 'horizontal',
       data: ['成功数', '失败数', '已知问题', '总数'],
-      right: 300,
+      right: 200,
       bottom: 30,
       align: 'right',
       textStyle: {
@@ -667,6 +678,13 @@ const toBack = () => {
 // 关闭弹窗
 const closeDialog = (value) => {
   isShowDialog.value = value
+}
+
+const fullScreen = () => {
+  const terminalContainer = document.getElementById('tabs')
+  if (terminalContainer.requestFullscreen) {
+    terminalContainer.requestFullscreen()
+  }
 }
 
 const getLog = (row, expandedRows) => {
@@ -987,6 +1005,22 @@ onMounted(async () => {
 </style>
 
 <style lang="scss">
+.caseScriptDialog2 {
+  .el-dialog__body {
+    padding-top: 0px !important;
+  }
+  .el-dialog__header {
+    padding-top: 0px !important;
+    padding-bottom: 0px;
+  }
+  .full-icon {
+    margin-left: 10px;
+    cursor: pointer;
+  }
+  .full-icon:hover {
+    color: #1890ff;
+  }
+}
 .caseScriptDialog {
   .el-dialog__body {
     padding-top: 0px !important;
