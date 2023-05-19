@@ -9,6 +9,7 @@
     "build": "vite build",
     "build:stage": "vite build --mode staging",
     "build:prod": "vite build --mode production",
+    "build:53": "vite build --mode 53",
     "preview": "vite preview"
   },
   "dependencies": {
