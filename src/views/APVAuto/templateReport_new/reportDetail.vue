@@ -157,10 +157,14 @@
         <div style="display: flex; align-items: center">
           <h4 :id="titleId" :class="titleClass">{{ logTitle }}</h4>
         </div>
-        <el-button type="danger" @click="close">
-          <el-icon class="el-icon--left"><CircleCloseFilled /></el-icon>
-          关闭
-        </el-button>
+        <div>
+          <el-button type="primary" @click="lastLook">上一条</el-button>
+          <el-button type="primary" @click="nextLook">下一条</el-button>
+          <el-button type="danger" @click="close">
+            <el-icon class="el-icon--left"><CircleCloseFilled /></el-icon>
+            关闭
+          </el-button>
+        </div>
       </div>
     </template>
     <div class="detailCaseScript">
@@ -192,7 +196,7 @@ import { getDataApi } from '@/utils/getApi.js'
 import { utc2beijing } from '@/utils/util.js'
 import { options } from './data.js'
 import * as monaco from 'monaco-editor'
-import type { TabsPaneContext } from 'element-plus'
+import { ElMessage, TabsPaneContext } from 'element-plus'
 import { CircleCloseFilled, FullScreen } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -203,6 +207,8 @@ const isShowDialog = ref(false)
 const modeTableData = ref([]) // 模块数据
 const tableData = ref([]) // 详情数据
 const detailTableData = ref([])
+const detailTableIdData = ref([])
+const detailId = ref('')
 const isShowLogDialog = ref(false) // 日志详情弹窗
 const logTitle = ref('') // 日志详情弹窗标题
 const contentItemList = ref([
@@ -757,6 +763,7 @@ const handleDetailCurrentChange = (val: number) => {
 }
 
 const toSeeLog = (row) => {
+  detailId.value = row.case_id
   logTitle.value = `【 ${row.case_id}】的日志详情`
   activeName.value = 'first'
   let LogList = []
@@ -784,6 +791,26 @@ const toSeeLog = (row) => {
     })
   })
   isShowLogDialog.value = true
+}
+
+const lastLook = () => {
+  const index = detailTableData.value.findIndex((item) => item.case_id === detailId.value)
+  if (index === 0) {
+    ElMessage.warning('已经是当前页面第一条啦~~~')
+    return
+  }
+  const lastObj = detailTableData.value[index - 1]
+  toSeeLog(lastObj)
+}
+
+const nextLook = () => {
+  const index = detailTableData.value.findIndex((item) => item.case_id === detailId.value)
+  if (index === detailTableData.value.length - 1) {
+    ElMessage.warning('已经是当前页面最后一条啦~~~')
+    return
+  }
+  const nextObj = detailTableData.value[index + 1]
+  toSeeLog(nextObj)
 }
 
 const toSeeDeatil = (row, type) => {
