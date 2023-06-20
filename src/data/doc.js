@@ -1,7 +1,5 @@
 export const docText = `step1:  su sunyb; click1 
 
-step1:  su sunyb; click1 
-
 step2:  smoke
 
 step3:  cd smoke_test/SLB/   ### 进入要调试得模块目录，可创建个人专属调试模块

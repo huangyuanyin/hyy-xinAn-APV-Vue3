@@ -677,10 +677,10 @@ onMounted(async () => {
 
 <style lang="scss">
 .operationDocrDialog {
-  width: 800px;
+  width: 50%;
   height: 600px;
   .el-notification__content {
-    width: 750px;
+    width: 47vw;
     height: 600px;
   }
   .cm-editor {
