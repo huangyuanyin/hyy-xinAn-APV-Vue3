@@ -81,9 +81,14 @@
           <el-collapse-item v-for="(item, index) in dialogTable" :key="'dialogTable' + index" :name="item.name">
             <template #title>
               {{ item.name }}
-              <el-tag style="margin-left: 2%"> {{ Object.keys(item.valList).length }} </el-tag>
+              <el-tooltip class="box-item" effect="dark" content="相同数" placement="top">
+                <el-tag style="margin-left: 2%"> {{ item.same }} </el-tag>
+              </el-tooltip>
+              <el-tooltip class="box-item" effect="dark" content="差异数" placement="top">
+                <el-tag style="margin-left: 2%" type="danger"> {{ item.different }} </el-tag>
+              </el-tooltip>
             </template>
-            <el-table :data="valListData1" style="width: 100%" height="450">
+            <el-table :data="valListData1" style="width: 100%" height="450" v-loading="valListData1Loading">
               <el-table-column prop="valName" label="case_ID" align="center" width="125" :span-method="mergeCells1" />
               <el-table-column prop="name" label="模块名" align="center" width="220" />
               <el-table-column prop="comment" label="comment" align="center" />
@@ -103,9 +108,14 @@
           <el-collapse-item v-for="(item, index) in dialogTable2" :key="'dialogTable2' + index" :name="item.name">
             <template #title>
               {{ item.name }}
-              <el-tag style="margin-left: 2%"> {{ Object.keys(item.valList).length }} </el-tag>
+              <el-tooltip class="box-item" effect="dark" content="相同数" placement="top">
+                <el-tag style="margin-left: 2%"> {{ item.same }} </el-tag>
+              </el-tooltip>
+              <el-tooltip class="box-item" effect="dark" content="差异数" placement="top">
+                <el-tag style="margin-left: 2%" type="danger"> {{ item.different }} </el-tag>
+              </el-tooltip>
             </template>
-            <el-table :data="valListData2" style="width: 100%" height="450">
+            <el-table :data="valListData2" style="width: 100%" height="450" v-loading="valListData1Loading2">
               <el-table-column prop="valName" label="case_ID" align="center" width="125" :span-method="mergeCells1" />
               <el-table-column prop="name" label="模块名" align="center" width="220" />
               <el-table-column prop="comment" label="comment" align="center" />
@@ -192,6 +202,8 @@ const dialogTable2 = ref([])
 const valListData1 = ref([])
 const valListData2 = ref([])
 const isLoadingData = ref(false)
+const valListData1Loading = ref(false)
+const valListData1Loading2 = ref(false)
 const dialogTableVisible = ref(false)
 const dialogTableTitle = ref('')
 const isShowLogDialog = ref(false)
@@ -303,8 +315,10 @@ const contrastReport = async (val1, val2) => {
     // res.data = transformData(res.data)
     res.data = Object.keys(res.data).map((key) => ({
       name: key,
-      valList: res.data[key]
+      same: res.data[key].same,
+      different: res.data[key].different
     }))
+    console.log(`output->res.data`, res.data)
     let half = Math.ceil(res.data.length / 2)
     dialogTable.value = res.data.slice(0, half)
     dialogTable2.value = res.data.slice(half)
@@ -428,54 +442,64 @@ const toSeeLog = async (type, row, data?) => {
 }
 
 const valList = ref([])
-const selectValList1 = (val) => {
-  isLoadingData.value = true
-  dialogTable.value.map((item) => {
-    if (item.name === val) {
-      valList.value.push(item)
+const selectValList1 = async (val) => {
+  const params = {
+    report1: multipleSelection.value[0].id,
+    report2: multipleSelection.value[1].id,
+    module: val
+  }
+  valListData1Loading.value = true
+  let res = await contrastReportApi(params)
+  if (res.code === 1000) {
+    for (const key in res.data) {
+      valList.value = res.data[key]
     }
-  })
-  for (const valName in valList.value[0].valList) {
-    const val = valList.value[0].valList[valName]
-    for (const name in val) {
+  }
+  for (const valKey in valList.value) {
+    const valItem = valList.value[valKey]
+    for (const name in valItem) {
       if (name !== 'equal') {
-        valListData1.value.push({
-          valName: valName,
-          name: name,
-          result: val[name].result,
-          comment: val[name].comment,
-          log: val[name].log
-        })
+        const item = {
+          valName: valKey,
+          name,
+          log: valItem[name].log,
+          result: valItem[name].result === 'pass'
+        }
+        valListData1.value.push(item)
       }
     }
   }
-  if (valListData1.value.length !== 0) {
-    isLoadingData.value = false
-  }
+  valListData1Loading.value = false
 }
 const valList2 = ref([])
-const selectValList2 = (val) => {
-  isLoadingData.value = true
-  dialogTable2.value.map((item) => {
-    if (item.name === val) {
-      valList2.value.push(item)
+const selectValList2 = async (val) => {
+  const params = {
+    report1: multipleSelection.value[0].id,
+    report2: multipleSelection.value[1].id,
+    module: val
+  }
+  valListData1Loading2.value = true
+  let res = await contrastReportApi(params)
+  if (res.code === 1000) {
+    for (const key in res.data) {
+      valList2.value = res.data[key]
     }
-  })
-  for (const valName in valList2.value[0].valList) {
-    const val = valList2.value[0].valList[valName]
-    for (const name in val) {
+  }
+  for (const valKey in valList2.value) {
+    const valItem = valList2.value[valKey]
+    for (const name in valItem) {
       if (name !== 'equal') {
-        valListData2.value.push({
-          valName: valName,
-          name: name,
-          result: val[name].result,
-          comment: val[name].comment,
-          log: val[name].log
-        })
+        const item = {
+          valName: valKey,
+          name,
+          log: valItem[name].log,
+          result: valItem[name].result === 'pass'
+        }
+        valListData2.value.push(item)
       }
     }
   }
-  isLoadingData.value = false
+  valListData1Loading2.value = false
 }
 
 const lastLook = () => {
