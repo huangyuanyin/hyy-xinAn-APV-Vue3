@@ -70,12 +70,12 @@
     v-loading.fullscreen.lock="isLoadingData"
     v-model="dialogTableVisible"
     :title="dialogTableTitle"
-    size="80%"
+    size="40%"
     direction="rtl"
     :close-on-press-escape="false"
     :close-on-click-modal="false"
   >
-    <el-row>
+    <!-- <el-row>
       <el-col :span="10">
         <el-collapse v-model="activeNames" accordion @change="selectValList1">
           <el-collapse-item v-for="(item, index) in dialogTable" :key="'dialogTable' + index" :name="item.name">
@@ -115,21 +115,48 @@
                 <el-tag style="margin-left: 2%" type="danger"> {{ item.different }} </el-tag>
               </el-tooltip>
             </template>
-            <el-table :data="valListData2" style="width: 100%" height="450" v-loading="valListData1Loading2">
-              <el-table-column prop="valName" label="case_ID" align="center" width="125" :span-method="mergeCells1" />
-              <el-table-column prop="name" label="模块名" align="center" width="220" />
-              <el-table-column prop="comment" label="comment" align="center" />
-              <el-table-column prop="result" label="结果" align="center" width="90" />
-              <el-table-column fixed="right" label="操作" width="90" align="center">
-                <template #default="scope">
-                  <el-button link type="primary" size="small" @click="toSeeLog(true, scope.row, valListData2)">查看</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
           </el-collapse-item>
         </el-collapse>
       </el-col>
-    </el-row>
+    </el-row> -->
+    <el-table :data="dialogTable" style="width: 100%" stripe border max-height="87vh">
+      <el-table-column prop="model" label="模块名" align="center" width="150"></el-table-column>
+      <el-table-column prop="same" label="相同数" width="120" align="center" />
+      <el-table-column prop="different" label="差异数" width="120" align="center" />
+      <el-table-column label="操作" align="center">
+        <template #default="scope">
+          <el-button link type="primary" size="small" @click="selectValList2(scope.row.model)">详情</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+  </el-drawer>
+  <el-drawer v-model="tableData2Drawer" :title="tableData2DrawerTitle" direction="rtl" :before-close="handleTableData2DrawerClose" size="50%">
+    <el-table :data="tableData2" v-loading="valListData1Loading2" element-loading-text="数据处理中，请稍后..." max-height="87vh">
+      <el-table-column prop="plName" label="模块名" align="center" width="150">
+        <template #default="scope">
+          <span :style="{ color: scope.row.equal ? '#67C23A' : '#F56C6C' }">{{ scope.row.plName }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="convertJSONToArray(valList2)[1][0]" align="center">
+        <el-table-column prop="comment1" label="Comment" :width="convertJSONToArray(valList2)[1].length === 1 ? '' : 120" align="center" />
+        <el-table-column prop="result1" label="result" :width="convertJSONToArray(valList2)[1].length === 1 ? '' : 120" align="center" />
+        <!-- <el-table-column prop="log1" label="日志" /> -->
+        <el-table-column label="日志" :width="convertJSONToArray(valList2)[1].length === 1 ? '' : 120" align="center">
+          <template #default="scope">
+            <el-button link type="primary" size="small" @click="toSeeLog('one', true, scope.row, tableData2)">查看</el-button>
+          </template>
+        </el-table-column>
+      </el-table-column>
+      <el-table-column v-if="convertJSONToArray(valList2)[1].length >= 2" :label="convertJSONToArray(valList2)[1][1]" align="center">
+        <el-table-column prop="comment2" label="Comment" min-width="120" align="center" />
+        <el-table-column prop="result2" label="result" min-width="120" align="center" />
+        <el-table-column label="日志" width="90" align="center">
+          <template #default="scope">
+            <el-button link type="primary" size="small" @click="toSeeLog('two', true, scope.row, tableData2)">查看</el-button>
+          </template>
+        </el-table-column>
+      </el-table-column>
+    </el-table>
   </el-drawer>
   <el-dialog :model-value="isShowLogDialog" custom-class="caseScriptDialog2" @close="isShowLogDialog = false" :show-close="false" fullscreen>
     <template #header="{ close, titleId, titleClass }">
@@ -197,10 +224,13 @@ const isShowMarkDialog = ref(false)
 const markData = ref({})
 const loading = ref(false)
 const loadingText = ref('正在加载中...')
+const tableData2Drawer = ref(false)
+const tableData2DrawerTitle = ref('')
 const dialogTable = ref([])
 const dialogTable2 = ref([])
 const valListData1 = ref([])
 const valListData2 = ref([])
+const tableData2 = ref([])
 const isLoadingData = ref(false)
 const valListData1Loading = ref(false)
 const valListData1Loading2 = ref(false)
@@ -311,17 +341,20 @@ const contrastReport = async (val1, val2) => {
   if (res.code === 1000) {
     dialogTableVisible.value = true
     dialogTableTitle.value = `【${val1.name}】 - 【${val2.name}】数据对比结果`
-
     // res.data = transformData(res.data)
-    res.data = Object.keys(res.data).map((key) => ({
-      name: key,
-      same: res.data[key].same,
-      different: res.data[key].different
+    // res.data = Object.keys(res.data).map((key) => ({
+    //   name: key,
+    //   same: res.data[key].same,
+    //   different: res.data[key].different
+    // }))
+    // let half = Math.ceil(res.data.length / 2)
+    // dialogTable.value = res.data.slice(0, half)
+    // dialogTable2.value = res.data.slice(half)
+    dialogTable.value = Object.keys(res.data).map((model) => ({
+      model,
+      same: res.data[model].same,
+      different: res.data[model].different
     }))
-    console.log(`output->res.data`, res.data)
-    let half = Math.ceil(res.data.length / 2)
-    dialogTable.value = res.data.slice(0, half)
-    dialogTable2.value = res.data.slice(half)
   }
 }
 
@@ -398,19 +431,21 @@ const mergeCells2 = ({ row, column, rowIndex, columnIndex }) => {
   // }
 }
 
+const onceType = ref('')
 const detailTableData = ref([])
 const detailId = ref('')
 const detailName = ref('')
-const toSeeLog = async (type, row, data?) => {
+const toSeeLog = async (once, type, row, data?) => {
+  onceType.value = once
   type ? (detailTableData.value = data) : ''
-  detailId.value = row.valName
-  detailName.value = row.name
-  logTitle.value = `【 ${row.valName}】- 【${row.name}】的日志详情`
+  detailId.value = row.plName
+  detailName.value = once == 'one' ? row.label1 : row.label2
+  logTitle.value = `【 ${row.plName}】- 【${detailName.value}】的日志详情`
   shell_log.value = []
   const params = {
-    log: row.log,
-    module: row.name,
-    case_id: row.valName
+    log: once == 'one' ? row.log1 : row.log2,
+    module: detailName.value,
+    case_id: row.plName
   }
   await getContrastReportApi(params).then((res) => {
     let LogList = []
@@ -473,11 +508,13 @@ const selectValList1 = async (val) => {
 }
 const valList2 = ref([])
 const selectValList2 = async (val) => {
+  tableData2Drawer.value = true
   const params = {
     report1: multipleSelection.value[0].id,
     report2: multipleSelection.value[1].id,
     module: val
   }
+  tableData2DrawerTitle.value = `【${val}】模块比对详情`
   valListData1Loading2.value = true
   let res = await contrastReportApi(params)
   if (res.code === 1000) {
@@ -485,21 +522,51 @@ const selectValList2 = async (val) => {
       valList2.value = res.data[key]
     }
   }
-  for (const valKey in valList2.value) {
-    const valItem = valList2.value[valKey]
-    for (const name in valItem) {
-      if (name !== 'equal') {
-        const item = {
-          valName: valKey,
-          name,
-          log: valItem[name].log,
-          result: valItem[name].result === 'pass'
-        }
-        valListData2.value.push(item)
-      }
-    }
-  }
+  tableData2.value = convertJSONToArray(valList2.value)[0]
+  // for (const valKey in valList2.value) {
+  //   const valItem = valList2.value[valKey]
+  //   for (const name in valItem) {
+  //     if (name !== 'equal') {
+  //       const item = {
+  //         valName: valKey,
+  //         name,
+  //         log: valItem[name].log,
+  //         result: valItem[name].result === 'pass'
+  //       }
+  //       valListData2.value.push(item)
+  //     }
+  //   }
+  // }
   valListData1Loading2.value = false
+}
+
+function convertJSONToArray(inputJSON) {
+  const outputArray = []
+  const labelArray = []
+
+  for (const plName in inputJSON) {
+    const testData = inputJSON[plName]
+    const entry = {
+      plName: plName,
+      equal: testData.equal
+    }
+
+    let index = 1
+    for (const label in testData) {
+      if (label === 'equal') continue
+      const testInfo = testData[label]
+      entry[`label${index}`] = label
+      entry[`result${index}`] = testInfo.result
+      entry[`comment${index}`] = testInfo.comment
+      entry[`log${index}`] = testInfo.log
+      labelArray.push(label)
+      index++
+    }
+
+    outputArray.push(entry)
+  }
+
+  return [outputArray, [...new Set(labelArray)]]
 }
 
 const lastLook = () => {
@@ -509,7 +576,7 @@ const lastLook = () => {
     return
   }
   const lastObj = detailTableData.value[index - 1]
-  toSeeLog(false, lastObj)
+  toSeeLog(onceType.value, false, lastObj)
 }
 
 const nextLook = () => {
@@ -519,7 +586,7 @@ const nextLook = () => {
     return
   }
   const nextObj = detailTableData.value[index + 1]
-  toSeeLog(false, nextObj)
+  toSeeLog(onceType.value, false, nextObj)
 }
 
 // 跳转详情
@@ -559,6 +626,10 @@ const toMark = (id) => {
 }
 const closeMarkDialog = (res) => {
   isShowMarkDialog.value = res
+}
+
+const handleTableData2DrawerClose = () => {
+  tableData2Drawer.value = false
 }
 
 const handleSizeChange = (val: number) => {
