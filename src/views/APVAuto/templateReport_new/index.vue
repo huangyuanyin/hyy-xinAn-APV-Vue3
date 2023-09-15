@@ -163,6 +163,7 @@
       <div class="my-header" style="display: flex; align-items: center; justify-content: space-between">
         <div style="display: flex; align-items: center">
           <h4 :id="titleId" :class="titleClass">{{ logTitle }}</h4>
+          <span style="margin-left: 10px; font-size: 14px; color: #909399">IP: {{ logIp }}</span>
         </div>
         <div>
           <el-button type="primary" @click="lastLook">上一条</el-button>
@@ -238,6 +239,7 @@ const dialogTableVisible = ref(false)
 const dialogTableTitle = ref('')
 const isShowLogDialog = ref(false)
 const logTitle = ref('')
+const logIp = ref('')
 const activeName = ref('1')
 const shell_log = ref([])
 const case_script = ref('')
@@ -452,6 +454,7 @@ const toSeeLog = async (once, type, row, data?) => {
     LogList.push(res.data.case_script, res.data.case_log)
     LogList.map(async (item, index) => {
       await getLogApi({ url: String(item) }).then((res) => {
+        logIp.value = item.split('//')[1].split('/')[0]
         switch (index) {
           case 0:
             case_script.value = res.data || '请求错误'

@@ -154,11 +154,12 @@
   <el-dialog :model-value="isShowLogDialog" custom-class="caseScriptDialog2" @close="isShowLogDialog = false" :show-close="false" fullscreen>
     <template #header="{ close, titleId, titleClass }">
       <div class="my-header" style="display: flex; align-items: center; justify-content: space-between">
-        <div style="display: flex; align-items: center">
+        <div style="display: flex; align-items: baseline">
           <h4 :id="titleId" :class="titleClass">{{ logTitle }}</h4>
+          <span style="margin-left: 10px; font-size: 14px; color: #909399">IP: {{ logIp }}</span>
         </div>
         <div>
-          <el-button type="primary" @click="lastLook">上一条</el-button>
+          <el-button type="primary" @click="lastLook">上一条2</el-button>
           <el-button type="primary" @click="nextLook">下一条</el-button>
           <el-button type="danger" @click="close">
             <el-icon class="el-icon--left"><CircleCloseFilled /></el-icon>
@@ -211,6 +212,7 @@ const detailTableIdData = ref([])
 const detailId = ref('')
 const isShowLogDialog = ref(false) // 日志详情弹窗
 const logTitle = ref('') // 日志详情弹窗标题
+const logIp = ref('')
 const contentItemList = ref([
   { name: '报告名称', label: 'name', value: '' },
   { name: '成功', label: 'pass', value: '' },
@@ -770,6 +772,7 @@ const toSeeLog = (row) => {
   LogList.push(row.case_script, row.case_log)
   LogList.map(async (item, index) => {
     await getLogApi({ url: String(item) }).then((res) => {
+      logIp.value = item.split('//')[1].split('/')[0]
       switch (index) {
         case 0:
           case_script.value = res.data || '请求错误'
