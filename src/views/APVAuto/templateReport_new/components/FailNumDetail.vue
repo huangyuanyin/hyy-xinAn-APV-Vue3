@@ -46,7 +46,21 @@
     </div>
   </el-dialog>
 
-  <el-dialog :model-value="isShowLogDialog" custom-class="caseScriptDialog" :title="logTitle" @close="isShowLogDialog = false">
+  <el-dialog :model-value="isShowLogDialog" custom-class="caseLogialog" :show-close="false" :title="logTitle" @close="isShowLogDialog = false">
+    <template #header="{ close, titleId, titleClass }">
+      <div class="my-header" style="display: flex; align-items: center; justify-content: space-between">
+        <div style="display: flex; align-items: baseline">
+          <h4 :id="titleId" :class="titleClass">{{ logTitle }}</h4>
+          <span style="margin-left: 10px; font-size: 14px; color: #909399">IP:{{ logIp }}</span>
+        </div>
+        <div>
+          <el-button type="danger" @click="close">
+            <el-icon class="el-icon--left"><CircleCloseFilled /></el-icon>
+            关闭
+          </el-button>
+        </div>
+      </div>
+    </template>
     <div class="detailCaseScript">
       <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
         <el-tab-pane label="用例脚本" name="first">
@@ -73,6 +87,7 @@ import type { TabsPaneContext } from 'element-plus'
 import * as monaco from 'monaco-editor'
 import { getReportDetailApi, getLogApi, getHistoryReportApi } from '@/api/APV/testReport.js'
 import { useRoute, useRouter } from 'vue-router'
+import { CircleCloseFilled } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -86,6 +101,7 @@ const case_script = ref('')
 const case_log = ref('')
 const shell_log = ref([])
 const expands = ref([])
+const logIp = ref('')
 const caseScriptValue = ref(
   '20 | 400 | slb_rr_100.pl | Thursday, September 08, 2022 AM02:30:04 CST \n20 | 200 |  TIP all 10015100161000710008 \n20 | 200 |  TIP  10015:10016 \n20 | 200 |  2:30:4-172.16.26.215-ttyS0 :  user sunyb pass click1 \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : script dir /home/sunyb/sunyb.ws/src_apv/result/log//2022-09-08-02:29:22--Beta_APV_10_5_0_42.array/smoke_test//result/mnet_env//T_0001/shell-ttyS0.txt \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : Test Machine ip 172.16.26.215 \n20 | 200 |  2:30:5-172.16.26.215-ttyS0 : login user root \n20 | 200 |   \n20 | 200 |  the last prompt \n20 | 200 |  command timed-out at ../../util/cli/ca.pm line 159 \n20 | 200 |   \n 50 | 255 | Unkonw | FAIL | Unkonw Exit Code 255 \n20 | 500 | slb_rr_100.pl | Thursday, September 08, 2022 AM02:30:54 CST \nunable to update smoke test result'
 )
@@ -104,12 +120,13 @@ const toDetailCase = () => {
 }
 
 const toSeeLog = (row) => {
-  logTitle.value = `【 ${row.case_id}】的日志详情`
+  logTitle.value = `【 ${row.case_id}】的日志详情 IP:  `
   activeName.value = 'first'
   let LogList = []
   LogList.push(row.case_script, row.case_log)
   LogList.map(async (item, index) => {
     await getLogApi({ url: String(item) }).then((res) => {
+      logIp.value = item.split('//')[1].split('/')[0]
       switch (index) {
         case 0:
           case_script.value = res.data || '请求错误'
@@ -231,5 +248,12 @@ onMounted(() => {
 
 .demo-tabs {
   padding-left: 10px;
+}
+</style>
+<style lang="scss">
+.caseLogialog {
+  .el-dialog__body {
+    padding-top: 5px !important;
+  }
 }
 </style>
