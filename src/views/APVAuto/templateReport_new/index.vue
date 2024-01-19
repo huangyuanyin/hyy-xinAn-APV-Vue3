@@ -15,7 +15,6 @@
     <el-table
       ref="multipleTableRef"
       :data="tableData"
-      row-key="id"
       :row-key="getRowKeys"
       @selection-change="handleSelectionChange"
       style="width: 100%; margin-top: 10px"
@@ -44,6 +43,7 @@
         <template #default="scope">
           <el-button link type="primary" disabled size="small" @click="toMark(scope.row.id)">标记</el-button>
           <el-button link type="primary" size="small" @click="toDetail(scope.row.id, 'history')">历史报告</el-button>
+          <el-button link type="primary" disabled size="small" @click="toDetail(scope.row.id, 'history')">数据汇总</el-button>
           <!-- <el-button link type="danger" size="small">删除</el-button> -->
         </template>
       </el-table-column>
@@ -65,7 +65,7 @@
       />
     </div>
   </el-card>
-  <MarkDialog :markData="markData" :isShowDialog="isShowMarkDialog" v-on:closeMarkDialog="closeMarkDialog(res)" />
+  <MarkDialog :markData="markData" :isShowDialog="isShowMarkDialog" v-on:closeMarkDialog="closeMarkDialog" />
   <el-drawer
     v-loading.fullscreen.lock="isLoadingData"
     v-model="dialogTableVisible"

@@ -31,6 +31,16 @@ export function getLogApi(params) {
   })
 }
 
+// 获取case执行日志
+export function getCaseLog(params) {
+  return request({
+    url: '/autoapv/report_log/',
+    method: 'put',
+    urlType: 'APV',
+    params
+  })
+}
+
 // 历史报告 - 获取
 export function getHistoryReportApi(params) {
   return request({

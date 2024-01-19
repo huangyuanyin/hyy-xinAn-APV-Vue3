@@ -128,6 +128,13 @@
               </el-popover>
             </template>
           </el-table-column>
+          <el-table-column prop="lunci" label="轮/次" align="center" width="80">
+            <template #default="scope">
+              <span v-if="scope.row.plan_num">{{ scope.row.plan_num }}</span>
+              <span style="margin: 0 5px">/</span>
+              <span>{{ scope.row.run_num }}</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="number" label="总数 / 执行 / 失败" align="center" width="180">
             <template #default="scope">
               <span v-if="scope.row.number">{{ scope.row.number[0] }}</span>
@@ -394,6 +401,9 @@
               clearable
               :disabled="titleDialog === '任务详情'"
             />
+          </el-form-item>
+          <el-form-item label="执行轮次" prop="plan_num">
+            <el-input v-model="addTaskForm.plan_num" placeholder="1" :disabled="titleDialog === '任务详情'" />
           </el-form-item>
           <el-form-item label="备注" prop="remarks" style="margin-bottom: 0px">
             <div class="remarks">
@@ -810,6 +820,7 @@ const addTaskForm = reactive({
   group_false: [],
   cases: null,
   remarks: '',
+  plan_num: 1,
   config: [],
   group: []
   // config: {

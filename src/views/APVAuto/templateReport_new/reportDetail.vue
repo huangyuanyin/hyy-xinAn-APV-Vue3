@@ -159,7 +159,7 @@
           <span style="margin-left: 10px; font-size: 14px; color: #909399">IP: {{ logIp }}</span>
         </div>
         <div>
-          <el-button type="primary" @click="lastLook">上一条2</el-button>
+          <el-button type="primary" @click="lastLook">上一条</el-button>
           <el-button type="primary" @click="nextLook">下一条</el-button>
           <el-button type="danger" @click="close">
             <el-icon class="el-icon--left"><CircleCloseFilled /></el-icon>
@@ -190,7 +190,7 @@
 
 <script lang="ts" setup>
 import { onMounted, ref, reactive, inject, nextTick } from 'vue'
-import { getReportDetailApi, getLogApi, getHistoryReportDetailApi } from '@/api/APV/testReport.js'
+import { getReportDetailApi, getLogApi, getHistoryReportDetailApi, getCaseLog } from '@/api/APV/testReport.js'
 import { useRoute, useRouter } from 'vue-router'
 import DataTemplateDialog from './components/dataTemplateDialog.vue'
 import { getDataApi } from '@/utils/getApi.js'
@@ -764,35 +764,43 @@ const handleDetailCurrentChange = (val: number) => {
   toSeeDeatil(currentRow.value, currentType.value)
 }
 
-const toSeeLog = (row) => {
+const toSeeLog = async (row) => {
   detailId.value = row.case_id
-  logTitle.value = `【 ${row.case_id}】的日志详情`
-  activeName.value = 'first'
-  let LogList = []
-  LogList.push(row.case_script, row.case_log)
-  LogList.map(async (item, index) => {
-    await getLogApi({ url: String(item) }).then((res) => {
-      logIp.value = item.split('//')[1].split('/')[0]
-      switch (index) {
-        case 0:
-          case_script.value = res.data || '请求错误'
-          break
-        case 1:
-          case_log.value = res.data || '请求错误'
-          break
-        default:
-          break
-      }
-    })
-  })
+  logTitle.value = `【${row.case_id}】的日志详情`
   shell_log.value = []
-  row.shell_log.map(async (item, index) => {
-    await getLogApi({ url: String(item) }).then((res) => {
-      shell_log.value.push({
-        value: res.data || '请求错误'
+  const params = {
+    url: row.url,
+    module: row.module,
+    case_id: row.case_id
+  }
+  await getCaseLog(params).then((res) => {
+    let LogList = []
+    console.log(res.data)
+    LogList.push(res.data.case_script, res.data.case_log)
+    LogList.map(async (item, index) => {
+      await getLogApi({ url: String(item) }).then((res1) => {
+        logIp.value = item.split('//')[1].split('/')[0]
+        switch (index) {
+          case 0:
+            case_script.value = res1.data || '请求错误'
+            break
+          case 1:
+            case_log.value = res1.data || '请求错误'
+            break
+          default:
+            break
+        }
+      })
+    })
+    res.data.shell_log.map(async (item, index) => {
+      await getLogApi({ url: String(item) }).then((res) => {
+        shell_log.value.push({
+          value: res.data || '请求错误'
+        })
       })
     })
   })
+  activeName.value = 'first'
   isShowLogDialog.value = true
 }
 
