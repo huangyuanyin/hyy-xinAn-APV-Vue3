@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { login } from '@/api/user'
 import jwt_decode from 'jwt-decode'
 // import { removeToken, setToken } from '../../../utils/auth'
+import CryptoJS from 'crypto-js'
 
 interface BaseUserInfo {
   id: string
@@ -19,15 +20,14 @@ export const useUserStore = defineStore({
   },
   actions: {
     async Login(loginInfo: { username: string; password: string }) {
-      const { token } = await login(loginInfo)
-      //   let token =
-      //     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im1heGYiLCJuaWNrbmFtZSI6Ilx1OWE2Y1x1NjY1M1x1OThkZSIsInJvbGUiOiJhZG1pbiIsImVtYWlsIjoibWF4ZkBpbmZvc2VjLmNvbS5jbiIsImV4cCI6MTY3NjA5NTE3Mn0.dNeISoxMB58NpWtDENiP74iQ3UKVV7eUDlavMRxtfZQ'
-      this.userInfo = jwt_decode(token)
+      loginInfo.password = CryptoJS.SHA512(loginInfo.password).toString(CryptoJS.enc.Base64)
+      let res = await login(loginInfo)
+      this.userInfo = jwt_decode(res.data.token)
       localStorage.setItem('userInfo', JSON.stringify(this.userInfo))
-      this.token = token
+      this.token = res.data.token
       // setToken(this.token)
       localStorage.setItem('token', this.token)
-      return token
+      return res.data.token
     },
     LoginOut() {
       this.userInfo = {} as BaseUserInfo
